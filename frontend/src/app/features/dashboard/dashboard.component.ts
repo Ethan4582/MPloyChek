@@ -616,27 +616,27 @@ export class DashboardComponent implements OnInit {
     const query = this.searchQuery().toLowerCase().trim();
     const status = this.selectedStatus();
     const access = this.selectedAccessLevel();
-    const view = this.activeView();
 
     return list.filter((r) => {
-      // 1. Text Search matching
+      // 1. Full-field Text Search matching
       const matchesQuery =
         !query ||
         r.recordId.toLowerCase().includes(query) ||
         r.employeeName.toLowerCase().includes(query) ||
         r.department.toLowerCase().includes(query) ||
-        r.position.toLowerCase().includes(query);
+        r.position.toLowerCase().includes(query) ||
+        r.accessLevel.toLowerCase().includes(query) ||
+        r.verificationStatus.toLowerCase().includes(query) ||
+        r.backgroundCheckDate.toLowerCase().includes(query) ||
+        (r.compensationGrade ? r.compensationGrade.toLowerCase().includes(query) : false);
 
-      // 2. View Tab matching
-      const matchesView = view === 'ALL' || r.verificationStatus === view;
-
-      // 3. Dropdown Status Filter matching
+      // 2. Status matching (synced with view tab)
       const matchesStatus = status === 'ALL' || r.verificationStatus === status;
 
-      // 4. Dropdown Clearance Filter matching
+      // 3. Dropdown Clearance Filter matching
       const matchesAccess = access === 'ALL' || r.accessLevel === access;
 
-      return matchesQuery && matchesView && matchesStatus && matchesAccess;
+      return matchesQuery && matchesStatus && matchesAccess;
     });
   });
 
@@ -644,8 +644,7 @@ export class DashboardComponent implements OnInit {
     return (
       this.searchQuery() !== '' ||
       this.selectedStatus() !== 'ALL' ||
-      this.selectedAccessLevel() !== 'ALL' ||
-      this.activeView() !== 'ALL'
+      this.selectedAccessLevel() !== 'ALL'
     );
   });
 
@@ -682,11 +681,7 @@ export class DashboardComponent implements OnInit {
 
   setView(view: 'ALL' | 'Verified' | 'Pending Review' | 'Flagged'): void {
     this.activeView.set(view);
-    if (view !== 'ALL') {
-      this.selectedStatus.set(view);
-    } else {
-      this.selectedStatus.set('ALL');
-    }
+    this.selectedStatus.set(view);
   }
 
   toggleStatusMenu(): void {
@@ -701,6 +696,11 @@ export class DashboardComponent implements OnInit {
 
   selectStatus(status: string): void {
     this.selectedStatus.set(status);
+    if (['ALL', 'Verified', 'Pending Review', 'Flagged'].includes(status)) {
+      this.activeView.set(status as any);
+    } else {
+      this.activeView.set('ALL');
+    }
     this.isStatusMenuOpen.set(false);
   }
 
