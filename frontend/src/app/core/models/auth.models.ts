@@ -19,6 +19,14 @@ export interface LoginCredentials {
   role: UserRole;
 }
 
+export interface RegisterData {
+  userId: string;
+  name: string;
+  department: string;
+  password: string;
+  role: UserRole;
+}
+
 export interface AuthResponse {
   success: boolean;
   message?: string;

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { LandingComponent } from './features/landing/landing.component';
 import { LoginComponent } from './features/auth/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { AdminUsersComponent } from './features/admin/admin-users.component';
@@ -8,7 +9,8 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'dashboard',
+    component: LandingComponent,
+    title: 'MPloyChek • Employment Verification & RBAC Portal',
   },
   {
     path: 'login',
@@ -30,6 +32,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: '',
   },
 ];

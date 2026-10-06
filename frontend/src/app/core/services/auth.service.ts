@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of, map, firstValueFrom } from 'rxjs';
-import { IUser, LoginCredentials, AuthResponse, MeResponse } from '../models/auth.models';
+import { IUser, LoginCredentials, RegisterData, AuthResponse, MeResponse } from '../models/auth.models';
 import { ToastService } from './toast.service';
 
 @Injectable({
@@ -29,6 +29,17 @@ export class AuthService {
         if (res.success && res.data) {
           this.setSession(res.data.token, res.data.user);
           this.toast.success(`Welcome back, ${res.data.user.name}!`, `Logged in as ${res.data.user.role}`);
+        }
+      })
+    );
+  }
+
+  register(data: RegisterData): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>('/api/auth/register', data).pipe(
+      tap((res) => {
+        if (res.success && res.data) {
+          this.setSession(res.data.token, res.data.user);
+          this.toast.success(`Account created!`, `Welcome to MPloyChek, ${res.data.user.name}`);
         }
       })
     );

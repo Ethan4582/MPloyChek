@@ -47,6 +47,16 @@ export const LoginSchema = z.object({
 
 export type LoginInput = z.infer<typeof LoginSchema>;
 
+export const RegisterSchema = z.object({
+  userId: z.string().min(3, 'User ID must be at least 3 characters').max(50),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  department: z.string().min(2, 'Department must be at least 2 characters').max(50),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['General User', 'Admin']).default('General User'),
+});
+
+export type RegisterInput = z.infer<typeof RegisterSchema>;
+
 export const CreateUserSchema = z.object({
   userId: z.string().min(3).max(50),
   name: z.string().min(2).max(100),

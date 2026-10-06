@@ -11,8 +11,7 @@ export async function seedDatabase(): Promise<void> {
 
   console.log('[Seed] Seeding database with initial users and employment verification records...');
 
-  const adminPasswordHash = await bcrypt.hash('Admin@123', 10);
-  const userPasswordHash = await bcrypt.hash('User@123', 10);
+  const defaultPasswordHash = await bcrypt.hash('Password@123', 10);
 
   const users = [
     {
@@ -21,7 +20,7 @@ export async function seedDatabase(): Promise<void> {
       role: 'Admin',
       department: 'Security & Compliance',
       status: 'Active',
-      passwordHash: adminPasswordHash,
+      passwordHash: defaultPasswordHash,
       lastLoginAt: new Date(),
     },
     {
@@ -30,7 +29,7 @@ export async function seedDatabase(): Promise<void> {
       role: 'General User',
       department: 'Software Engineering',
       status: 'Active',
-      passwordHash: userPasswordHash,
+      passwordHash: defaultPasswordHash,
       lastLoginAt: new Date(Date.now() - 3600 * 1000 * 24),
     },
     {
@@ -39,7 +38,7 @@ export async function seedDatabase(): Promise<void> {
       role: 'General User',
       department: 'Product Design',
       status: 'Active',
-      passwordHash: userPasswordHash,
+      passwordHash: defaultPasswordHash,
       lastLoginAt: new Date(Date.now() - 3600 * 1000 * 48),
     },
     {
@@ -48,7 +47,7 @@ export async function seedDatabase(): Promise<void> {
       role: 'General User',
       department: 'Finance & Payroll',
       status: 'Active',
-      passwordHash: userPasswordHash,
+      passwordHash: defaultPasswordHash,
       lastLoginAt: new Date(Date.now() - 3600 * 1000 * 12),
     },
     {
@@ -57,7 +56,7 @@ export async function seedDatabase(): Promise<void> {
       role: 'Admin',
       department: 'People Operations',
       status: 'Active',
-      passwordHash: adminPasswordHash,
+      passwordHash: defaultPasswordHash,
       lastLoginAt: new Date(Date.now() - 3600 * 1000 * 6),
     },
   ];

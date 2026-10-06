@@ -16,11 +16,6 @@ import { ToastComponent } from './shared/components/toast/toast.component';
       </main>
 
       <app-toast></app-toast>
-
-      <!-- Minimal Workspace Footer -->
-      <footer class="w-full border-t border-[#262626] py-3.5 px-6 text-center text-[11px] text-[#605f5b]">
-        <span>MPloyChek &bull; Verification Workspace &bull; MongoDB RBAC Portal</span>
-      </footer>
     </div>
   `,
 })
