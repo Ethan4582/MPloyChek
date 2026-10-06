@@ -10,6 +10,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
   }
 
   ::selection {
@@ -33,13 +35,14 @@
     @apply w-full bg-[#191919] border border-[#2f2f2f] rounded-md px-3 py-1.5 text-xs text-[#e6e6e5] placeholder-[#5a5a58] focus:outline-none focus:border-[#529cca] focus:ring-1 focus:ring-[#529cca]/30 transition-all font-sans;
   }
 
-  /* Notion Action Buttons (shadcn-style) */
+  /* Notion Action Buttons */
   .notion-btn {
     @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-[#e6e6e5] bg-[#252525] hover:bg-[#2e2e2e] active:bg-[#333333] border border-[#2f2f2f] transition-colors disabled:opacity-40 disabled:cursor-not-allowed select-none;
   }
 
+  /* High-contrast premium Notion primary action button */
   .notion-btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white bg-[#2563eb] hover:bg-[#1d4ed8] active:bg-[#1e40af] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm select-none;
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#141414] bg-[#ffffff] hover:bg-[#ededed] active:bg-[#e0e0e0] transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm select-none;
   }
 
   .notion-btn-ghost {
@@ -50,37 +53,39 @@
     @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-[#e05757] bg-[#3b2222]/40 hover:bg-[#3b2222] border border-[#e05757]/30 transition-colors disabled:opacity-40 select-none;
   }
 
-  /* Authentic Notion Multi-Select Badges (Matte, desaturated) */
+  /* Authentic Notion Multi-Select Badges (Matte, desaturated, NO PURPLE) */
   .tag-blue {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#1e2d3d] text-[#529cca];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#1e2d3d] text-[#529cca] border border-[#273c52];
   }
 
   .tag-green {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#1f3328] text-[#4dab7e];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#1f3328] text-[#4dab7e] border border-[#274433];
   }
 
   .tag-yellow {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#37321e] text-[#d8a33f];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#37321e] text-[#d8a33f] border border-[#4a4224];
   }
 
   .tag-orange {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#392a1e] text-[#e07a38];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#392a1e] text-[#e07a38] border border-[#4e3725];
   }
 
+  /* Notion Warm Bronze / Amber for Security / Admin - Zero Purple */
+  .tag-bronze,
   .tag-purple {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#2f223d] text-[#9d68d3];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#332924] text-[#bc8c74] border border-[#48372f];
   }
 
   .tag-red {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#3b2222] text-[#e05757];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#3b2222] text-[#e05757] border border-[#522f2f];
   }
 
   .tag-gray {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#2a2a2a] text-[#9b9a97];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#2a2a2a] text-[#9b9a97] border border-[#383838];
   }
 
   .tag-brown {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#332924] text-[#bc8c74];
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#332924] text-[#bc8c74] border border-[#48372f];
   }
 }
 

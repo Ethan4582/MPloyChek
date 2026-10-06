@@ -12,7 +12,8 @@ import { IEmployeeRecord } from '../../core/models/record.models';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Edge-to-Edge Notion Workspace Container -->
+    <div class="w-full px-4 sm:px-8 lg:px-10 py-6 space-y-5">
       
       <!-- Notion Page Title & Header -->
       <div class="space-y-3">
@@ -39,7 +40,7 @@ import { IEmployeeRecord } from '../../core/models/record.models';
                 <span class="text-[#9b9a97] font-mono text-[11px]">{{ authService.currentUser()?.userId }}</span>
                 
                 @if (authService.isAdmin()) {
-                  <span class="tag-purple">Admin Clearance</span>
+                  <span class="tag-bronze">Admin Clearance</span>
                 } @else {
                   <span class="tag-blue">General User</span>
                 }
@@ -47,7 +48,7 @@ import { IEmployeeRecord } from '../../core/models/record.models';
               <p class="text-[11px] text-[#787774] mt-0.5">
                 {{ authService.currentUser()?.department }} &bull;
                 @if (authService.isAdmin()) {
-                  <span class="text-[#9d68d3]">Organization-wide scope: Viewing all records including confidential compensation & risk audit notes.</span>
+                  <span class="text-[#bc8c74]">Organization-wide scope: Viewing all records including confidential compensation & risk audit notes.</span>
                 } @else {
                   <span class="text-[#529cca]">User-restricted scope: Restricted strictly to your records. Confidential data is stripped at the API.</span>
                 }
@@ -344,22 +345,22 @@ import { IEmployeeRecord } from '../../core/models/record.models';
                   </span>
                 </th>
 
-                <!-- Admin Protected Columns -->
+                <!-- Admin Protected Columns (Notion Bronze, Zero Purple) -->
                 @if (authService.isAdmin()) {
                   <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                    <span class="flex items-center gap-1.5 text-[#9d68d3]">
+                    <span class="flex items-center gap-1.5 text-[#bc8c74]">
                       <span>🔒</span>
                       <span>Comp Grade</span>
                     </span>
                   </th>
                   <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                    <span class="flex items-center gap-1.5 text-[#9d68d3]">
+                    <span class="flex items-center gap-1.5 text-[#bc8c74]">
                       <span>🔒</span>
                       <span>Risk</span>
                     </span>
                   </th>
                   <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                    <span class="flex items-center gap-1.5 text-[#9d68d3]">
+                    <span class="flex items-center gap-1.5 text-[#bc8c74]">
                       <span>🔒</span>
                       <span>Audit Notes</span>
                     </span>
@@ -423,7 +424,7 @@ import { IEmployeeRecord } from '../../core/models/record.models';
                       @if (record.accessLevel === 'General') {
                         <span class="tag-blue">{{ record.accessLevel }}</span>
                       } @else if (record.accessLevel === 'Confidential') {
-                        <span class="tag-purple">{{ record.accessLevel }}</span>
+                        <span class="tag-bronze">{{ record.accessLevel }}</span>
                       } @else {
                         <span class="tag-orange">{{ record.accessLevel }}</span>
                       }
@@ -545,7 +546,13 @@ import { IEmployeeRecord } from '../../core/models/record.models';
               <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
                 <span class="text-[#787774] flex items-center gap-1"><span>🏷️</span> Clearance</span>
                 <div class="col-span-2">
-                  <span class="tag-blue">{{ selectedRecord()?.accessLevel }}</span>
+                  @if (selectedRecord()?.accessLevel === 'General') {
+                    <span class="tag-blue">{{ selectedRecord()?.accessLevel }}</span>
+                  } @else if (selectedRecord()?.accessLevel === 'Confidential') {
+                    <span class="tag-bronze">{{ selectedRecord()?.accessLevel }}</span>
+                  } @else {
+                    <span class="tag-orange">{{ selectedRecord()?.accessLevel }}</span>
+                  }
                 </div>
               </div>
 
@@ -556,17 +563,17 @@ import { IEmployeeRecord } from '../../core/models/record.models';
 
               @if (authService.isAdmin()) {
                 <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
-                  <span class="text-[#9d68d3] flex items-center gap-1"><span>🔒</span> Comp Grade</span>
+                  <span class="text-[#bc8c74] flex items-center gap-1"><span>🔒</span> Comp Grade</span>
                   <span class="col-span-2 font-mono text-[#ffffff]">{{ selectedRecord()?.compensationGrade || 'None' }}</span>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
-                  <span class="text-[#9d68d3] flex items-center gap-1"><span>🔒</span> Risk Score</span>
+                  <span class="text-[#bc8c74] flex items-center gap-1"><span>🔒</span> Risk Score</span>
                   <span class="col-span-2 font-mono text-[#ffffff]">{{ selectedRecord()?.riskScore }}%</span>
                 </div>
 
                 <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
-                  <span class="text-[#9d68d3] flex items-center gap-1"><span>🔒</span> Audit Notes</span>
+                  <span class="text-[#bc8c74] flex items-center gap-1"><span>🔒</span> Audit Notes</span>
                   <p class="col-span-2 text-[#e6e6e5] leading-relaxed">{{ selectedRecord()?.auditNotes }}</p>
                 </div>
               } @else {

@@ -11,40 +11,44 @@ import { DelayService } from '../../core/services/delay.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="min-h-[calc(100vh-3rem)] flex items-center justify-center p-4 bg-[#191919]">
-      <div class="w-full max-w-sm">
+    <div class="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-14 bg-[#191919] w-full">
+      <div class="w-full max-w-[420px] mx-auto animate-in fade-in zoom-in-95 duration-150">
         
         <!-- Notion Header -->
         <div class="text-center mb-6">
-          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#222222] border border-[#2f2f2f] text-2xl mb-3 shadow-sm">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#222222] border border-[#2f2f2f] text-2xl mb-3 shadow-notion-card select-none">
             🛡️
           </div>
-          <h1 class="text-xl font-semibold text-[#ffffff] tracking-tight">MPloyChek Workspace</h1>
+          <h1 class="text-xl font-bold text-[#ffffff] tracking-tight">MPloyChek Workspace</h1>
           <p class="text-xs text-[#9b9a97] mt-1">Employment Verification & RBAC Portal</p>
         </div>
 
         <!-- Notion Login Card -->
-        <div class="notion-card p-6 border-[#2f2f2f] bg-[#202020]">
+        <div class="notion-card p-6 sm:p-7 border-[#2f2f2f] bg-[#202020] shadow-notion-card">
           
-          <!-- Test Account Presets -->
-          <div class="mb-5 p-2.5 rounded-md bg-[#191919] border border-[#2a2a2a]">
-            <div class="text-[10px] font-medium uppercase tracking-wider text-[#6b6b68] mb-2 flex items-center justify-between">
-              <span>Quick Fill Accounts</span>
-              <span class="text-[#529cca]">1-Click</span>
+          <!-- Test Account Quick-Fill Presets -->
+          <div class="mb-5 p-3 rounded-lg bg-[#191919] border border-[#2a2a2a]">
+            <div class="text-[10px] font-medium uppercase tracking-wider text-[#6b6b68] mb-2.5 flex items-center justify-between">
+              <span>Quick-Fill Demo Credentials</span>
+              <span class="text-[#529cca] font-mono text-[10px]">1-Click</span>
             </div>
+            
             <div class="grid grid-cols-2 gap-2">
+              <!-- Admin Preset (Notion Bronze, Zero Purple) -->
               <button
                 type="button"
                 (click)="fillPreset('Admin')"
-                class="px-2.5 py-1.5 rounded text-xs font-medium bg-[#2f223d] hover:bg-[#382649] text-[#9d68d3] border border-[#9d68d3]/30 transition-colors flex items-center justify-center gap-1.5"
+                class="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#2a221c] hover:bg-[#332924] text-[#bc8c74] border border-[#48372f] transition-all flex items-center justify-center gap-1.5"
               >
-                <span>⚡</span>
+                <span>🛡️</span>
                 <span>Admin User</span>
               </button>
+
+              <!-- General User Preset (Notion Slate Blue) -->
               <button
                 type="button"
                 (click)="fillPreset('General User')"
-                class="px-2.5 py-1.5 rounded text-xs font-medium bg-[#1e2d3d] hover:bg-[#24374b] text-[#529cca] border border-[#529cca]/30 transition-colors flex items-center justify-center gap-1.5"
+                class="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#1a2530] hover:bg-[#202f3d] text-[#7da0ca] border border-[#283f57] transition-all flex items-center justify-center gap-1.5"
               >
                 <span>👤</span>
                 <span>General User</span>
@@ -72,7 +76,7 @@ import { DelayService } from '../../core/services/delay.service';
                 [class.border-[#e05757]]="isFieldInvalid('userId')"
               />
               @if (isFieldInvalid('userId')) {
-                <p class="text-[11px] text-[#e05757] mt-1">Please enter your User ID</p>
+                <p class="text-[11px] text-[#e05757] mt-1">Please enter your User ID or email</p>
               }
             </div>
 
@@ -91,21 +95,23 @@ import { DelayService } from '../../core/services/delay.service';
               }
             </div>
 
-            <!-- Role Selector (Mandatory per assignment specs) -->
+            <!-- Role Segmented Selector (Mandatory per assignment requirements) -->
             <div>
-              <label class="block text-xs font-medium text-[#9b9a97] mb-1 flex items-center justify-between">
-                <span>Select Login Role</span>
+              <label class="block text-xs font-medium text-[#9b9a97] mb-1.5 flex items-center justify-between">
+                <span>Account Role</span>
                 <span class="text-[10px] text-[#6b6b68]">Enforced by DB</span>
               </label>
-              <div class="grid grid-cols-2 gap-2">
+              
+              <!-- Notion Segmented Control -->
+              <div class="grid grid-cols-2 p-1 rounded-lg bg-[#191919] border border-[#2a2a2a] gap-1">
                 <button
                   type="button"
                   (click)="setRole('General User')"
-                  class="py-1.5 px-2 rounded-md border text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+                  class="py-1.5 px-2 rounded-md text-xs font-medium transition-all flex items-center justify-center gap-1.5 select-none"
                   [ngClass]="
                     loginForm.get('role')?.value === 'General User'
-                      ? 'bg-[#1e2d3d] text-[#529cca] border-[#529cca]/50'
-                      : 'bg-[#191919] text-[#787774] border-[#2f2f2f] hover:text-[#9b9a97] hover:bg-[#222222]'
+                      ? 'bg-[#282828] text-[#ffffff] border border-[#3a3a3a] shadow-sm'
+                      : 'text-[#787774] hover:text-[#e6e6e5] border border-transparent'
                   "
                 >
                   <span>👤</span>
@@ -115,36 +121,36 @@ import { DelayService } from '../../core/services/delay.service';
                 <button
                   type="button"
                   (click)="setRole('Admin')"
-                  class="py-1.5 px-2 rounded-md border text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+                  class="py-1.5 px-2 rounded-md text-xs font-medium transition-all flex items-center justify-center gap-1.5 select-none"
                   [ngClass]="
                     loginForm.get('role')?.value === 'Admin'
-                      ? 'bg-[#2f223d] text-[#9d68d3] border-[#9d68d3]/50'
-                      : 'bg-[#191919] text-[#787774] border-[#2f2f2f] hover:text-[#9b9a97] hover:bg-[#222222]'
+                      ? 'bg-[#282828] text-[#bc8c74] border border-[#48372f] shadow-sm'
+                      : 'text-[#787774] hover:text-[#e6e6e5] border border-transparent'
                   "
                 >
-                  <span>⚡</span>
-                  <span>Admin</span>
+                  <span>🛡️</span>
+                  <span>Administrator</span>
                 </button>
               </div>
             </div>
 
-            <!-- Submit Button -->
+            <!-- Submit Button (High-Contrast Notion Primary) -->
             <button
               type="submit"
               [disabled]="loginForm.invalid || isLoading()"
-              class="w-full notion-btn-primary mt-2 py-2"
+              class="w-full notion-btn-primary mt-3 py-2 text-xs font-semibold cursor-pointer"
             >
               @if (isLoading()) {
                 <span class="inline-block animate-spin mr-1">⏳</span>
                 <span>Connecting ({{ delayService.currentDelay() }}ms)...</span>
               } @else {
-                <span>Continue</span>
+                <span>Sign In to Workspace</span>
               }
             </button>
           </form>
 
-          <div class="mt-5 pt-3 border-t border-[#2a2a2a] text-center">
-            <span class="text-[11px] text-[#6b6b68]">MongoDB Dual-Mode &bull; JWT Authentication</span>
+          <div class="mt-6 pt-3.5 border-t border-[#282828] text-center">
+            <span class="text-[11px] text-[#605f5b]">MongoDB In-Memory / Local Daemon &bull; JWT Auth &bull; RBAC</span>
           </div>
 
         </div>
@@ -164,17 +170,21 @@ export class LoginComponent {
   errorMessage = signal<string | null>(null);
 
   loginForm = this.fb.group({
-    userId: ['admin@mploychek.com', [Validators.required, Validators.minLength(3)]],
-    password: ['Admin@123', [Validators.required, Validators.minLength(4)]],
-    role: ['Admin' as UserRole, [Validators.required]],
+    userId: ['user@mploychek.com', [Validators.required, Validators.minLength(3)]],
+    password: ['User@123', [Validators.required, Validators.minLength(4)]],
+    role: ['General User' as UserRole, [Validators.required]],
   });
+
+  isFieldInvalid(field: string): boolean {
+    const control = this.loginForm.get(field);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
 
   setRole(role: UserRole): void {
     this.loginForm.patchValue({ role });
   }
 
   fillPreset(role: UserRole): void {
-    this.errorMessage.set(null);
     if (role === 'Admin') {
       this.loginForm.setValue({
         userId: 'admin@mploychek.com',
@@ -190,11 +200,6 @@ export class LoginComponent {
     }
   }
 
-  isFieldInvalid(field: string): boolean {
-    const control = this.loginForm.get(field);
-    return !!control && control.invalid && (control.dirty || control.touched);
-  }
-
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -204,25 +209,27 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const formValues = this.loginForm.value;
-    const credentials = {
-      userId: formValues.userId!,
-      password: formValues.password!,
-      role: formValues.role as UserRole,
-    };
+    const { userId, password, role } = this.loginForm.value;
 
-    this.authService.login(credentials).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-        this.router.navigateByUrl(returnUrl);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(
-          err.error?.error || 'Authentication failed. Please verify credentials.'
-        );
-      },
-    });
+    this.authService
+      .login({
+        userId: userId!.trim(),
+        password: password!,
+        role: role as UserRole,
+      })
+      .subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+          this.router.navigateByUrl(returnUrl);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.errorMessage.set(
+            err.error?.message ||
+              'Authentication failed. Please verify your credentials and role.'
+          );
+        },
+      });
   }
 }

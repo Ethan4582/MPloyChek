@@ -12,7 +12,8 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Edge-to-Edge Notion Workspace Container -->
+    <div class="w-full px-4 sm:px-8 lg:px-10 py-6 space-y-5">
       
       <!-- Top Notion Breadcrumbs & Header -->
       <div class="space-y-3">
@@ -28,7 +29,7 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
             <div>
               <div class="flex items-center gap-2">
                 <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
-                <span class="tag-purple">Admin Restricted</span>
+                <span class="tag-bronze">Admin Restricted</span>
               </div>
               <p class="text-xs text-[#9b9a97] mt-0.5">
                 Manage accounts, assign roles (General User / Admin), and toggle security state in MongoDB.
@@ -223,7 +224,7 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
                     <td class="py-2 px-3 border-r border-[#262626]">
                       <div class="flex items-center gap-1.5">
                         @if (user.role === 'Admin') {
-                          <span class="tag-purple">Admin</span>
+                          <span class="tag-bronze">Admin</span>
                         } @else {
                           <span class="tag-blue">General User</span>
                         }
@@ -260,10 +261,10 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
 
                     <td class="py-2 px-3 text-right">
                       <button
-                        (click)="confirmDelete(user)"
+                        (click)="confirmDeleteUser(user)"
                         [disabled]="user.userId === authService.currentUser()?.userId"
-                        class="notion-btn-ghost text-[#787774] hover:text-[#e05757] text-xs py-0.5 px-1.5 disabled:opacity-20"
-                        title="Delete user"
+                        class="text-[#787774] hover:text-[#e05757] p-1 transition-colors disabled:opacity-20 disabled:hover:text-[#787774]"
+                        title="Delete user from database"
                       >
                         🗑️
                       </button>
@@ -275,27 +276,27 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
           </table>
         </div>
 
-        <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] text-[11px] text-[#787774]">
-          Role-Based Access Control enforced at MongoDB schema and Express middleware.
+        <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
+          <span>Total: <strong class="text-[#9b9a97]">{{ filteredUsers().length }}</strong> Accounts</span>
+          <span class="text-[10px] text-[#555552]">MongoDB User Model Collection</span>
         </div>
-
       </div>
 
       <!-- Create User Modal (Notion Dialog) -->
       @if (showCreateModal()) {
         <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div class="notion-card max-w-md w-full p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
-            <div class="flex items-center justify-between pb-3 border-b border-[#2f2f2f]">
+            <div class="flex items-center justify-between pb-3 border-b border-[#2f2f2f] mb-4">
               <div class="flex items-center gap-2">
-                <span class="text-xl">➕</span>
-                <h3 class="text-sm font-semibold text-[#ffffff]">New User Account</h3>
+                <span class="text-xl">👤</span>
+                <h3 class="text-sm font-semibold text-[#ffffff]">Create New Database User</h3>
               </div>
               <button (click)="closeCreateModal()" class="text-[#787774] hover:text-[#ffffff] text-sm">✕</button>
             </div>
 
-            <form [formGroup]="userForm" (ngSubmit)="onCreateUser()" class="space-y-3 py-4 text-xs">
+            <form [formGroup]="userForm" (ngSubmit)="onCreateUser()" class="space-y-3.5 text-xs">
               <div>
-                <label class="block text-[#9b9a97] mb-1 font-medium">User ID / Email</label>
+                <label class="block text-[#9b9a97] mb-1 font-medium">Email / User ID</label>
                 <input
                   type="text"
                   formControlName="userId"
@@ -369,20 +370,17 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
       <!-- Delete User Modal -->
       @if (userToDelete()) {
         <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="notion-card max-w-sm w-full p-5 border-[#e05757]/40 bg-[#222222] shadow-notion-dropdown">
-            <h3 class="text-sm font-semibold text-[#ffffff] flex items-center gap-2">
+          <div class="notion-card max-w-sm w-full p-5 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
+            <h3 class="text-sm font-semibold text-[#ffffff] mb-2 flex items-center gap-1.5">
               <span>⚠️</span>
               <span>Confirm Account Deletion</span>
             </h3>
-            <p class="text-xs text-[#9b9a97] mt-2 leading-relaxed">
-              Are you sure you want to permanently delete user <strong class="text-[#ffffff]">{{ userToDelete()?.name }}</strong> (<code class="text-[#529cca]">{{ userToDelete()?.userId }}</code>) from MongoDB?
+            <p class="text-xs text-[#9b9a97] mb-4">
+              Are you sure you want to permanently delete user <strong class="text-[#ffffff]">{{ userToDelete()?.name }}</strong> ({{ userToDelete()?.userId }}) from the database?
             </p>
-
-            <div class="mt-4 flex justify-end gap-2">
-              <button (click)="userToDelete.set(null)" class="notion-btn">Cancel</button>
-              <button (click)="executeDelete()" class="notion-btn-danger">
-                Delete
-              </button>
+            <div class="flex justify-end gap-2">
+              <button (click)="cancelDelete()" class="notion-btn text-xs">Cancel</button>
+              <button (click)="executeDelete()" class="notion-btn-danger text-xs">Delete User</button>
             </div>
           </div>
         </div>
@@ -394,7 +392,6 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
 export class AdminUsersComponent implements OnInit {
   userService = inject(UserService);
   authService = inject(AuthService);
-  delayService = inject(DelayService);
   private fb = inject(FormBuilder);
 
   searchQuery = signal<string>('');
@@ -402,12 +399,12 @@ export class AdminUsersComponent implements OnInit {
   isRoleMenuOpen = signal<boolean>(false);
 
   showCreateModal = signal<boolean>(false);
-  isSubmitting = signal<boolean>(false);
   userToDelete = signal<IUser | null>(null);
+  isSubmitting = signal<boolean>(false);
 
   userForm = this.fb.group({
     userId: ['', [Validators.required, Validators.minLength(3)]],
-    name: ['', [Validators.required, Validators.minLength(2)]],
+    name: ['', [Validators.required]],
     department: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     role: ['General User' as UserRole, [Validators.required]],
@@ -415,11 +412,11 @@ export class AdminUsersComponent implements OnInit {
   });
 
   filteredUsers = computed(() => {
-    const list = this.userService.users();
+    const users = this.userService.users();
     const query = this.searchQuery().toLowerCase().trim();
     const role = this.selectedRole();
 
-    return list.filter((u) => {
+    return users.filter((u) => {
       const matchesQuery =
         !query ||
         u.name.toLowerCase().includes(query) ||
@@ -440,13 +437,13 @@ export class AdminUsersComponent implements OnInit {
     this.userService.getUsers().subscribe();
   }
 
-  toggleRoleMenu(): void {
-    this.isRoleMenuOpen.update((v) => !v);
-  }
-
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchQuery.set(input.value);
+  }
+
+  toggleRoleMenu(): void {
+    this.isRoleMenuOpen.update((v) => !v);
   }
 
   selectRole(role: string): void {
@@ -457,6 +454,16 @@ export class AdminUsersComponent implements OnInit {
   resetFilters(): void {
     this.searchQuery.set('');
     this.selectedRole.set('ALL');
+  }
+
+  toggleRole(user: IUser): void {
+    const nextRole: UserRole = user.role === 'Admin' ? 'General User' : 'Admin';
+    this.userService.updateUser(user.userId, { role: nextRole }).subscribe();
+  }
+
+  toggleStatus(user: IUser): void {
+    const nextStatus: UserStatus = user.status === 'Active' ? 'Disabled' : 'Active';
+    this.userService.updateUser(user.userId, { status: nextStatus }).subscribe();
   }
 
   openCreateModal(): void {
@@ -476,23 +483,12 @@ export class AdminUsersComponent implements OnInit {
   }
 
   onCreateUser(): void {
-    if (this.userForm.invalid) {
-      this.userForm.markAllAsTouched();
-      return;
-    }
+    if (this.userForm.invalid) return;
 
     this.isSubmitting.set(true);
-    const val = this.userForm.value;
-    const payload: CreateUserData = {
-      userId: val.userId!,
-      name: val.name!,
-      department: val.department!,
-      password: val.password!,
-      role: val.role as UserRole,
-      status: val.status as UserStatus,
-    };
+    const data = this.userForm.value as CreateUserData;
 
-    this.userService.createUser(payload).subscribe({
+    this.userService.createUser(data).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.closeCreateModal();
@@ -503,24 +499,19 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  toggleRole(user: IUser): void {
-    const newRole: UserRole = user.role === 'Admin' ? 'General User' : 'Admin';
-    this.userService.updateUser(user._id, { role: newRole }).subscribe();
-  }
-
-  toggleStatus(user: IUser): void {
-    this.userService.toggleStatus(user._id).subscribe();
-  }
-
-  confirmDelete(user: IUser): void {
+  confirmDeleteUser(user: IUser): void {
     this.userToDelete.set(user);
   }
 
-  executeDelete(): void {
-    const target = this.userToDelete();
-    if (!target) return;
+  cancelDelete(): void {
+    this.userToDelete.set(null);
+  }
 
-    this.userService.deleteUser(target._id).subscribe({
+  executeDelete(): void {
+    const user = this.userToDelete();
+    if (!user) return;
+
+    this.userService.deleteUser(user.userId).subscribe({
       next: () => {
         this.userToDelete.set(null);
       },
