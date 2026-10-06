@@ -2,12 +2,11 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { ToastComponent } from './shared/components/toast/toast.component';
-import { TelemetryDrawerComponent } from './shared/components/telemetry-drawer/telemetry-drawer.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, ToastComponent, TelemetryDrawerComponent],
+  imports: [RouterOutlet, NavbarComponent, ToastComponent],
   template: `
     <div class="min-h-screen flex flex-col bg-[#191919] text-[#e6e6e5] w-full">
       <app-navbar></app-navbar>
@@ -17,11 +16,10 @@ import { TelemetryDrawerComponent } from './shared/components/telemetry-drawer/t
       </main>
 
       <app-toast></app-toast>
-      <app-telemetry-drawer></app-telemetry-drawer>
 
-      <!-- Minimal Notion Footer (Edge-to-Edge) -->
+      <!-- Minimal Workspace Footer -->
       <footer class="w-full border-t border-[#262626] py-3.5 px-6 text-center text-[11px] text-[#605f5b]">
-        <span>MPloyChek &bull; Notion Dark Workspace &bull; MongoDB RBAC Architecture</span>
+        <span>MPloyChek &bull; Verification Workspace &bull; MongoDB RBAC Portal</span>
       </footer>
     </div>
   `,

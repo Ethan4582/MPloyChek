@@ -4,7 +4,6 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angu
 import { RouterLink } from '@angular/router';
 import { UserService, CreateUserData } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
-import { DelayService } from '../../core/services/delay.service';
 import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
 
 @Component({
@@ -12,10 +11,10 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   template: `
-    <!-- Edge-to-Edge Notion Workspace Container -->
+    <!-- Edge-to-Edge Workspace Container -->
     <div class="w-full px-4 sm:px-8 lg:px-10 py-6 space-y-5">
       
-      <!-- Top Notion Breadcrumbs & Header -->
+      <!-- Top Breadcrumbs & Header -->
       <div class="space-y-3">
         <div class="flex items-center gap-2 text-xs text-[#9b9a97]">
           <a routerLink="/dashboard" class="hover:text-[#ffffff] transition-colors">Workspace</a>
@@ -24,33 +23,28 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
         </div>
 
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl select-none">⚙️</span>
-            <div>
-              <div class="flex items-center gap-2">
-                <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
-                <span class="tag-bronze">Admin Restricted</span>
-              </div>
-              <p class="text-xs text-[#9b9a97] mt-0.5">
-                Manage accounts, assign roles (General User / Admin), and toggle security state in MongoDB.
-              </p>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
+              <span class="tag-bronze">Admin Restricted</span>
             </div>
+            <p class="text-xs text-[#9b9a97] mt-0.5">
+              Manage accounts, assign roles (General User / Admin), and toggle security state in MongoDB.
+            </p>
           </div>
 
           <div class="flex items-center gap-2">
             <button (click)="loadUsers()" [disabled]="userService.isLoading()" class="notion-btn text-xs py-1.5 px-3">
-              <span>🔄</span>
               <span>Refresh</span>
             </button>
             <button (click)="openCreateModal()" class="notion-btn-primary text-xs py-1.5 px-3">
-              <span>+</span>
-              <span>New Account</span>
+              <span>+ New Account</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Users Notion Database Container -->
+      <!-- Users Database Container -->
       <div class="notion-card overflow-hidden">
         
         <!-- Toolbar & Filter Popover -->
@@ -68,9 +62,8 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
                 [value]="searchQuery()"
                 (input)="onSearchInput($event)"
                 placeholder="Filter by name, ID..."
-                class="notion-input py-1 pl-7 pr-2.5 w-44 sm:w-56 text-xs"
+                class="notion-input py-1 px-2.5 w-44 sm:w-56 text-xs"
               />
-              <span class="absolute left-2.5 top-1.5 text-[11px] text-[#6b6b68] pointer-events-none">🔍</span>
               @if (searchQuery()) {
                 <button
                   type="button"
@@ -82,7 +75,7 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
               }
             </div>
 
-            <!-- Role Filter Popover Trigger -->
+            <!-- Role Filter Dropdown Trigger -->
             <div class="relative">
               <button
                 type="button"
@@ -91,7 +84,6 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
                 [class.border-[#529cca]]="selectedRole() !== 'ALL'"
                 [class.text-[#529cca]]="selectedRole() !== 'ALL'"
               >
-                <span>🏷️</span>
                 <span>Role: <strong>{{ selectedRole() === 'ALL' ? 'All' : selectedRole() }}</strong></span>
                 <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -134,47 +126,17 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
           </div>
         </div>
 
-        <!-- Notion Users Table -->
+        <!-- Users Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs border-collapse">
             <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
               <tr>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                  <span class="flex items-center gap-1.5">
-                    <span>👤</span>
-                    <span>Name</span>
-                  </span>
-                </th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                  <span class="flex items-center gap-1.5">
-                    <span>#</span>
-                    <span>User ID / Email</span>
-                  </span>
-                </th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                  <span class="flex items-center gap-1.5">
-                    <span>💼</span>
-                    <span>Department</span>
-                  </span>
-                </th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                  <span class="flex items-center gap-1.5">
-                    <span>🏷️</span>
-                    <span>Role Assignment</span>
-                  </span>
-                </th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                  <span class="flex items-center gap-1.5">
-                    <span>🔘</span>
-                    <span>Status</span>
-                  </span>
-                </th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                  <span class="flex items-center gap-1.5">
-                    <span>📅</span>
-                    <span>Last Login</span>
-                  </span>
-                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Name</th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">User ID / Email</th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Department</th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Role Assignment</th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Status</th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Last Login</th>
                 <th class="py-2.5 px-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -203,7 +165,7 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
                   <tr class="hover:bg-[#262626] transition-colors group">
                     <td class="py-2 px-3 border-r border-[#262626]">
                       <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-[#2a2a2a] border border-[#333333] flex items-center justify-center font-medium text-[11px] text-[#e6e6e5]">
+                        <div class="w-6 h-6 rounded-md bg-[#2a2a2a] border border-[#333333] flex items-center justify-center font-medium text-[11px] text-[#e6e6e5]">
                           {{ user.name.substring(0, 1).toUpperCase() }}
                         </div>
                         <span class="font-medium text-[#ffffff]">{{ user.name }}</span>
@@ -266,7 +228,9 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
                         class="text-[#787774] hover:text-[#e05757] p-1 transition-colors disabled:opacity-20 disabled:hover:text-[#787774]"
                         title="Delete user from database"
                       >
-                        🗑️
+                        <svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     </td>
                   </tr>
@@ -282,15 +246,12 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
         </div>
       </div>
 
-      <!-- Create User Modal (Notion Dialog) -->
+      <!-- Create User Modal -->
       @if (showCreateModal()) {
         <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div class="notion-card max-w-md w-full p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
             <div class="flex items-center justify-between pb-3 border-b border-[#2f2f2f] mb-4">
-              <div class="flex items-center gap-2">
-                <span class="text-xl">👤</span>
-                <h3 class="text-sm font-semibold text-[#ffffff]">Create New Database User</h3>
-              </div>
+              <h3 class="text-sm font-semibold text-[#ffffff]">Create New Database User</h3>
               <button (click)="closeCreateModal()" class="text-[#787774] hover:text-[#ffffff] text-sm">✕</button>
             </div>
 
@@ -352,36 +313,29 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
                 </div>
               </div>
 
-              <div class="pt-3 border-t border-[#2f2f2f] flex justify-end gap-2">
-                <button type="button" (click)="closeCreateModal()" class="notion-btn">Cancel</button>
-                <button type="submit" [disabled]="userForm.invalid || isSubmitting()" class="notion-btn-primary">
-                  @if (isSubmitting()) {
-                    <span>Saving...</span>
-                  } @else {
-                    <span>Save User</span>
-                  }
+              @if (createError()) {
+                <div class="p-2 rounded bg-[#3b2222] border border-[#e05757]/30 text-[#e05757] text-[11px]">
+                  {{ createError() }}
+                </div>
+              }
+
+              <div class="pt-3 border-t border-[#2f2f2f] flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  (click)="closeCreateModal()"
+                  class="notion-btn-ghost text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="isSubmitting() || userForm.invalid"
+                  class="notion-btn-primary text-xs"
+                >
+                  {{ isSubmitting() ? 'Creating...' : 'Create Account' }}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      }
-
-      <!-- Delete User Modal -->
-      @if (userToDelete()) {
-        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="notion-card max-w-sm w-full p-5 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
-            <h3 class="text-sm font-semibold text-[#ffffff] mb-2 flex items-center gap-1.5">
-              <span>⚠️</span>
-              <span>Confirm Account Deletion</span>
-            </h3>
-            <p class="text-xs text-[#9b9a97] mb-4">
-              Are you sure you want to permanently delete user <strong class="text-[#ffffff]">{{ userToDelete()?.name }}</strong> ({{ userToDelete()?.userId }}) from the database?
-            </p>
-            <div class="flex justify-end gap-2">
-              <button (click)="cancelDelete()" class="notion-btn text-xs">Cancel</button>
-              <button (click)="executeDelete()" class="notion-btn-danger text-xs">Delete User</button>
-            </div>
           </div>
         </div>
       }
@@ -399,11 +353,11 @@ export class AdminUsersComponent implements OnInit {
   isRoleMenuOpen = signal<boolean>(false);
 
   showCreateModal = signal<boolean>(false);
-  userToDelete = signal<IUser | null>(null);
   isSubmitting = signal<boolean>(false);
+  createError = signal<string | null>(null);
 
   userForm = this.fb.group({
-    userId: ['', [Validators.required, Validators.minLength(3)]],
+    userId: ['', [Validators.required]],
     name: ['', [Validators.required]],
     department: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -412,11 +366,11 @@ export class AdminUsersComponent implements OnInit {
   });
 
   filteredUsers = computed(() => {
-    const users = this.userService.users();
+    const list = this.userService.users();
     const query = this.searchQuery().toLowerCase().trim();
     const role = this.selectedRole();
 
-    return users.filter((u) => {
+    return list.filter((u) => {
       const matchesQuery =
         !query ||
         u.name.toLowerCase().includes(query) ||
@@ -456,16 +410,6 @@ export class AdminUsersComponent implements OnInit {
     this.selectedRole.set('ALL');
   }
 
-  toggleRole(user: IUser): void {
-    const nextRole: UserRole = user.role === 'Admin' ? 'General User' : 'Admin';
-    this.userService.updateUser(user.userId, { role: nextRole }).subscribe();
-  }
-
-  toggleStatus(user: IUser): void {
-    const nextStatus: UserStatus = user.status === 'Active' ? 'Disabled' : 'Active';
-    this.userService.updateUser(user.userId, { status: nextStatus }).subscribe();
-  }
-
   openCreateModal(): void {
     this.userForm.reset({
       userId: '',
@@ -475,6 +419,7 @@ export class AdminUsersComponent implements OnInit {
       role: 'General User',
       status: 'Active',
     });
+    this.createError.set(null);
     this.showCreateModal.set(true);
   }
 
@@ -486,35 +431,35 @@ export class AdminUsersComponent implements OnInit {
     if (this.userForm.invalid) return;
 
     this.isSubmitting.set(true);
-    const data = this.userForm.value as CreateUserData;
+    this.createError.set(null);
 
-    this.userService.createUser(data).subscribe({
+    const formData = this.userForm.value as CreateUserData;
+
+    this.userService.createUser(formData).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.closeCreateModal();
       },
-      error: () => {
+      error: (err) => {
         this.isSubmitting.set(false);
+        this.createError.set(err?.error?.error || 'Failed to create user. Please try again.');
       },
     });
+  }
+
+  toggleRole(user: IUser): void {
+    const newRole: UserRole = user.role === 'Admin' ? 'General User' : 'Admin';
+    this.userService.updateUser(user.userId, { role: newRole }).subscribe();
+  }
+
+  toggleStatus(user: IUser): void {
+    const newStatus: UserStatus = user.status === 'Active' ? 'Disabled' : 'Active';
+    this.userService.updateUser(user.userId, { status: newStatus }).subscribe();
   }
 
   confirmDeleteUser(user: IUser): void {
-    this.userToDelete.set(user);
-  }
-
-  cancelDelete(): void {
-    this.userToDelete.set(null);
-  }
-
-  executeDelete(): void {
-    const user = this.userToDelete();
-    if (!user) return;
-
-    this.userService.deleteUser(user.userId).subscribe({
-      next: () => {
-        this.userToDelete.set(null);
-      },
-    });
+    if (confirm(`Are you sure you want to delete user ${user.name} (${user.userId}) from the database?`)) {
+      this.userService.deleteUser(user.userId).subscribe();
+    }
   }
 }
