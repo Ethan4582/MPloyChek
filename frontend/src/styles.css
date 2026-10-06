@@ -4,67 +4,101 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-brand-500 selection:text-white;
+    background-color: #191919;
+    color: #e6e6e5;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: #2e4d6b;
+    color: #ffffff;
   }
 }
 
 @layer components {
-  .glass-card {
-    @apply bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl shadow-black/20;
-  }
-  
-  .glass-card-hover {
-    @apply transition-all duration-300 hover:border-slate-700/80 hover:bg-slate-900/95 hover:shadow-2xl hover:shadow-brand-500/5;
+  /* Notion Clean Cards */
+  .notion-card {
+    @apply bg-[#202020] border border-[#2f2f2f] rounded-lg shadow-notion-card transition-all;
   }
 
-  .glass-input {
-    @apply w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm;
+  .notion-card-interactive {
+    @apply bg-[#202020] border border-[#2f2f2f] rounded-lg hover:border-[#3a3a3a] hover:bg-[#232323] transition-colors cursor-pointer;
   }
 
-  .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-white bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 active:scale-[0.98] transition-all shadow-lg shadow-brand-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  /* Notion Inputs (shadcn-like) */
+  .notion-input {
+    @apply w-full bg-[#191919] border border-[#2f2f2f] rounded-md px-3 py-1.5 text-xs text-[#e6e6e5] placeholder-[#5a5a58] focus:outline-none focus:border-[#529cca] focus:ring-1 focus:ring-[#529cca]/30 transition-all font-sans;
   }
 
-  .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-800 hover:text-white border border-slate-700/60 active:scale-[0.98] transition-all disabled:opacity-50;
+  /* Notion Action Buttons (shadcn-style) */
+  .notion-btn {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-[#e6e6e5] bg-[#252525] hover:bg-[#2e2e2e] active:bg-[#333333] border border-[#2f2f2f] transition-colors disabled:opacity-40 disabled:cursor-not-allowed select-none;
   }
 
-  .badge-admin {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30;
+  .notion-btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white bg-[#2563eb] hover:bg-[#1d4ed8] active:bg-[#1e40af] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-sm select-none;
   }
 
-  .badge-user {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30;
-  }
-  
-  .badge-verified {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/25;
+  .notion-btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#262626] transition-colors disabled:opacity-40 disabled:cursor-not-allowed select-none;
   }
 
-  .badge-pending {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/25;
+  .notion-btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-[#e05757] bg-[#3b2222]/40 hover:bg-[#3b2222] border border-[#e05757]/30 transition-colors disabled:opacity-40 select-none;
   }
 
-  .badge-flagged {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/25;
+  /* Authentic Notion Multi-Select Badges (Matte, desaturated) */
+  .tag-blue {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#1e2d3d] text-[#529cca];
+  }
+
+  .tag-green {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#1f3328] text-[#4dab7e];
+  }
+
+  .tag-yellow {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#37321e] text-[#d8a33f];
+  }
+
+  .tag-orange {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#392a1e] text-[#e07a38];
+  }
+
+  .tag-purple {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#2f223d] text-[#9d68d3];
+  }
+
+  .tag-red {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#3b2222] text-[#e05757];
+  }
+
+  .tag-gray {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#2a2a2a] text-[#9b9a97];
+  }
+
+  .tag-brown {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#332924] text-[#bc8c74];
   }
 }
 
-/* Custom scrollbars */
+/* Notion Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
-  border-radius: 9999px;
+  background: #333333;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 1);
+  background: #444444;
 }

@@ -1,54 +1,73 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     "./src/**/*.{html,ts}",
   ],
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#f0f7ff',
-          100: '#e0effe',
-          200: '#bae0fd',
-          300: '#7cc7fb',
-          400: '#38a9f7',
-          500: '#0e8de9',
-          600: '#026fc7',
-          700: '#0358a1',
-          800: '#074b84',
-          900: '#0c3f6e',
-          950: '#082849',
+        notion: {
+          bg: '#191919',
+          sidebar: '#202020',
+          card: '#202020',
+          hover: '#262626',
+          active: '#2f2f2f',
+          border: '#2f2f2f',
+          borderSubtle: '#262626',
+          borderStrong: '#373737',
+          text: '#ffffff',
+          textMuted: '#9b9a97',
+          textSubtle: '#605f5b',
+          // Notion Muted Tag Colors (Matte, desaturated, authentic)
+          tag: {
+            grayBg: '#2a2a2a',
+            grayText: '#9b9a97',
+            blueBg: '#1e2d3d',
+            blueText: '#529cca',
+            greenBg: '#1f3328',
+            greenText: '#4dab7e',
+            orangeBg: '#392a1e',
+            orangeText: '#e07a38',
+            yellowBg: '#37321e',
+            yellowText: '#d8a33f',
+            purpleBg: '#2f223d',
+            purpleText: '#9d68d3',
+            pinkBg: '#38202d',
+            pinkText: '#d15796',
+            redBg: '#3b2222',
+            redText: '#e05757',
+            brownBg: '#332924',
+            brownText: '#bc8c74',
+          }
         },
-        surface: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
-        }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: [
+          'Inter',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Helvetica',
+          '"Apple Color Emoji"',
+          'Arial',
+          'sans-serif',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"'
+        ],
+        mono: [
+          '"SFMono-Regular"',
+          'Menlo',
+          'Consolas',
+          '"PT Mono"',
+          '"Liberation Mono"',
+          'monospace'
+        ]
       },
-      animation: {
-        'shimmer': 'shimmer 2s infinite linear',
-        'pulse-subtle': 'pulseSubtle 2.5s infinite ease-in-out',
-      },
-      keyframes: {
-        shimmer: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' },
-        },
-        pulseSubtle: {
-          '0%, 100%': { opacity: 1 },
-          '50%': { opacity: 0.7 },
-        }
+      boxShadow: {
+        'notion-popover': '0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px #2f2f2f',
+        'notion-dropdown': '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px #333333',
+        'notion-card': '0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 1px #2a2a2a',
       }
     },
   },

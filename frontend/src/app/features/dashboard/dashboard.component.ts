@@ -12,359 +12,476 @@ import { IEmployeeRecord } from '../../core/models/record.models';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
-      <!-- User Profile Header & Role Card -->
-      <div class="glass-card p-6 relative overflow-hidden border-slate-800">
-        <div class="absolute -right-10 -top-10 w-48 h-48 bg-brand-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      <!-- Notion Page Title & Header -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl select-none">🛡️</span>
+          <div>
+            <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Employment Verification Directory</h1>
+            <p class="text-xs text-[#9b9a97] mt-0.5">
+              Secure RBAC directory of employee screening audits and security clearances.
+            </p>
+          </div>
+        </div>
 
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div class="flex items-center gap-4">
-            <!-- Avatar -->
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white text-xl font-extrabold shadow-lg shadow-brand-500/20">
+        <!-- Notion Callout: Active Profile & Access Scope -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg bg-[#202020] border border-[#2f2f2f] text-xs">
+          <div class="flex items-start sm:items-center gap-3">
+            <div class="w-8 h-8 rounded bg-[#292929] border border-[#383838] flex items-center justify-center text-sm font-medium text-[#e6e6e5] shrink-0">
               {{ getUserInitials() }}
             </div>
-
             <div>
-              <div class="flex items-center gap-3">
-                <h1 class="text-xl font-bold text-white">{{ authService.currentUser()?.name }}</h1>
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-[#e6e6e5]">{{ authService.currentUser()?.name }}</span>
+                <span class="text-[#605f5b]">&bull;</span>
+                <span class="text-[#9b9a97] font-mono text-[11px]">{{ authService.currentUser()?.userId }}</span>
+                
                 @if (authService.isAdmin()) {
-                  <span class="badge-admin">
-                    <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 2l2.5 5.5H18l-4.5 4 1.5 6.5-5-3.5-5 3.5 1.5-6.5L2 7.5h5.5L10 2z" clip-rule="evenodd" />
-                    </svg>
-                    Administrator
-                  </span>
+                  <span class="tag-purple">Admin Clearance</span>
                 } @else {
-                  <span class="badge-user">
-                    <svg class="w-3.5 h-3.5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                    </svg>
-                    General User
-                  </span>
+                  <span class="tag-blue">General User</span>
                 }
               </div>
-
-              <div class="flex flex-wrap items-center gap-y-1 gap-x-4 mt-1.5 text-xs text-slate-400">
-                <span class="flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
-                  </svg>
-                  <strong class="text-slate-300 font-mono">{{ authService.currentUser()?.userId }}</strong>
-                </span>
-
-                <span class="flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <span>{{ authService.currentUser()?.department }}</span>
-                </span>
-
-                <span class="flex items-center gap-1.5 text-emerald-400">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>{{ authService.currentUser()?.status }}</span>
-                </span>
-              </div>
+              <p class="text-[11px] text-[#787774] mt-0.5">
+                {{ authService.currentUser()?.department }} &bull;
+                @if (authService.isAdmin()) {
+                  <span class="text-[#9d68d3]">Organization-wide scope: Viewing all records including confidential compensation & risk audit notes.</span>
+                } @else {
+                  <span class="text-[#529cca]">User-restricted scope: Restricted strictly to your records. Confidential data is stripped at the API.</span>
+                }
+              </p>
             </div>
           </div>
 
-          <!-- Quick Navigation Actions -->
-          <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2 shrink-0 self-end sm:self-auto">
             @if (authService.isAdmin()) {
-              <a routerLink="/admin/users" class="btn-secondary text-xs">
-                <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span>Manage Users (Admin Console)</span>
+              <a routerLink="/admin/users" class="notion-btn text-xs py-1">
+                <span>⚙️</span>
+                <span>Manage DB Users</span>
               </a>
             }
-
-            <button (click)="loadRecords()" [disabled]="recordService.isLoading()" class="btn-primary text-xs">
+            <button
+              (click)="loadRecords()"
+              [disabled]="recordService.isLoading()"
+              class="notion-btn text-xs py-1"
+            >
               @if (recordService.isLoading()) {
-                <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Loading ({{ activeTimer() }}ms)...</span>
+                <span class="animate-spin text-xs">⏳</span>
+                <span>Fetching ({{ activeTimer() }}ms)...</span>
               } @else {
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Reload Records</span>
+                <span>🔄</span>
+                <span>Reload</span>
               }
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Async Latency Showcase & Access Level Control Bar -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Latency Emulation Controls -->
-        <div class="lg:col-span-2 glass-card p-4 flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <span class="p-1 rounded-lg bg-amber-500/10 text-amber-400">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </span>
-              <div>
-                <h3 class="text-xs font-semibold text-slate-200 uppercase tracking-wider">Simulated Network Delay Controller</h3>
-                <p class="text-[11px] text-slate-400">Parameter appended to API request: <code class="text-brand-300 font-mono">?delay={{ delayService.currentDelay() }}</code></p>
-              </div>
-            </div>
-
-            @if (lastDuration() !== null) {
-              <span class="px-2 py-1 rounded-lg bg-slate-950 text-slate-300 border border-slate-800 text-[11px] font-mono">
-                Last Roundtrip: <strong class="text-emerald-400">{{ lastDuration() }}ms</strong>
-              </span>
-            }
-          </div>
-
-          <!-- Delay preset buttons -->
-          <div class="grid grid-cols-5 gap-2">
-            @for (opt of delayService.delayOptions; track opt.value) {
-              <button
-                type="button"
-                (click)="onSelectDelay(opt.value)"
-                class="py-1.5 px-2 rounded-lg text-xs font-medium border transition-all text-center"
-                [ngClass]="
-                  delayService.currentDelay() === opt.value
-                    ? 'bg-brand-600 text-white border-brand-500 shadow-md shadow-brand-500/20'
-                    : 'bg-slate-950/60 text-slate-400 border-slate-800 hover:text-slate-200 hover:bg-slate-800'
-                "
-              >
-                {{ opt.label }}
-              </button>
-            }
+      <!-- Latency Emulation Bar (Notion Toolbar) -->
+      <div class="p-3 rounded-lg bg-[#202020] border border-[#2f2f2f] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-sm">⏱️</span>
+          <div>
+            <span class="text-[#e6e6e5] font-medium">Asynchronous Latency Simulator:</span>
+            <span class="text-[#9b9a97] ml-1.5 hidden sm:inline">Testing API delay handling</span>
           </div>
         </div>
 
-        <!-- Role Scope Insight Card -->
-        <div class="glass-card p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-xs font-semibold text-slate-200 uppercase tracking-wider">Data Access Scope</span>
-              @if (recordService.meta()?.confidentialFieldsVisible) {
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">ALL RECORDS</span>
-              } @else {
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-300 border border-blue-500/30">PERSONAL ONLY</span>
-              }
-            </div>
-            
-            <p class="text-[11px] text-slate-400 leading-relaxed">
-              @if (authService.isAdmin()) {
-                You have <strong>Admin clearance</strong>. You can view all organizational records including confidential compensation tiers, risk scores, and audit notes.
-              } @else {
-                You are logged in as <strong>General User</strong>. You can only view your own records. Confidential fields are securely omitted at the backend repository.
-              }
-            </p>
-          </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          @for (opt of delayService.delayOptions; track opt.value) {
+            <button
+              type="button"
+              (click)="onSelectDelay(opt.value)"
+              class="px-2.5 py-1 rounded text-xs transition-colors"
+              [ngClass]="
+                delayService.currentDelay() === opt.value
+                  ? 'bg-[#2f2f2f] text-[#ffffff] font-medium border border-[#3e3e3e]'
+                  : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#262626] border border-transparent'
+              "
+            >
+              {{ opt.label }}
+            </button>
+          }
 
-          <div class="mt-2 pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-            <span>Records Loaded: <strong class="text-slate-200">{{ filteredRecords().length }}</strong></span>
-            <span>Confidential Columns: <strong [class.text-emerald-400]="authService.isAdmin()" [class.text-slate-500]="!authService.isAdmin()">{{ authService.isAdmin() ? 'Visible' : 'Masked' }}</strong></span>
-          </div>
+          @if (lastDuration() !== null) {
+            <span class="ml-2 pl-2 border-l border-[#2f2f2f] font-mono text-[11px] text-[#4dab7e]">
+              {{ lastDuration() }}ms
+            </span>
+          }
         </div>
       </div>
 
-      <!-- Live Async Progress Indicator (Showcasing async state) -->
+      <!-- Live Loading Progress Bar -->
       @if (recordService.isLoading()) {
-        <div class="glass-card p-4 border-brand-500/30 bg-brand-950/20 animate-in fade-in duration-150">
-          <div class="flex items-center justify-between text-xs mb-2">
-            <span class="flex items-center gap-2 font-medium text-brand-300">
-              <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
-              </span>
-              <span>Processing asynchronous API request with {{ delayService.currentDelay() }}ms simulated delay...</span>
+        <div class="p-2.5 rounded-lg bg-[#202020] border border-[#333333] space-y-1.5 animate-in fade-in duration-100">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-[#529cca] flex items-center gap-1.5">
+              <span class="animate-pulse">●</span>
+              <span>Awaiting server response with {{ delayService.currentDelay() }}ms simulated delay...</span>
             </span>
-            <span class="font-mono text-brand-400 font-semibold">{{ activeTimer() }}ms</span>
+            <span class="font-mono text-[#9b9a97]">{{ activeTimer() }}ms</span>
           </div>
-
-          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div class="w-full h-1 bg-[#191919] rounded-full overflow-hidden">
             <div
-              class="h-full bg-gradient-to-r from-brand-500 to-indigo-500 transition-all duration-100 rounded-full"
+              class="h-full bg-[#529cca] transition-all duration-75 rounded-full"
               [style.width.%]="getProgressPercent()"
             ></div>
           </div>
         </div>
       }
 
-      <!-- Records Section with Search & Table -->
-      <div class="glass-card overflow-hidden">
-        <!-- Table Toolbar -->
-        <div class="p-4 sm:p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-base font-bold text-white">Employment Verification Records</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Records returned from MongoDB API matching your role permissions</p>
+      <!-- Notion Database Container -->
+      <div class="notion-card overflow-hidden">
+        
+        <!-- Notion Database Controls (Views, Filter Popovers, Search) -->
+        <div class="p-3 border-b border-[#2f2f2f] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs bg-[#202020]">
+          
+          <!-- View Tabs (Notion style) -->
+          <div class="flex items-center gap-1">
+            <button
+              type="button"
+              (click)="setView('ALL')"
+              class="px-2.5 py-1 rounded transition-colors flex items-center gap-1.5"
+              [ngClass]="activeView() === 'ALL' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
+            >
+              <span>📋</span>
+              <span>All Records</span>
+              <span class="text-[10px] text-[#6b6b68]">({{ recordService.records().length }})</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="setView('Verified')"
+              class="px-2.5 py-1 rounded transition-colors flex items-center gap-1.5"
+              [ngClass]="activeView() === 'Verified' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-[#4dab7e]"></span>
+              <span>Verified</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="setView('Pending Review')"
+              class="px-2.5 py-1 rounded transition-colors flex items-center gap-1.5"
+              [ngClass]="activeView() === 'Pending Review' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-[#d8a33f]"></span>
+              <span>Pending</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="setView('Flagged')"
+              class="px-2.5 py-1 rounded transition-colors flex items-center gap-1.5"
+              [ngClass]="activeView() === 'Flagged' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-[#e05757]"></span>
+              <span>Flagged</span>
+            </button>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2.5">
-            <!-- Search Input -->
-            <div class="relative min-w-[200px]">
+          <!-- Filters & Search Toolbar (shadcn/Notion Popover Style) -->
+          <div class="flex flex-wrap items-center gap-2">
+            
+            <!-- Search Bar -->
+            <div class="relative">
               <input
                 type="text"
-                [(ngModel)]="searchQuery"
-                placeholder="Search records..."
-                class="glass-input text-xs py-1.5 pl-8 pr-3"
+                [value]="searchQuery()"
+                (input)="onSearchInput($event)"
+                placeholder="Search database..."
+                class="notion-input py-1 pl-7 pr-2.5 w-44 sm:w-56 text-xs"
               />
-              <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <span class="absolute left-2.5 top-1.5 text-[11px] text-[#6b6b68] pointer-events-none">🔍</span>
+              @if (searchQuery()) {
+                <button
+                  type="button"
+                  (click)="searchQuery.set('')"
+                  class="absolute right-2 top-1.5 text-[#6b6b68] hover:text-[#e6e6e5] text-xs"
+                >
+                  ✕
+                </button>
+              }
             </div>
 
-            <!-- Status Filter -->
-            <select
-              [(ngModel)]="selectedStatus"
-              class="bg-slate-950 text-slate-300 rounded-xl px-3 py-1.5 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-500 text-xs cursor-pointer"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="Verified">Verified</option>
-              <option value="Pending Review">Pending Review</option>
-              <option value="Flagged">Flagged</option>
-            </select>
+            <!-- Status Filter Popover Trigger -->
+            <div class="relative">
+              <button
+                type="button"
+                (click)="toggleStatusMenu()"
+                class="notion-btn py-1 px-2.5 text-xs flex items-center gap-1.5"
+                [class.border-[#529cca]]="selectedStatus() !== 'ALL'"
+                [class.text-[#529cca]]="selectedStatus() !== 'ALL'"
+              >
+                <span>🔘</span>
+                <span>Status: <strong>{{ selectedStatus() === 'ALL' ? 'All' : selectedStatus() }}</strong></span>
+                <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-            <!-- Access Level Filter -->
-            <select
-              [(ngModel)]="selectedAccessLevel"
-              class="bg-slate-950 text-slate-300 rounded-xl px-3 py-1.5 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-500 text-xs cursor-pointer"
-            >
-              <option value="ALL">All Access Levels</option>
-              <option value="General">General</option>
-              <option value="Confidential">Confidential</option>
-              <option value="Executive">Executive</option>
-            </select>
+              <!-- Popover Menu -->
+              @if (isStatusMenuOpen()) {
+                <div (click)="isStatusMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
+                <div class="absolute right-0 mt-1 w-44 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div class="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[#6b6b68]">Filter by Status</div>
+                  @for (status of statusOptions; track status) {
+                    <button
+                      type="button"
+                      (click)="selectStatus(status)"
+                      class="w-full flex items-center justify-between px-2 py-1.5 rounded text-xs text-left hover:bg-[#2f2f2f] transition-colors"
+                      [class.text-[#529cca]]="selectedStatus() === status"
+                    >
+                      <span>{{ status === 'ALL' ? 'All Statuses' : status }}</span>
+                      @if (selectedStatus() === status) {
+                        <svg class="w-3.5 h-3.5 text-[#529cca]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Access Level Filter Popover Trigger -->
+            <div class="relative">
+              <button
+                type="button"
+                (click)="toggleAccessMenu()"
+                class="notion-btn py-1 px-2.5 text-xs flex items-center gap-1.5"
+                [class.border-[#529cca]]="selectedAccessLevel() !== 'ALL'"
+                [class.text-[#529cca]]="selectedAccessLevel() !== 'ALL'"
+              >
+                <span>🏷️</span>
+                <span>Clearance: <strong>{{ selectedAccessLevel() === 'ALL' ? 'All' : selectedAccessLevel() }}</strong></span>
+                <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Popover Menu -->
+              @if (isAccessMenuOpen()) {
+                <div (click)="isAccessMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
+                <div class="absolute right-0 mt-1 w-44 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div class="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[#6b6b68]">Filter by Clearance</div>
+                  @for (level of accessOptions; track level) {
+                    <button
+                      type="button"
+                      (click)="selectAccessLevel(level)"
+                      class="w-full flex items-center justify-between px-2 py-1.5 rounded text-xs text-left hover:bg-[#2f2f2f] transition-colors"
+                      [class.text-[#529cca]]="selectedAccessLevel() === level"
+                    >
+                      <span>{{ level === 'ALL' ? 'All Clearances' : level }}</span>
+                      @if (selectedAccessLevel() === level) {
+                        <svg class="w-3.5 h-3.5 text-[#529cca]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Clear filters button if active -->
+            @if (hasActiveFilters()) {
+              <button
+                type="button"
+                (click)="resetFilters()"
+                class="notion-btn-ghost text-xs py-1 px-2 text-[#9b9a97] hover:text-[#ffffff]"
+                title="Reset all filters"
+              >
+                Reset
+              </button>
+            }
+
           </div>
         </div>
 
-        <!-- Table View with Shimmer Skeleton States -->
+        <!-- Notion Database Table -->
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800 text-[11px]">
+          <table class="w-full text-left text-xs border-collapse">
+            <!-- Table Header with Notion Property Icons -->
+            <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
               <tr>
-                <th class="py-3.5 px-4">Record ID</th>
-                <th class="py-3.5 px-4">Employee</th>
-                <th class="py-3.5 px-4">Department & Position</th>
-                <th class="py-3.5 px-4">Access Level</th>
-                <th class="py-3.5 px-4">Status</th>
-                <th class="py-3.5 px-4">Screen Date</th>
-                
-                <!-- Admin-Exclusive Columns -->
+                <th class="py-2.5 px-3 w-32 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>#</span>
+                    <span>Record ID</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>👤</span>
+                    <span>Candidate</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>💼</span>
+                    <span>Role & Team</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>🏷️</span>
+                    <span>Clearance</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>🔘</span>
+                    <span>Status</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>📅</span>
+                    <span>Screen Date</span>
+                  </span>
+                </th>
+
+                <!-- Admin Protected Columns -->
                 @if (authService.isAdmin()) {
-                  <th class="py-3.5 px-4 text-amber-400">Comp Grade</th>
-                  <th class="py-3.5 px-4 text-amber-400">Risk Score</th>
-                  <th class="py-3.5 px-4 text-amber-400">Audit Notes</th>
+                  <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                    <span class="flex items-center gap-1.5 text-[#9d68d3]">
+                      <span>🔒</span>
+                      <span>Comp Grade</span>
+                    </span>
+                  </th>
+                  <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                    <span class="flex items-center gap-1.5 text-[#9d68d3]">
+                      <span>🔒</span>
+                      <span>Risk</span>
+                    </span>
+                  </th>
+                  <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                    <span class="flex items-center gap-1.5 text-[#9d68d3]">
+                      <span>🔒</span>
+                      <span>Audit Notes</span>
+                    </span>
+                  </th>
                 }
-                <th class="py-3.5 px-4 text-right">Actions</th>
+
+                <th class="py-2.5 px-3 text-right">Action</th>
               </tr>
             </thead>
 
-            <tbody class="divide-y divide-slate-800/60">
-              <!-- Skeleton Loaders when data is being asynchronously fetched -->
+            <tbody class="divide-y divide-[#262626]">
+              <!-- Loading Skeleton State -->
               @if (recordService.isLoading()) {
                 @for (i of [1, 2, 3, 4, 5]; track i) {
-                  <tr class="animate-pulse">
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-24 bg-slate-800 rounded"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-32 bg-slate-800 rounded"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-40 bg-slate-800 rounded"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-5 w-20 bg-slate-800 rounded-full"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-5 w-20 bg-slate-800 rounded-full"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-24 bg-slate-800 rounded"></div></td>
+                  <tr class="animate-pulse bg-[#202020]">
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-20 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-28 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-36 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-20 bg-[#2a2a2a] rounded"></div></td>
                     @if (authService.isAdmin()) {
-                      <td class="py-3.5 px-4"><div class="h-3.5 w-16 bg-slate-800 rounded"></div></td>
-                      <td class="py-3.5 px-4"><div class="h-3.5 w-10 bg-slate-800 rounded"></div></td>
-                      <td class="py-3.5 px-4"><div class="h-3.5 w-44 bg-slate-800 rounded"></div></td>
+                      <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-12 bg-[#2a2a2a] rounded"></div></td>
+                      <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-10 bg-[#2a2a2a] rounded"></div></td>
+                      <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-32 bg-[#2a2a2a] rounded"></div></td>
                     }
-                    <td class="py-3.5 px-4 text-right"><div class="h-7 w-14 bg-slate-800 rounded ml-auto"></div></td>
+                    <td class="py-2.5 px-3 text-right"><div class="h-5 w-12 bg-[#2a2a2a] rounded ml-auto"></div></td>
                   </tr>
                 }
               } @else if (filteredRecords().length === 0) {
                 <tr>
-                  <td [attr.colspan]="authService.isAdmin() ? 10 : 7" class="py-12 text-center text-slate-500">
-                    <div class="flex flex-col items-center justify-center gap-2">
-                      <svg class="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p class="text-sm font-medium">No matching records found.</p>
-                      <p class="text-xs text-slate-600">Try modifying your search or filter filters.</p>
+                  <td [attr.colspan]="authService.isAdmin() ? 10 : 7" class="py-12 text-center text-[#787774]">
+                    <div class="flex flex-col items-center justify-center gap-1.5">
+                      <span class="text-xl">📭</span>
+                      <p class="text-xs font-medium text-[#9b9a97]">No records match the current filters.</p>
+                      <button (click)="resetFilters()" class="text-xs text-[#529cca] hover:underline mt-1">
+                        Clear all filters
+                      </button>
                     </div>
                   </td>
                 </tr>
               } @else {
-                <!-- Render Records -->
+                <!-- Render Database Rows -->
                 @for (record of filteredRecords(); track record._id) {
-                  <tr class="hover:bg-slate-900/60 transition-colors">
-                    <td class="py-3.5 px-4 font-mono font-medium text-brand-300">
+                  <tr class="hover:bg-[#262626] transition-colors group">
+                    <td class="py-2 px-3 font-mono text-[11px] text-[#9b9a97] border-r border-[#262626]">
                       {{ record.recordId }}
                     </td>
-                    <td class="py-3.5 px-4">
-                      <div class="font-medium text-slate-200">{{ record.employeeName }}</div>
-                      <div class="text-[10px] text-slate-500 font-mono">{{ record.userId }}</div>
+
+                    <td class="py-2 px-3 border-r border-[#262626]">
+                      <div class="font-medium text-[#ffffff]">{{ record.employeeName }}</div>
+                      <div class="text-[10px] text-[#605f5b] font-mono">{{ record.userId }}</div>
                     </td>
-                    <td class="py-3.5 px-4">
-                      <div class="text-slate-200 font-medium">{{ record.position }}</div>
-                      <div class="text-[10px] text-slate-400">{{ record.department }}</div>
+
+                    <td class="py-2 px-3 border-r border-[#262626]">
+                      <div class="text-[#e6e6e5]">{{ record.position }}</div>
+                      <div class="text-[10px] text-[#787774]">{{ record.department }}</div>
                     </td>
-                    <td class="py-3.5 px-4">
-                      <span
-                        class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                        [ngClass]="{
-                          'bg-blue-500/10 text-blue-400 border border-blue-500/20': record.accessLevel === 'General',
-                          'bg-purple-500/10 text-purple-400 border border-purple-500/20': record.accessLevel === 'Confidential',
-                          'bg-amber-500/10 text-amber-400 border border-amber-500/20': record.accessLevel === 'Executive'
-                        }"
-                      >
-                        {{ record.accessLevel }}
-                      </span>
+
+                    <td class="py-2 px-3 border-r border-[#262626]">
+                      @if (record.accessLevel === 'General') {
+                        <span class="tag-blue">{{ record.accessLevel }}</span>
+                      } @else if (record.accessLevel === 'Confidential') {
+                        <span class="tag-purple">{{ record.accessLevel }}</span>
+                      } @else {
+                        <span class="tag-orange">{{ record.accessLevel }}</span>
+                      }
                     </td>
-                    <td class="py-3.5 px-4">
+
+                    <td class="py-2 px-3 border-r border-[#262626]">
                       @if (record.verificationStatus === 'Verified') {
-                        <span class="badge-verified">
-                          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Verified
+                        <span class="tag-green">
+                          <span class="w-1.5 h-1.5 rounded-full bg-[#4dab7e]"></span>
+                          <span>Verified</span>
                         </span>
                       } @else if (record.verificationStatus === 'Pending Review') {
-                        <span class="badge-pending">
-                          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Pending
+                        <span class="tag-yellow">
+                          <span class="w-1.5 h-1.5 rounded-full bg-[#d8a33f]"></span>
+                          <span>Pending</span>
                         </span>
                       } @else {
-                        <span class="badge-flagged">
-                          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Flagged
+                        <span class="tag-red">
+                          <span class="w-1.5 h-1.5 rounded-full bg-[#e05757]"></span>
+                          <span>Flagged</span>
                         </span>
                       }
                     </td>
-                    <td class="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
+
+                    <td class="py-2 px-3 font-mono text-[11px] text-[#9b9a97] border-r border-[#262626]">
                       {{ record.backgroundCheckDate }}
                     </td>
 
-                    <!-- Admin-Only Columns -->
+                    <!-- Admin Only Metrics -->
                     @if (authService.isAdmin()) {
-                      <td class="py-3.5 px-4 font-mono text-slate-300">
+                      <td class="py-2 px-3 font-mono text-[11px] text-[#e6e6e5] border-r border-[#262626]">
                         {{ record.compensationGrade || 'N/A' }}
                       </td>
-                      <td class="py-3.5 px-4">
+
+                      <td class="py-2 px-3 border-r border-[#262626]">
                         @if (record.riskScore !== undefined) {
                           <span
-                            class="px-2 py-0.5 rounded text-[10px] font-mono font-bold"
+                            class="px-1.5 py-0.5 rounded text-[10px] font-mono"
                             [ngClass]="{
-                              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': record.riskScore <= 10,
-                              'bg-amber-500/10 text-amber-400 border border-amber-500/20': record.riskScore > 10 && record.riskScore <= 30,
-                              'bg-rose-500/10 text-rose-400 border border-rose-500/20': record.riskScore > 30
+                              'tag-green': record.riskScore <= 10,
+                              'tag-yellow': record.riskScore > 10 && record.riskScore <= 30,
+                              'tag-red': record.riskScore > 30
                             }"
                           >
-                            Risk: {{ record.riskScore }}%
+                            {{ record.riskScore }}%
                           </span>
                         }
                       </td>
-                      <td class="py-3.5 px-4 text-slate-400 max-w-xs truncate" [title]="record.auditNotes || ''">
+
+                      <td class="py-2 px-3 text-[#9b9a97] max-w-xs truncate border-r border-[#262626]" [title]="record.auditNotes || ''">
                         {{ record.auditNotes || '—' }}
                       </td>
                     }
 
-                    <td class="py-3.5 px-4 text-right">
+                    <td class="py-2 px-3 text-right">
                       <button
                         (click)="selectRecord(record)"
-                        class="px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
+                        class="notion-btn-ghost text-[11px] py-0.5 px-2 opacity-80 group-hover:opacity-100"
                       >
                         Inspect
                       </button>
@@ -375,79 +492,97 @@ import { IEmployeeRecord } from '../../core/models/record.models';
             </tbody>
           </table>
         </div>
+
+        <!-- Notion Database Footer -->
+        <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
+          <div class="flex items-center gap-3">
+            <span>Count: <strong class="text-[#9b9a97] font-mono">{{ filteredRecords().length }}</strong></span>
+            @if (recordService.meta()) {
+              <span>&bull;</span>
+              <span>Scope: <strong class="text-[#9b9a97]">{{ recordService.meta()?.scope }}</strong></span>
+            }
+          </div>
+          <span class="text-[10px] text-[#555552]">MongoDB Mongoose Indexed View</span>
+        </div>
+
       </div>
 
-      <!-- Record Detail Modal -->
+      <!-- Record Detail Modal (Notion Side Peek Dialog Style) -->
       @if (selectedRecord()) {
-        <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="glass-card max-w-lg w-full p-6 border-slate-700 shadow-2xl animate-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div class="flex items-center gap-2">
-                <span class="p-1.5 rounded-lg bg-brand-500/10 text-brand-400">
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </span>
+        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div class="notion-card max-w-lg w-full p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
+            <div class="flex items-start justify-between pb-3 border-b border-[#2f2f2f]">
+              <div class="flex items-center gap-2.5">
+                <span class="text-2xl">📋</span>
                 <div>
-                  <h3 class="text-sm font-bold text-white">{{ selectedRecord()?.recordId }}</h3>
-                  <p class="text-[11px] text-slate-400">{{ selectedRecord()?.employeeName }} • {{ selectedRecord()?.position }}</p>
+                  <h3 class="text-sm font-semibold text-[#ffffff]">{{ selectedRecord()?.employeeName }}</h3>
+                  <p class="text-xs text-[#9b9a97] font-mono">{{ selectedRecord()?.recordId }} &bull; {{ selectedRecord()?.position }}</p>
                 </div>
               </div>
-              <button (click)="selectedRecord.set(null)" class="text-slate-400 hover:text-white text-lg">✕</button>
+              <button (click)="selectedRecord.set(null)" class="text-[#787774] hover:text-[#ffffff] text-sm p-1">✕</button>
             </div>
 
-            <div class="py-4 space-y-3 text-xs">
-              <div class="grid grid-cols-2 gap-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-                <div>
-                  <span class="text-slate-500 block text-[10px]">Department</span>
-                  <span class="text-slate-200 font-medium">{{ selectedRecord()?.department }}</span>
-                </div>
-                <div>
-                  <span class="text-slate-500 block text-[10px]">Status</span>
-                  <span class="text-slate-200 font-medium">{{ selectedRecord()?.verificationStatus }}</span>
-                </div>
-                <div>
-                  <span class="text-slate-500 block text-[10px]">Access Level</span>
-                  <span class="text-slate-200 font-medium">{{ selectedRecord()?.accessLevel }}</span>
-                </div>
-                <div>
-                  <span class="text-slate-500 block text-[10px]">Screening Date</span>
-                  <span class="text-slate-200 font-mono">{{ selectedRecord()?.backgroundCheckDate }}</span>
+            <!-- Properties List (Notion Page Properties Style) -->
+            <div class="py-4 space-y-2.5 text-xs">
+              <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                <span class="text-[#787774] flex items-center gap-1"><span>💼</span> Department</span>
+                <span class="col-span-2 text-[#e6e6e5]">{{ selectedRecord()?.department }}</span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                <span class="text-[#787774] flex items-center gap-1"><span>🔘</span> Status</span>
+                <div class="col-span-2">
+                  @if (selectedRecord()?.verificationStatus === 'Verified') {
+                    <span class="tag-green">Verified</span>
+                  } @else if (selectedRecord()?.verificationStatus === 'Pending Review') {
+                    <span class="tag-yellow">Pending Review</span>
+                  } @else {
+                    <span class="tag-red">Flagged</span>
+                  }
                 </div>
               </div>
 
-              <!-- Confidential Details (Admin Only) -->
+              <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                <span class="text-[#787774] flex items-center gap-1"><span>🏷️</span> Clearance</span>
+                <div class="col-span-2">
+                  <span class="tag-blue">{{ selectedRecord()?.accessLevel }}</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                <span class="text-[#787774] flex items-center gap-1"><span>📅</span> Screen Date</span>
+                <span class="col-span-2 font-mono text-[#e6e6e5]">{{ selectedRecord()?.backgroundCheckDate }}</span>
+              </div>
+
               @if (authService.isAdmin()) {
-                <div class="p-3 bg-amber-500/5 rounded-xl border border-amber-500/20 space-y-2">
-                  <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Admin Confidential Metrics</div>
-                  <div class="grid grid-cols-2 gap-2">
-                    <div>
-                      <span class="text-slate-500 block text-[10px]">Compensation Grade</span>
-                      <span class="text-amber-300 font-mono font-medium">{{ selectedRecord()?.compensationGrade || 'None' }}</span>
-                    </div>
-                    <div>
-                      <span class="text-slate-500 block text-[10px]">Risk Score</span>
-                      <span class="text-amber-300 font-mono font-medium">{{ selectedRecord()?.riskScore }}%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <span class="text-slate-500 block text-[10px]">Audit Notes</span>
-                    <p class="text-slate-300 text-[11px] leading-relaxed mt-0.5">{{ selectedRecord()?.auditNotes }}</p>
-                  </div>
+                <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                  <span class="text-[#9d68d3] flex items-center gap-1"><span>🔒</span> Comp Grade</span>
+                  <span class="col-span-2 font-mono text-[#ffffff]">{{ selectedRecord()?.compensationGrade || 'None' }}</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                  <span class="text-[#9d68d3] flex items-center gap-1"><span>🔒</span> Risk Score</span>
+                  <span class="col-span-2 font-mono text-[#ffffff]">{{ selectedRecord()?.riskScore }}%</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                  <span class="text-[#9d68d3] flex items-center gap-1"><span>🔒</span> Audit Notes</span>
+                  <p class="col-span-2 text-[#e6e6e5] leading-relaxed">{{ selectedRecord()?.auditNotes }}</p>
                 </div>
               } @else {
-                <div class="p-3 bg-slate-950/40 rounded-xl border border-slate-800 text-[11px] text-slate-500 text-center">
-                  Confidential compensation & audit notes are restricted to Administrator accounts.
+                <div class="p-2.5 bg-[#191919] rounded border border-[#2a2a2a] text-[11px] text-[#787774]">
+                  Confidential compensation and risk metrics are restricted to Administrator roles.
                 </div>
               }
             </div>
 
-            <div class="pt-3 border-t border-slate-800 flex justify-end">
-              <button (click)="selectedRecord.set(null)" class="btn-secondary text-xs">Close</button>
+            <div class="pt-3 border-t border-[#2f2f2f] flex justify-end">
+              <button (click)="selectedRecord.set(null)" class="notion-btn text-xs">Close</button>
             </div>
           </div>
         </div>
       }
+
     </div>
   `,
 })
@@ -456,9 +591,18 @@ export class DashboardComponent implements OnInit {
   recordService = inject(RecordService);
   delayService = inject(DelayService);
 
-  searchQuery = '';
-  selectedStatus = 'ALL';
-  selectedAccessLevel = 'ALL';
+  // Angular Signals for fully reactive filters
+  searchQuery = signal<string>('');
+  selectedStatus = signal<string>('ALL');
+  selectedAccessLevel = signal<string>('ALL');
+  activeView = signal<'ALL' | 'Verified' | 'Pending Review' | 'Flagged'>('ALL');
+
+  // Popover menus state
+  isStatusMenuOpen = signal<boolean>(false);
+  isAccessMenuOpen = signal<boolean>(false);
+
+  readonly statusOptions = ['ALL', 'Verified', 'Pending Review', 'Flagged'];
+  readonly accessOptions = ['ALL', 'General', 'Confidential', 'Executive'];
 
   selectedRecord = signal<IEmployeeRecord | null>(null);
   activeTimer = signal<number>(0);
@@ -466,13 +610,16 @@ export class DashboardComponent implements OnInit {
 
   private timerInterval: any = null;
 
+  // Fully reactive computed stream tracking all filter signals
   filteredRecords = computed(() => {
     const list = this.recordService.records();
-    const query = this.searchQuery.toLowerCase().trim();
-    const status = this.selectedStatus;
-    const access = this.selectedAccessLevel;
+    const query = this.searchQuery().toLowerCase().trim();
+    const status = this.selectedStatus();
+    const access = this.selectedAccessLevel();
+    const view = this.activeView();
 
     return list.filter((r) => {
+      // 1. Text Search matching
       const matchesQuery =
         !query ||
         r.recordId.toLowerCase().includes(query) ||
@@ -480,11 +627,26 @@ export class DashboardComponent implements OnInit {
         r.department.toLowerCase().includes(query) ||
         r.position.toLowerCase().includes(query);
 
+      // 2. View Tab matching
+      const matchesView = view === 'ALL' || r.verificationStatus === view;
+
+      // 3. Dropdown Status Filter matching
       const matchesStatus = status === 'ALL' || r.verificationStatus === status;
+
+      // 4. Dropdown Clearance Filter matching
       const matchesAccess = access === 'ALL' || r.accessLevel === access;
 
-      return matchesQuery && matchesStatus && matchesAccess;
+      return matchesQuery && matchesView && matchesStatus && matchesAccess;
     });
+  });
+
+  hasActiveFilters = computed(() => {
+    return (
+      this.searchQuery() !== '' ||
+      this.selectedStatus() !== 'ALL' ||
+      this.selectedAccessLevel() !== 'ALL' ||
+      this.activeView() !== 'ALL'
+    );
   });
 
   ngOnInit(): void {
@@ -511,6 +673,47 @@ export class DashboardComponent implements OnInit {
         clearInterval(this.timerInterval);
       },
     });
+  }
+
+  onSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value);
+  }
+
+  setView(view: 'ALL' | 'Verified' | 'Pending Review' | 'Flagged'): void {
+    this.activeView.set(view);
+    if (view !== 'ALL') {
+      this.selectedStatus.set(view);
+    } else {
+      this.selectedStatus.set('ALL');
+    }
+  }
+
+  toggleStatusMenu(): void {
+    this.isStatusMenuOpen.update((v) => !v);
+    this.isAccessMenuOpen.set(false);
+  }
+
+  toggleAccessMenu(): void {
+    this.isAccessMenuOpen.update((v) => !v);
+    this.isStatusMenuOpen.set(false);
+  }
+
+  selectStatus(status: string): void {
+    this.selectedStatus.set(status);
+    this.isStatusMenuOpen.set(false);
+  }
+
+  selectAccessLevel(level: string): void {
+    this.selectedAccessLevel.set(level);
+    this.isAccessMenuOpen.set(false);
+  }
+
+  resetFilters(): void {
+    this.searchQuery.set('');
+    this.selectedStatus.set('ALL');
+    this.selectedAccessLevel.set('ALL');
+    this.activeView.set('ALL');
   }
 
   onSelectDelay(ms: number): void {

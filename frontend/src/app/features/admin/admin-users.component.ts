@@ -12,183 +12,260 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
-      <!-- Top Header & Breadcrumb -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2 text-xs text-slate-400 mb-1">
-            <a routerLink="/dashboard" class="hover:text-slate-200">Dashboard</a>
-            <span>/</span>
-            <span class="text-amber-400 font-medium">User Management</span>
-          </div>
-          <h1 class="text-2xl font-bold text-white flex items-center gap-2.5">
-            <span>Database User Administration</span>
-            <span class="badge-admin">Admin Protected</span>
-          </h1>
-          <p class="text-xs text-slate-400 mt-1">Manage user credentials, assign roles, toggle security status, and create new DB accounts</p>
+      <!-- Top Notion Breadcrumbs & Header -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2 text-xs text-[#9b9a97]">
+          <a routerLink="/dashboard" class="hover:text-[#ffffff] transition-colors">Workspace</a>
+          <span class="text-[#444444]">/</span>
+          <span class="text-[#ffffff] font-medium">User Management</span>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button (click)="loadUsers()" [disabled]="userService.isLoading()" class="btn-secondary text-xs">
-            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span>Refresh</span>
-          </button>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl select-none">⚙️</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
+                <span class="tag-purple">Admin Restricted</span>
+              </div>
+              <p class="text-xs text-[#9b9a97] mt-0.5">
+                Manage accounts, assign roles (General User / Admin), and toggle security state in MongoDB.
+              </p>
+            </div>
+          </div>
 
-          <button (click)="openCreateModal()" class="btn-primary text-xs">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Add New User</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button (click)="loadUsers()" [disabled]="userService.isLoading()" class="notion-btn text-xs py-1.5 px-3">
+              <span>🔄</span>
+              <span>Refresh</span>
+            </button>
+            <button (click)="openCreateModal()" class="notion-btn-primary text-xs py-1.5 px-3">
+              <span>+</span>
+              <span>New Account</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Users Table Card -->
-      <div class="glass-card overflow-hidden">
-        <!-- Toolbar -->
-        <div class="p-4 sm:p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <!-- Users Notion Database Container -->
+      <div class="notion-card overflow-hidden">
+        
+        <!-- Toolbar & Filter Popover -->
+        <div class="p-3 border-b border-[#2f2f2f] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#202020]">
           <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-slate-300">Registered Accounts:</span>
-            <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono text-xs">
-              {{ filteredUsers().length }}
-            </span>
+            <span class="text-[#787774]">Registered DB Users:</span>
+            <span class="font-mono font-medium text-[#ffffff]">{{ filteredUsers().length }}</span>
           </div>
 
-          <div class="flex flex-wrap items-center gap-3">
-            <!-- Search Filter -->
-            <div class="relative min-w-[200px]">
+          <div class="flex items-center gap-2">
+            <!-- Search Input -->
+            <div class="relative">
               <input
                 type="text"
-                [(ngModel)]="searchQuery"
-                placeholder="Search by name, ID, department..."
-                class="glass-input text-xs py-1.5 pl-8 pr-3"
+                [value]="searchQuery()"
+                (input)="onSearchInput($event)"
+                placeholder="Filter by name, ID..."
+                class="notion-input py-1 pl-7 pr-2.5 w-44 sm:w-56 text-xs"
               />
-              <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <span class="absolute left-2.5 top-1.5 text-[11px] text-[#6b6b68] pointer-events-none">🔍</span>
+              @if (searchQuery()) {
+                <button
+                  type="button"
+                  (click)="searchQuery.set('')"
+                  class="absolute right-2 top-1.5 text-[#6b6b68] hover:text-[#e6e6e5] text-xs"
+                >
+                  ✕
+                </button>
+              }
             </div>
 
-            <!-- Role Filter -->
-            <select
-              [(ngModel)]="selectedRole"
-              class="bg-slate-950 text-slate-300 rounded-xl px-3 py-1.5 border border-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-500 text-xs cursor-pointer"
-            >
-              <option value="ALL">All Roles</option>
-              <option value="Admin">Admin</option>
-              <option value="General User">General User</option>
-            </select>
+            <!-- Role Filter Popover Trigger -->
+            <div class="relative">
+              <button
+                type="button"
+                (click)="toggleRoleMenu()"
+                class="notion-btn py-1 px-2.5 text-xs flex items-center gap-1.5"
+                [class.border-[#529cca]]="selectedRole() !== 'ALL'"
+                [class.text-[#529cca]]="selectedRole() !== 'ALL'"
+              >
+                <span>🏷️</span>
+                <span>Role: <strong>{{ selectedRole() === 'ALL' ? 'All' : selectedRole() }}</strong></span>
+                <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Popover Menu -->
+              @if (isRoleMenuOpen()) {
+                <div (click)="isRoleMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
+                <div class="absolute right-0 mt-1 w-44 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div class="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[#6b6b68]">Filter Role</div>
+                  @for (role of ['ALL', 'Admin', 'General User']; track role) {
+                    <button
+                      type="button"
+                      (click)="selectRole(role)"
+                      class="w-full flex items-center justify-between px-2 py-1.5 rounded text-xs text-left hover:bg-[#2f2f2f] transition-colors"
+                      [class.text-[#529cca]]="selectedRole() === role"
+                    >
+                      <span>{{ role === 'ALL' ? 'All Roles' : role }}</span>
+                      @if (selectedRole() === role) {
+                        <svg class="w-3.5 h-3.5 text-[#529cca]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (searchQuery() || selectedRole() !== 'ALL') {
+              <button
+                type="button"
+                (click)="resetFilters()"
+                class="notion-btn-ghost text-xs py-1 px-2 text-[#9b9a97] hover:text-[#ffffff]"
+              >
+                Reset
+              </button>
+            }
           </div>
         </div>
 
-        <!-- Table View -->
+        <!-- Notion Users Table -->
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800 text-[11px]">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
               <tr>
-                <th class="py-3.5 px-4">User</th>
-                <th class="py-3.5 px-4">User ID / Email</th>
-                <th class="py-3.5 px-4">Department</th>
-                <th class="py-3.5 px-4">Role & Quick Switch</th>
-                <th class="py-3.5 px-4">Status</th>
-                <th class="py-3.5 px-4">Last Login</th>
-                <th class="py-3.5 px-4 text-right">Actions</th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>👤</span>
+                    <span>Name</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>#</span>
+                    <span>User ID / Email</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>💼</span>
+                    <span>Department</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>🏷️</span>
+                    <span>Role Assignment</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>🔘</span>
+                    <span>Status</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                  <span class="flex items-center gap-1.5">
+                    <span>📅</span>
+                    <span>Last Login</span>
+                  </span>
+                </th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody class="divide-y divide-slate-800/60">
+            <tbody class="divide-y divide-[#262626]">
               @if (userService.isLoading()) {
                 @for (i of [1, 2, 3, 4]; track i) {
-                  <tr class="animate-pulse">
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-32 bg-slate-800 rounded"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-40 bg-slate-800 rounded"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-24 bg-slate-800 rounded"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-5 w-24 bg-slate-800 rounded-full"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-5 w-16 bg-slate-800 rounded-full"></div></td>
-                    <td class="py-3.5 px-4"><div class="h-3.5 w-28 bg-slate-800 rounded"></div></td>
-                    <td class="py-3.5 px-4 text-right"><div class="h-7 w-20 bg-slate-800 rounded ml-auto"></div></td>
+                  <tr class="animate-pulse bg-[#202020]">
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-28 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-36 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-20 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
+                    <td class="py-2.5 px-3 text-right"><div class="h-4 w-12 bg-[#2a2a2a] rounded ml-auto"></div></td>
                   </tr>
                 }
               } @else if (filteredUsers().length === 0) {
                 <tr>
-                  <td colspan="7" class="py-12 text-center text-slate-500">
+                  <td colspan="7" class="py-12 text-center text-[#787774]">
                     No users matching criteria.
                   </td>
                 </tr>
               } @else {
                 @for (user of filteredUsers(); track user._id) {
-                  <tr class="hover:bg-slate-900/60 transition-colors">
-                    <td class="py-3.5 px-4">
-                      <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-slate-200 text-xs">
-                          {{ user.name.substring(0, 2).toUpperCase() }}
+                  <tr class="hover:bg-[#262626] transition-colors group">
+                    <td class="py-2 px-3 border-r border-[#262626]">
+                      <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded bg-[#2a2a2a] border border-[#333333] flex items-center justify-center font-medium text-[11px] text-[#e6e6e5]">
+                          {{ user.name.substring(0, 1).toUpperCase() }}
                         </div>
-                        <div>
-                          <div class="font-medium text-slate-200">{{ user.name }}</div>
-                          @if (user.userId === authService.currentUser()?.userId) {
-                            <span class="text-[10px] text-brand-400 font-semibold">(You)</span>
-                          }
-                        </div>
+                        <span class="font-medium text-[#ffffff]">{{ user.name }}</span>
+                        @if (user.userId === authService.currentUser()?.userId) {
+                          <span class="text-[10px] text-[#529cca] font-mono">(You)</span>
+                        }
                       </div>
                     </td>
-                    <td class="py-3.5 px-4 font-mono text-slate-300">
+
+                    <td class="py-2 px-3 font-mono text-[11px] text-[#9b9a97] border-r border-[#262626]">
                       {{ user.userId }}
                     </td>
-                    <td class="py-3.5 px-4 text-slate-300">
+
+                    <td class="py-2 px-3 text-[#e6e6e5] border-r border-[#262626]">
                       {{ user.department }}
                     </td>
-                    <td class="py-3.5 px-4">
-                      <div class="flex items-center gap-2">
+
+                    <td class="py-2 px-3 border-r border-[#262626]">
+                      <div class="flex items-center gap-1.5">
                         @if (user.role === 'Admin') {
-                          <span class="badge-admin">Admin</span>
+                          <span class="tag-purple">Admin</span>
                         } @else {
-                          <span class="badge-user">General User</span>
+                          <span class="tag-blue">General User</span>
                         }
 
-                        <!-- Quick Toggle Role Button -->
                         <button
                           (click)="toggleRole(user)"
                           [disabled]="user.userId === authService.currentUser()?.userId"
-                          title="Switch role between General User and Admin"
-                          class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          title="Switch between General User and Admin"
+                          class="notion-btn-ghost py-0.5 px-1 text-[11px] text-[#787774] hover:text-[#ffffff] disabled:opacity-30"
                         >
-                          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                          </svg>
+                          ⇄
                         </button>
                       </div>
                     </td>
-                    <td class="py-3.5 px-4">
+
+                    <td class="py-2 px-3 border-r border-[#262626]">
                       <button
                         (click)="toggleStatus(user)"
                         [disabled]="user.userId === authService.currentUser()?.userId"
-                        class="px-2.5 py-0.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1.5"
-                        [ngClass]="
-                          user.status === 'Active'
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30'
-                            : 'bg-rose-500/10 text-rose-400 border-rose-500/25 hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/30'
-                        "
+                        class="cursor-pointer disabled:cursor-not-allowed"
                         title="Click to toggle status"
                       >
-                        <span class="w-1.5 h-1.5 rounded-full" [ngClass]="user.status === 'Active' ? 'bg-emerald-400' : 'bg-rose-400'"></span>
-                        <span>{{ user.status }}</span>
+                        @if (user.status === 'Active') {
+                          <span class="tag-green">Active</span>
+                        } @else {
+                          <span class="tag-red">Disabled</span>
+                        }
                       </button>
                     </td>
-                    <td class="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
+
+                    <td class="py-2 px-3 font-mono text-[11px] text-[#787774] border-r border-[#262626]">
                       {{ user.lastLoginAt ? (user.lastLoginAt | date: 'short') : 'Never' }}
                     </td>
-                    <td class="py-3.5 px-4 text-right">
+
+                    <td class="py-2 px-3 text-right">
                       <button
                         (click)="confirmDelete(user)"
                         [disabled]="user.userId === authService.currentUser()?.userId"
-                        class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Delete user from database"
+                        class="notion-btn-ghost text-[#787774] hover:text-[#e05757] text-xs py-0.5 px-1.5 disabled:opacity-20"
+                        title="Delete user"
                       >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        🗑️
                       </button>
                     </td>
                   </tr>
@@ -197,85 +274,88 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
             </tbody>
           </table>
         </div>
+
+        <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] text-[11px] text-[#787774]">
+          Role-Based Access Control enforced at MongoDB schema and Express middleware.
+        </div>
+
       </div>
 
-      <!-- Create User Modal -->
+      <!-- Create User Modal (Notion Dialog) -->
       @if (showCreateModal()) {
-        <div class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="glass-card max-w-md w-full p-6 border-slate-700 shadow-2xl animate-in zoom-in-95 duration-150">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>Add User to MongoDB Database</span>
-              </h3>
-              <button (click)="closeCreateModal()" class="text-slate-400 hover:text-white">✕</button>
+        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div class="notion-card max-w-md w-full p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
+            <div class="flex items-center justify-between pb-3 border-b border-[#2f2f2f]">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">➕</span>
+                <h3 class="text-sm font-semibold text-[#ffffff]">New User Account</h3>
+              </div>
+              <button (click)="closeCreateModal()" class="text-[#787774] hover:text-[#ffffff] text-sm">✕</button>
             </div>
 
-            <form [formGroup]="userForm" (ngSubmit)="onCreateUser()" class="space-y-3.5 py-4">
+            <form [formGroup]="userForm" (ngSubmit)="onCreateUser()" class="space-y-3 py-4 text-xs">
               <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">User ID / Email</label>
+                <label class="block text-[#9b9a97] mb-1 font-medium">User ID / Email</label>
                 <input
                   type="text"
                   formControlName="userId"
                   placeholder="e.g. michael.chang@mploychek.com"
-                  class="glass-input"
+                  class="notion-input"
                 />
               </div>
 
               <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                <label class="block text-[#9b9a97] mb-1 font-medium">Full Name</label>
                 <input
                   type="text"
                   formControlName="name"
                   placeholder="e.g. Michael Chang"
-                  class="glass-input"
+                  class="notion-input"
                 />
               </div>
 
               <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Department</label>
+                <label class="block text-[#9b9a97] mb-1 font-medium">Department</label>
                 <input
                   type="text"
                   formControlName="department"
-                  placeholder="e.g. Information Technology"
-                  class="glass-input"
+                  placeholder="e.g. Security Engineering"
+                  class="notion-input"
                 />
               </div>
 
               <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Initial Password</label>
+                <label class="block text-[#9b9a97] mb-1 font-medium">Password</label>
                 <input
                   type="password"
                   formControlName="password"
                   placeholder="At least 6 characters"
-                  class="glass-input"
+                  class="notion-input"
                 />
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Assigned Role</label>
-                  <select formControlName="role" class="glass-input cursor-pointer">
+                  <label class="block text-[#9b9a97] mb-1 font-medium">Role</label>
+                  <select formControlName="role" class="notion-input cursor-pointer">
                     <option value="General User">General User</option>
                     <option value="Admin">Admin</option>
                   </select>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-slate-300 mb-1">Account Status</label>
-                  <select formControlName="status" class="glass-input cursor-pointer">
+                  <label class="block text-[#9b9a97] mb-1 font-medium">Status</label>
+                  <select formControlName="status" class="notion-input cursor-pointer">
                     <option value="Active">Active</option>
                     <option value="Disabled">Disabled</option>
                   </select>
                 </div>
               </div>
 
-              <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-2.5">
-                <button type="button" (click)="closeCreateModal()" class="btn-secondary text-xs">Cancel</button>
-                <button type="submit" [disabled]="userForm.invalid || isSubmitting()" class="btn-primary text-xs">
+              <div class="pt-3 border-t border-[#2f2f2f] flex justify-end gap-2">
+                <button type="button" (click)="closeCreateModal()" class="notion-btn">Cancel</button>
+                <button type="submit" [disabled]="userForm.invalid || isSubmitting()" class="notion-btn-primary">
                   @if (isSubmitting()) {
-                    <span>Saving to MongoDB...</span>
+                    <span>Saving...</span>
                   } @else {
                     <span>Save User</span>
                   }
@@ -286,25 +366,22 @@ import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
         </div>
       }
 
-      <!-- Delete Confirmation Modal -->
+      <!-- Delete User Modal -->
       @if (userToDelete()) {
-        <div class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="glass-card max-w-sm w-full p-6 border-rose-500/40 shadow-2xl animate-in zoom-in-95 duration-150">
-            <div class="flex items-center gap-3 mb-3 text-rose-400">
-              <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <h3 class="text-sm font-bold text-white">Confirm User Deletion</h3>
-            </div>
-            
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Are you sure you want to permanently delete user <strong class="text-white">{{ userToDelete()?.name }}</strong> (<code class="text-brand-300">{{ userToDelete()?.userId }}</code>) from the database?
+        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div class="notion-card max-w-sm w-full p-5 border-[#e05757]/40 bg-[#222222] shadow-notion-dropdown">
+            <h3 class="text-sm font-semibold text-[#ffffff] flex items-center gap-2">
+              <span>⚠️</span>
+              <span>Confirm Account Deletion</span>
+            </h3>
+            <p class="text-xs text-[#9b9a97] mt-2 leading-relaxed">
+              Are you sure you want to permanently delete user <strong class="text-[#ffffff]">{{ userToDelete()?.name }}</strong> (<code class="text-[#529cca]">{{ userToDelete()?.userId }}</code>) from MongoDB?
             </p>
 
-            <div class="mt-5 flex justify-end gap-2.5">
-              <button (click)="userToDelete.set(null)" class="btn-secondary text-xs">Cancel</button>
-              <button (click)="executeDelete()" class="btn-primary bg-rose-600 hover:bg-rose-500 text-xs shadow-rose-600/30">
-                Delete Account
+            <div class="mt-4 flex justify-end gap-2">
+              <button (click)="userToDelete.set(null)" class="notion-btn">Cancel</button>
+              <button (click)="executeDelete()" class="notion-btn-danger">
+                Delete
               </button>
             </div>
           </div>
@@ -320,8 +397,9 @@ export class AdminUsersComponent implements OnInit {
   delayService = inject(DelayService);
   private fb = inject(FormBuilder);
 
-  searchQuery = '';
-  selectedRole = 'ALL';
+  searchQuery = signal<string>('');
+  selectedRole = signal<string>('ALL');
+  isRoleMenuOpen = signal<boolean>(false);
 
   showCreateModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
@@ -338,8 +416,8 @@ export class AdminUsersComponent implements OnInit {
 
   filteredUsers = computed(() => {
     const list = this.userService.users();
-    const query = this.searchQuery.toLowerCase().trim();
-    const role = this.selectedRole;
+    const query = this.searchQuery().toLowerCase().trim();
+    const role = this.selectedRole();
 
     return list.filter((u) => {
       const matchesQuery =
@@ -360,6 +438,25 @@ export class AdminUsersComponent implements OnInit {
 
   loadUsers(): void {
     this.userService.getUsers().subscribe();
+  }
+
+  toggleRoleMenu(): void {
+    this.isRoleMenuOpen.update((v) => !v);
+  }
+
+  onSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value);
+  }
+
+  selectRole(role: string): void {
+    this.selectedRole.set(role);
+    this.isRoleMenuOpen.set(false);
+  }
+
+  resetFilters(): void {
+    this.searchQuery.set('');
+    this.selectedRole.set('ALL');
   }
 
   openCreateModal(): void {

@@ -9,7 +9,7 @@ import { TelemetryDrawerComponent } from './shared/components/telemetry-drawer/t
   standalone: true,
   imports: [RouterOutlet, NavbarComponent, ToastComponent, TelemetryDrawerComponent],
   template: `
-    <div class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div class="min-h-screen flex flex-col bg-[#191919] text-[#e6e6e5]">
       <app-navbar></app-navbar>
       
       <main class="flex-1">
@@ -19,9 +19,9 @@ import { TelemetryDrawerComponent } from './shared/components/telemetry-drawer/t
       <app-toast></app-toast>
       <app-telemetry-drawer></app-telemetry-drawer>
 
-      <!-- Footer -->
-      <footer class="border-t border-slate-800/60 py-4 px-6 text-center text-xs text-slate-500">
-        <span>MPloyChek &bull; Production-Grade Angular 18 & Node.js Architecture with MongoDB Mongoose & RBAC</span>
+      <!-- Minimal Notion Footer -->
+      <footer class="border-t border-[#262626] py-3 px-6 text-center text-[11px] text-[#605f5b]">
+        <span>MPloyChek &bull; Notion Dark Workspace &bull; MongoDB RBAC Architecture</span>
       </footer>
     </div>
   `,
