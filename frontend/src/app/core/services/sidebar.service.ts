@@ -4,7 +4,10 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root',
 })
 export class SidebarService {
-  readonly isOpen = signal<boolean>(true);
+  // On screens smaller than 768px (md breakpoint), sidebar should be closed by default
+  readonly isOpen = signal<boolean>(
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+  );
 
   toggle(): void {
     this.isOpen.update((v) => !v);

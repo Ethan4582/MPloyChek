@@ -29,8 +29,8 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
       <!-- Main Workspace View Container -->
       <div
         class="flex-1 flex flex-col min-w-0 transition-all duration-200"
-        [class.md:pl-60]=\"sidebarService.isOpen()\"
-        [class.md:pl-0]=\"!sidebarService.isOpen()\"
+        [class.md:pl-60]="sidebarService.isOpen()"
+        [class.md:pl-0]="!sidebarService.isOpen()"
       >
         
         <!-- Breadcrumb & Contextual Header (Top-Right Action Button) -->
@@ -42,14 +42,14 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
         ></app-workspace-header>
 
         <!-- Edge-to-Edge Workspace Container -->
-        <div class="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+        <div class="w-full px-3.5 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-4 sm:space-y-5">
           
           <!-- Top Header -->
           <div class="space-y-3">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div>
                 <div class="flex items-center gap-2">
-                  <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
+                  <h1 class="text-xl sm:text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
                   <span class="tag-bronze">Admin Restricted</span>
                 </div>
                 <p class="text-xs text-[#9b9a97] mt-0.5">
@@ -79,17 +79,17 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
             
             <!-- Filter & Toolbar -->
             <div class="p-3 sm:px-4 border-b border-[#2a2a2a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="relative">
+              <div class="relative w-full sm:w-64">
                 <input
                   type="text"
                   [value]="searchQuery()"
                   (input)="onSearchInput($event)"
                   placeholder="Search user accounts..."
-                  class="notion-input py-1 px-2.5 w-64 text-xs"
+                  class="notion-input py-1 px-2.5 w-full text-xs"
                 />
               </div>
 
-              <div class="flex items-center gap-2">
+              <div class="relative flex items-center gap-2">
                 <button
                   type="button"
                   (click)="toggleRoleMenu()"
@@ -104,7 +104,7 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
 
                 @if (isRoleMenuOpen()) {
                   <div (click)="isRoleMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
-                  <div class="absolute right-6 mt-24 w-40 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in duration-100">
+                  <div class="absolute right-0 top-full mt-1 w-40 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in duration-100">
                     <button
                       type="button"
                       (click)="selectRole('ALL')"
@@ -131,8 +131,90 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
               </div>
             </div>
 
-            <!-- Table of Users -->
-            <div class="overflow-x-auto">
+            <!-- Mobile View: User Account Cards (Screen < 640px) -->
+            <div class="block sm:hidden divide-y divide-[#262626]">
+              @if (userService.isLoading()) {
+                <div class="py-12 text-center text-[#787774]">
+                  <span class="inline-block animate-spin text-xl">⏳</span>
+                  <div class="mt-1 text-xs">Querying MongoDB users collection...</div>
+                </div>
+              } @else if (filteredUsers().length === 0) {
+                <div class="py-8 text-center text-[#787774] text-xs">
+                  No user accounts match the search criteria.
+                </div>
+              } @else {
+                @for (user of filteredUsers(); track user.userId) {
+                  <div class="p-3.5 space-y-2.5">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0 flex-1">
+                        <div class="font-medium text-[#ffffff] text-xs truncate">
+                          {{ user.name }}
+                        </div>
+                        <div class="text-[11px] text-[#787774] font-mono truncate">
+                          {{ user.userId }}
+                        </div>
+                      </div>
+                      
+                      <div class="shrink-0 flex items-center gap-1.5">
+                        @if (user.role === 'Admin') {
+                          <span class="tag-bronze text-[10px]">Admin</span>
+                        } @else {
+                          <span class="tag-blue text-[10px]">General User</span>
+                        }
+
+                        @if (user.status === 'Active') {
+                          <span class="tag-green text-[10px]">Active</span>
+                        } @else {
+                          <span class="tag-red text-[10px]">Disabled</span>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] text-[#8a8986] pt-1">
+                      <span>Dept: <strong class="text-[#e6e6e5] font-sans">{{ user.department || 'Operations' }}</strong></span>
+                      <span class="text-[10px] text-[#605f5b]">{{ user.createdAt ? (user.createdAt | date:'shortDate') : 'System Seed' }}</span>
+                    </div>
+
+                    <!-- Action Buttons Strip -->
+                    <div class="flex items-center justify-between pt-2 border-t border-[#292929]">
+                      <div class="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          (click)="onToggleRole(user)"
+                          class="px-2 py-1 rounded text-[11px] font-sans bg-[#2a2a2a] text-[#bc8c74] hover:bg-[#353535] transition-colors cursor-pointer"
+                          title="Flip role between Admin and General User"
+                        >
+                          Set {{ user.role === 'Admin' ? 'General' : 'Admin' }}
+                        </button>
+
+                        <button
+                          type="button"
+                          (click)="onToggleStatus(user)"
+                          class="px-2 py-1 rounded text-[11px] font-sans bg-[#2a2a2a] text-[#8a8986] hover:text-[#e6e6e5] hover:bg-[#353535] transition-colors cursor-pointer"
+                          title="Toggle active status"
+                        >
+                          {{ user.status === 'Active' ? 'Disable' : 'Enable' }}
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        (click)="onDeleteUser(user)"
+                        class="p-1.5 rounded text-[#787774] hover:text-[#e05757] hover:bg-[#353535] transition-colors cursor-pointer"
+                        title="Delete user from database"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+
+            <!-- Desktop / Tablet Table of Users -->
+            <div class="hidden sm:block overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse font-mono">
                 <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
                   <tr>
@@ -193,7 +275,7 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
                           <button
                             type="button"
                             (click)="onToggleRole(user)"
-                            class="px-2 py-0.5 rounded text-[10px] font-sans bg-[#2a2a2a] text-[#bc8c74] hover:bg-[#353535] transition-colors"
+                            class="px-2 py-0.5 rounded text-[10px] font-sans bg-[#2a2a2a] text-[#bc8c74] hover:bg-[#353535] transition-colors cursor-pointer"
                             title="Flip role between Admin and General User"
                           >
                             Set {{ user.role === 'Admin' ? 'General' : 'Admin' }}
@@ -203,7 +285,7 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
                           <button
                             type="button"
                             (click)="onToggleStatus(user)"
-                            class="px-2 py-0.5 rounded text-[10px] font-sans bg-[#2a2a2a] text-[#8a8986] hover:text-[#e6e6e5] hover:bg-[#353535] transition-colors"
+                            class="px-2 py-0.5 rounded text-[10px] font-sans bg-[#2a2a2a] text-[#8a8986] hover:text-[#e6e6e5] hover:bg-[#353535] transition-colors cursor-pointer"
                             title="Toggle active status"
                           >
                             {{ user.status === 'Active' ? 'Disable' : 'Enable' }}
@@ -213,7 +295,7 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
                           <button
                             type="button"
                             (click)="onDeleteUser(user)"
-                            class="p-1 rounded text-[#787774] hover:text-[#e05757] hover:bg-[#353535] transition-colors"
+                            class="p-1 rounded text-[#787774] hover:text-[#e05757] hover:bg-[#353535] transition-colors cursor-pointer"
                             title="Delete user from database"
                           >
                             <svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,9 +310,9 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
               </table>
             </div>
 
-            <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
+            <div class="p-2.5 sm:px-4 bg-[#1c1c1c] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
               <span>Total: <strong class="text-[#9b9a97]">{{ filteredUsers().length }}</strong> Accounts</span>
-              <span class="text-[10px] text-[#555552]">MongoDB User Model Collection</span>
+              <span class="text-[10px] text-[#555552] hidden xs:inline">MongoDB User Model Collection</span>
             </div>
           </div>
 
@@ -240,77 +322,77 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
 
       <!-- Create User Modal -->
       @if (showCreateModal()) {
-        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="notion-card max-w-md w-full p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
+        <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div class="notion-card max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
             <div class="flex items-center justify-between pb-3 border-b border-[#2f2f2f] mb-4">
               <h3 class="text-sm font-semibold text-[#ffffff]">Create New Database User</h3>
-              <button (click)="closeCreateModal()" class="text-[#787774] hover:text-[#ffffff] text-sm">✕</button>
+              <button (click)="closeCreateModal()" class="text-[#787774] hover:text-[#ffffff] text-sm p-1 cursor-pointer">✕</button>
             </div>
 
-            <form [formGroup]="userForm" (ngSubmit)="onCreateUser()" class="space-y-3.5 text-xs">
+            <form [formGroup]=\"userForm\" (ngSubmit)=\"onCreateUser()\" class=\"space-y-3.5 text-xs\">
               <div>
-                <label class="block text-[#9b9a97] mb-1 font-medium">Email / User ID</label>
+                <label class=\"block text-[#9b9a97] mb-1 font-medium\">Email / User ID</label>
                 <input
-                  type="text"
-                  formControlName="userId"
-                  placeholder="e.g. michael.chang@mploychek.com"
-                  class="notion-input"
+                  type=\"text\"
+                  formControlName=\"userId\"
+                  placeholder=\"e.g. michael.chang@mploychek.com\"
+                  class=\"notion-input\"
                 />
               </div>
 
               <div>
-                <label class="block text-[#9b9a97] mb-1 font-medium">Full Name</label>
+                <label class=\"block text-[#9b9a97] mb-1 font-medium\">Full Name</label>
                 <input
-                  type="text"
-                  formControlName="name"
-                  placeholder="e.g. Michael Chang"
-                  class="notion-input"
+                  type=\"text\"
+                  formControlName=\"name\"
+                  placeholder=\"e.g. Michael Chang\"
+                  class=\"notion-input\"
                 />
               </div>
 
               <div>
-                <label class="block text-[#9b9a97] mb-1 font-medium">Password</label>
+                <label class=\"block text-[#9b9a97] mb-1 font-medium\">Password</label>
                 <input
-                  type="password"
-                  formControlName="password"
-                  placeholder="Min 6 characters"
-                  class="notion-input"
+                  type=\"password\"
+                  formControlName=\"password\"
+                  placeholder=\"Min 6 characters\"
+                  class=\"notion-input\"
                 />
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
+              <div class=\"grid grid-cols-1 sm:grid-cols-2 gap-3\">
                 <div>
-                  <label class="block text-[#9b9a97] mb-1 font-medium">Role</label>
-                  <select formControlName="role" class="notion-input cursor-pointer">
-                    <option value="General User">General User</option>
-                    <option value="Admin">Administrator</option>
+                  <label class=\"block text-[#9b9a97] mb-1 font-medium\">Role</label>
+                  <select formControlName=\"role\" class=\"notion-input cursor-pointer\">
+                    <option value=\"General User\">General User</option>
+                    <option value=\"Admin\">Administrator</option>
                   </select>
                 </div>
                 <div>
-                  <label class="block text-[#9b9a97] mb-1 font-medium">Department</label>
+                  <label class=\"block text-[#9b9a97] mb-1 font-medium\">Department</label>
                   <input
-                    type="text"
-                    formControlName="department"
-                    placeholder="Engineering"
-                    class="notion-input"
+                    type=\"text\"
+                    formControlName=\"department\"
+                    placeholder=\"Engineering\"
+                    class=\"notion-input\"
                   />
                 </div>
               </div>
 
               @if (createError()) {
-                <div class="p-2.5 rounded bg-[#2c1d1d] border border-[#4a2a2a] text-[#e05757] text-[11px]">
+                <div class=\"p-2.5 rounded bg-[#2c1d1d] border border-[#4a2a2a] text-[#e05757] text-[11px]\">
                   {{ createError() }}
                 </div>
               }
 
-              <div class="pt-3 border-t border-[#2f2f2f] flex justify-end gap-2">
-                <button type="button" (click)="closeCreateModal()" class="notion-btn">
+              <div class=\"pt-3 border-t border-[#2f2f2f] flex justify-end gap-2\">
+                <button type=\"button\" (click)=\"closeCreateModal()\" class=\"notion-btn cursor-pointer\">
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  [disabled]="userForm.invalid || isSubmitting()"
-                  class="notion-btn-primary"
+                  type=\"submit\"
+                  [disabled]=\"userForm.invalid || isSubmitting()\"
+                  class=\"notion-btn-primary cursor-pointer\"
                 >
                   {{ isSubmitting() ? 'Saving...' : 'Create Account' }}
                 </button>
@@ -338,26 +420,25 @@ export class AdminUsersComponent implements OnInit {
 
   userForm = this.fb.group({
     userId: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
     name: ['', [Validators.required, Validators.minLength(2)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     role: ['General User' as UserRole, Validators.required],
     department: ['Engineering'],
-    status: ['Active' as UserStatus],
   });
 
   filteredUsers = computed(() => {
     let list = this.userService.users();
-    const q = this.searchQuery().trim().toLowerCase();
 
     if (this.selectedRole() !== 'ALL') {
       list = list.filter((u) => u.role === this.selectedRole());
     }
 
+    const q = this.searchQuery().trim().toLowerCase();
     if (q) {
       list = list.filter(
         (u) =>
-          u.userId.toLowerCase().includes(q) ||
           u.name.toLowerCase().includes(q) ||
+          u.userId.toLowerCase().includes(q) ||
           (u.department && u.department.toLowerCase().includes(q))
       );
     }
@@ -390,11 +471,10 @@ export class AdminUsersComponent implements OnInit {
   openCreateModal(): void {
     this.userForm.reset({
       userId: '',
-      password: '',
       name: '',
+      password: '',
       role: 'General User',
       department: 'Engineering',
-      status: 'Active',
     });
     this.createError.set(null);
     this.showCreateModal.set(true);
@@ -410,32 +490,40 @@ export class AdminUsersComponent implements OnInit {
     this.isSubmitting.set(true);
     this.createError.set(null);
 
-    const val = this.userForm.value as CreateUserData;
-    this.userService.createUser(val).subscribe({
+    const val = this.userForm.value;
+    const data: CreateUserData = {
+      userId: val.userId!,
+      name: val.name!,
+      password: val.password!,
+      role: val.role as UserRole,
+      department: val.department || 'Operations',
+      status: 'Active',
+    };
+
+    this.userService.createUser(data).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.closeCreateModal();
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.createError.set(err.error?.message || 'Failed to create user account.');
+        this.createError.set(err.error?.message || 'Failed to create user');
       },
     });
   }
 
   onToggleRole(user: IUser): void {
-    const newRole = user.role === 'Admin' ? 'General User' : 'Admin';
-    this.userService.updateUser(user.userId, { role: newRole }).subscribe();
+    const newRole: UserRole = user.role === 'Admin' ? 'General User' : 'Admin';
+    this.userService.updateUser(user._id, { role: newRole }).subscribe();
   }
 
   onToggleStatus(user: IUser): void {
-    const newStatus = user.status === 'Active' ? 'Disabled' : 'Active';
-    this.userService.updateUser(user.userId, { status: newStatus }).subscribe();
+    this.userService.toggleStatus(user._id).subscribe();
   }
 
   onDeleteUser(user: IUser): void {
-    if (confirm(`Permanently remove ${user.name} (${user.userId}) from the database?`)) {
-      this.userService.deleteUser(user.userId).subscribe();
+    if (confirm(`Are you sure you want to delete user ${user.userId}?`)) {
+      this.userService.deleteUser(user._id).subscribe();
     }
   }
 }

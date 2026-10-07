@@ -31,18 +31,18 @@ import { SidebarService } from '../../core/services/sidebar.service';
         ></app-workspace-header>
 
         <!-- Page Content -->
-        <div class="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div class="w-full max-w-6xl px-3.5 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6">
           
           <!-- Page Title & Overview -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <h1 class="text-xl font-bold text-[#ffffff] tracking-tight">Telemetry & Latency</h1>
+              <h1 class="text-xl sm:text-2xl font-bold text-[#ffffff] tracking-tight">Telemetry & Latency</h1>
               <p class="text-xs text-[#9b9a97] mt-0.5">
                 Real-time Express middleware performance metrics and parameterized asynchronous delay simulation.
               </p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono bg-[#1c2e22] text-[#5cb87a] border border-[#2d5238]">
                 <span>Live Streaming</span>
               </span>
@@ -65,9 +65,9 @@ import { SidebarService } from '../../core/services/sidebar.service';
           </div>
 
           <!-- Key Metrics Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
             <!-- Database Health -->
-            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
+            <div class="p-3.5 sm:p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
               <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Database</div>
               <div class="text-sm font-semibold text-[#ffffff] truncate">
                 {{ telemetryService.data()?.database?.provider || 'MongoDB In-Memory' }}
@@ -79,7 +79,7 @@ import { SidebarService } from '../../core/services/sidebar.service';
             </div>
 
             <!-- Total Recorded Traffic -->
-            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
+            <div class="p-3.5 sm:p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
               <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Total Requests</div>
               <div class="text-xl font-bold text-[#ffffff]">
                 {{ telemetryService.data()?.traffic?.totalRequests || 0 }}
@@ -90,7 +90,7 @@ import { SidebarService } from '../../core/services/sidebar.service';
             </div>
 
             <!-- Average Event Latency -->
-            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
+            <div class="p-3.5 sm:p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
               <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Average Latency</div>
               <div class="text-xl font-bold text-[#bc8c74]">
                 {{ telemetryService.data()?.traffic?.avgLatencyMs || 0 }}ms
@@ -101,7 +101,7 @@ import { SidebarService } from '../../core/services/sidebar.service';
             </div>
 
             <!-- Server Node Runtime & Memory -->
-            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
+            <div class="p-3.5 sm:p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
               <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Process Memory</div>
               <div class="text-sm font-semibold text-[#ffffff]">
                 {{ telemetryService.data()?.system?.memory?.heapUsedMb || 0 }} MB / {{ telemetryService.data()?.system?.memory?.rssMb || 0 }} MB
@@ -113,8 +113,8 @@ import { SidebarService } from '../../core/services/sidebar.service';
           </div>
 
           <!-- Interactive Latency Simulator Preset Strip -->
-          <div class="p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3">
-            <div class="flex items-center justify-between">
+          <div class="p-4 sm:p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3">
+            <div class="flex items-center justify-between gap-2">
               <div>
                 <h2 class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
                   Parameterized Latency Engine (?delay=ms)
@@ -123,7 +123,7 @@ import { SidebarService } from '../../core/services/sidebar.service';
                   Adjust simulated latency across all portal API calls. Uses non-blocking Express middleware timers.
                 </p>
               </div>
-              <span class="text-xs font-mono font-bold text-[#bc8c74] px-2.5 py-1 rounded bg-[#2a2420] border border-[#48372f]">
+              <span class="text-xs font-mono font-bold text-[#bc8c74] px-2.5 py-1 rounded bg-[#2a2420] border border-[#48372f] shrink-0">
                 {{ delayService.currentDelay() }}ms
               </span>
             </div>
@@ -143,7 +143,7 @@ import { SidebarService } from '../../core/services/sidebar.service';
           </div>
 
           <!-- Paginated Endpoint Latency Log -->
-          <div class="p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3">
+          <div class="p-4 sm:p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div class="flex items-center gap-2.5">
                 <h2 class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
@@ -155,7 +155,7 @@ import { SidebarService } from '../../core/services/sidebar.service';
               </div>
 
               <!-- Pagination Controls & Page Size Selector -->
-              <div class="flex items-center gap-2 text-xs font-mono">
+              <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 text-xs font-mono pt-1 sm:pt-0">
                 <!-- Page size selector -->
                 <div class="flex items-center gap-1 text-[#8a8986]">
                   <span>Show:</span>
@@ -202,11 +202,11 @@ import { SidebarService } from '../../core/services/sidebar.service';
             <!-- Paginated Request List -->
             <div class="space-y-1.5 font-mono text-xs">
               @for (req of paginatedRequests(); track req.id || $index) {
-                <div class="flex items-center justify-between p-2 rounded bg-[#171717] border border-[#262626]">
-                  <div class="flex items-center gap-2">
+                <div class="flex items-center justify-between p-2 rounded bg-[#171717] border border-[#262626] gap-2">
+                  <div class="flex items-center gap-2 min-w-0 flex-1">
                     <span
-                      class="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                      [ngClass]="
+                      class="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0"
+                      [ngClass]=\"
                         req.method === 'GET'
                           ? 'bg-[#1e2d3d] text-[#529cca]'
                           : req.method === 'POST'
@@ -214,31 +214,31 @@ import { SidebarService } from '../../core/services/sidebar.service';
                             : req.method === 'DELETE'
                               ? 'bg-[#331f1f] text-[#e05757]'
                               : 'bg-[#332924] text-[#bc8c74]'
-                      "
+                      \"
                     >
                       {{ req.method }}
                     </span>
-                    <span class="text-[#e6e6e5]">{{ req.path }}</span>
+                    <span class=\"text-[#e6e6e5] truncate\">{{ req.path }}</span>
                   </div>
 
-                  <div class="flex items-center gap-3">
-                    <span class="text-[#8a8986]">{{ req.durationMs }}ms</span>
+                  <div class=\"flex items-center gap-2 sm:gap-3 shrink-0\">
+                    <span class=\"text-[#8a8986] text-[11px] sm:text-xs\">{{ req.durationMs }}ms</span>
                     <span
-                      class="px-1.5 py-0.2 rounded text-[10px]"
-                      [ngClass]="
+                      class=\"px-1.5 py-0.2 rounded text-[10px]\"
+                      [ngClass]=\"
                         req.status < 300
                           ? 'text-[#5cb87a]'
                           : req.status < 400
                             ? 'text-[#529cca]'
                             : 'text-[#e05757]'
-                      "
+                      \"
                     >
                       {{ req.status }}
                     </span>
                   </div>
                 </div>
               } @empty {
-                <div class="text-[#8a8986] py-4 text-center text-xs">
+                <div class=\"text-[#8a8986] py-4 text-center text-xs\">
                   No requests captured yet. Trigger actions across the portal to see live telemetry.
                 </div>
               }
@@ -246,54 +246,37 @@ import { SidebarService } from '../../core/services/sidebar.service';
 
             <!-- Bottom pagination footer if multiple pages exist -->
             @if (totalPages() > 1) {
-              <div class="flex items-center justify-between pt-2 border-t border-[#262626] text-xs font-mono text-[#8a8986]">
+              <div class=\"flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#262626] text-xs font-mono text-[#8a8986]\">
                 <div>
                   Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), allRequests().length) }} of {{ allRequests().length }} requests
                 </div>
 
-                <div class="flex items-center gap-1">
+                <div class=\"flex items-center gap-1\">
                   <button
-                    type="button"
-                    (click)="goToPage(1)"
-                    [disabled]="currentPage() === 1"
-                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    type=\"button\"
+                    (click)=\"goToPage(1)\"
+                    [disabled]=\"currentPage() === 1\"
+                    class=\"notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer\"
                   >
                     First
                   </button>
                   <button
-                    type="button"
-                    (click)="prevPage()"
-                    [disabled]="currentPage() <= 1"
-                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    Prev
-                  </button>
-                  <span class="px-2 text-[#e6e6e5] font-semibold">{{ currentPage() }} / {{ totalPages() }}</span>
-                  <button
-                    type="button"
-                    (click)="nextPage()"
-                    [disabled]="currentPage() >= totalPages()"
-                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    Next
-                  </button>
-                  <button
-                    type="button"
-                    (click)="goToPage(totalPages())"
-                    [disabled]="currentPage() === totalPages()"
-                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    type=\"button\"
+                    (click)=\"goToPage(totalPages())\"
+                    [disabled]=\"currentPage() === totalPages()\"
+                    class=\"notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer\"
                   >
                     Last
                   </button>
                 </div>
               </div>
             }
+
           </div>
 
         </div>
 
       </div>
-
     </div>
   `,
 })
@@ -303,36 +286,43 @@ export class TelemetryComponent implements OnInit {
   sidebarService = inject(SidebarService);
   private http = inject(HttpClient);
 
-  readonly Math = Math;
+  Math = Math;
 
   isPinging = signal<boolean>(false);
+
+  // Pagination state
   currentPage = signal<number>(1);
   pageSize = signal<number>(10);
 
-  allRequests = computed<TelemetryMetric[]>(() => {
+  // All metrics log
+  allRequests = computed(() => {
     return this.telemetryService.data()?.traffic?.recentRequests || [];
   });
 
-  totalPages = computed<number>(() => {
+  // Calculate total pages based on allRequests length and pageSize
+  totalPages = computed(() => {
     const total = this.allRequests().length;
-    return total === 0 ? 1 : Math.ceil(total / this.pageSize());
+    return Math.max(1, Math.ceil(total / this.pageSize()));
   });
 
-  paginatedRequests = computed<TelemetryMetric[]>(() => {
-    const list = this.allRequests();
+  // Derived paginated slice of requests
+  paginatedRequests = computed(() => {
+    const requests = this.allRequests();
     const start = (this.currentPage() - 1) * this.pageSize();
-    return list.slice(start, start + this.pageSize());
+    const end = start + this.pageSize();
+    return requests.slice(start, end);
   });
 
   presets = [
     { label: '0ms (Instant)', ms: 0 },
-    { label: '500ms (Quick)', ms: 500 },
-    { label: '1500ms (Default)', ms: 1500 },
-    { label: '3000ms (Heavy)', ms: 3000 },
+    { label: '150ms (Optimal)', ms: 150 },
+    { label: '350ms (Real-world)', ms: 350 },
+    { label: '800ms (High Latency)', ms: 800 },
+    { label: '1500ms (Throttled)', ms: 1500 },
   ];
 
   ngOnInit(): void {
-    this.telemetryService.startPolling(2000);
+    this.refreshMetrics();
   }
 
   refreshMetrics(): void {
@@ -340,30 +330,29 @@ export class TelemetryComponent implements OnInit {
   }
 
   clearBuffer(): void {
-    this.http.post('/api/telemetry/reset', {}).subscribe({
+    this.telemetryService.resetMetrics().subscribe({
       next: () => {
         this.currentPage.set(1);
-        this.telemetryService.refresh();
+        this.refreshMetrics();
       },
     });
   }
 
   sendTestPing(): void {
     this.isPinging.set(true);
-    this.http.get('/api/health').subscribe({
+    const delay = this.delayService.currentDelay();
+    this.http.get(`/api/health?delay=${delay}`).subscribe({
       next: () => {
-        setTimeout(() => this.isPinging.set(false), 300);
+        this.isPinging.set(false);
+        this.refreshMetrics();
       },
-      error: () => this.isPinging.set(false),
+      error: () => {
+        this.isPinging.set(false);
+      },
     });
   }
 
-  onPageSizeChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.pageSize.set(Number(select.value));
-    this.currentPage.set(1);
-  }
-
+  // Pagination navigation helpers
   prevPage(): void {
     if (this.currentPage() > 1) {
       this.currentPage.update((p) => p - 1);
@@ -377,8 +366,13 @@ export class TelemetryComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages()) {
-      this.currentPage.set(page);
-    }
+    const clamped = Math.max(1, Math.min(page, this.totalPages()));
+    this.currentPage.set(clamped);
+  }
+
+  onPageSizeChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.pageSize.set(Number(select.value));
+    this.currentPage.set(1);
   }
 }

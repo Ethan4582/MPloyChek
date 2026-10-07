@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, signal, Input, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,10 +16,10 @@ export interface BreadcrumbItem {
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <header class="h-12 border-b border-[#252525] bg-[#191919] px-4 flex items-center justify-between sticky top-0 z-30 select-none">
+    <header class="h-12 border-b border-[#252525] bg-[#191919] px-3 sm:px-4 flex items-center justify-between sticky top-0 z-30 select-none">
       
       <!-- Left: Sidebar Toggle Button & Breadcrumb Navigation -->
-      <div class="flex items-center gap-2.5 min-w-0">
+      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
         <!-- Sidebar Toggle Icon Button (Always accessible to toggle or re-open sidebar) -->
         @if (authService.isAuthenticated()) {
           <button
@@ -41,17 +41,17 @@ export interface BreadcrumbItem {
           </button>
         }
 
-        <nav class="flex items-center gap-1.5 text-xs font-mono text-[#8a8986] overflow-hidden whitespace-nowrap">
-          <span class="text-[#555552]">MPloyChek</span>
-          <span class="text-[#3c3c3c]">/</span>
+        <nav class="flex items-center gap-1 sm:gap-1.5 text-xs font-mono text-[#8a8986] overflow-hidden whitespace-nowrap min-w-0">
+          <span class="text-[#555552] hidden xs:inline shrink-0">MPloyChek</span>
+          <span class="text-[#3c3c3c] hidden xs:inline shrink-0">/</span>
           @for (item of breadcrumbs; track item.label; let last = $last) {
             @if ((item.link || item.url) && !last) {
-              <a [routerLink]="item.link || item.url" class="hover:text-[#ffffff] transition-colors truncate">
+              <a [routerLink]="item.link || item.url" class="hover:text-[#ffffff] transition-colors truncate max-w-[100px] sm:max-w-none">
                 {{ item.label }}
               </a>
               <span class="text-[#3c3c3c]">/</span>
             } @else {
-              <span [ngClass]="last ? 'text-[#ffffff] font-medium' : 'text-[#8a8986]'" class="truncate">
+              <span [ngClass]="last ? 'text-[#ffffff] font-medium' : 'text-[#8a8986]'" class="truncate max-w-[140px] sm:max-w-none">
                 {{ item.label }}
               </span>
               @if (!last) {
@@ -63,12 +63,12 @@ export interface BreadcrumbItem {
       </div>
 
       <!-- Right: Action Badge & Tools -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         
         <!-- Live Parameterized Delay Badge -->
         <a
           routerLink="/telemetry"
-          class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono bg-[#222222] border border-[#2f2f2f] text-[#bc8c74] hover:border-[#bc8c74]/50 transition-all cursor-pointer"
+          class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono bg-[#222222] border border-[#2f2f2f] text-[#bc8c74] hover:border-[#bc8c74]/50 transition-all cursor-pointer"
           title="Open Backend Telemetry & Latency Engine"
         >
           <span>Delay: {{ delayService.currentDelay() }}ms</span>
@@ -79,7 +79,7 @@ export interface BreadcrumbItem {
           href="https://github.com/Ethan4582/MPloyChek"
           target="_blank"
           rel="noopener noreferrer"
-          class="p-1.5 rounded-md text-[#8a8986] hover:text-[#ffffff] hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-all cursor-pointer"
+          class="hidden sm:inline-flex p-1.5 rounded-md text-[#8a8986] hover:text-[#ffffff] hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-all cursor-pointer"
           title="View Source on GitHub"
           aria-label="GitHub Repository"
         >
@@ -94,21 +94,22 @@ export interface BreadcrumbItem {
             type="button"
             (click)="actionClicked.emit()"
             [disabled]="isActionLoading"
-            class="notion-btn-primary text-xs py-1 px-3 font-normal"
+            class="notion-btn-primary text-xs py-1 px-2.5 sm:px-3 font-normal whitespace-nowrap"
           >
             {{ isActionLoading ? 'Loading...' : actionLabel }}
           </button>
         }
 
-        <!-- Lightweight Shadcn-style Profile Hover Card (No Sheet Drawer) -->
+        <!-- Profile Menu / Popover (Supports both click for mobile/touch and hover for desktop) -->
         <div 
-          class="relative group"
+          class="relative profile-menu-container"
           (mouseenter)="isProfileHovered.set(true)"
           (mouseleave)="isProfileHovered.set(false)"
         >
           <!-- Trigger Avatar -->
           <button
             type="button"
+            (click)="toggleProfileMenu($event)"
             class="w-7 h-7 rounded-md bg-[#252525] border border-[#333333] flex items-center justify-center text-[11px] font-bold text-[#ffffff] hover:border-[#4f4f4f] transition-all cursor-pointer"
             [title]="authService.currentUser()?.name || 'Account'"
             aria-label="User Account"
@@ -116,8 +117,8 @@ export interface BreadcrumbItem {
             {{ getUserInitials() }}
           </button>
 
-          <!-- Hover Card Popover -->
-          @if (isProfileHovered()) {
+          <!-- Hover / Click Card Popover -->
+          @if (isProfileHovered() || isProfileMenuOpen()) {
             <div 
               class="absolute right-0 top-full pt-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
               (mouseenter)="isProfileHovered.set(true)"
@@ -155,6 +156,19 @@ export interface BreadcrumbItem {
                   <span class="text-[#5cb87a] font-medium">Active</span>
                 </div>
 
+                <!-- Mobile Quick Link to GitHub -->
+                <div class="pt-2 border-t border-[#292929] sm:hidden">
+                  <a
+                    href="https://github.com/Ethan4582/MPloyChek"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="w-full text-left px-2 py-1.5 rounded text-xs text-[#9b9a97] hover:bg-[#252525] hover:text-[#ffffff] transition-colors flex items-center justify-between"
+                  >
+                    <span>GitHub Repository</span>
+                    <span>&nearr;</span>
+                  </a>
+                </div>
+
                 <!-- Sign Out Button -->
                 <div class="pt-2 border-t border-[#292929]">
                   <button
@@ -182,6 +196,7 @@ export class WorkspaceHeaderComponent {
   delayService = inject(DelayService);
   sidebarService = inject(SidebarService);
   private router = inject(Router);
+  private elementRef = inject(ElementRef);
 
   @Input() breadcrumbs: BreadcrumbItem[] = [];
   @Input() actionLabel?: string | null;
@@ -189,6 +204,20 @@ export class WorkspaceHeaderComponent {
   @Output() actionClicked = new EventEmitter<void>();
 
   isProfileHovered = signal<boolean>(false);
+  isProfileMenuOpen = signal<boolean>(false);
+
+  toggleProfileMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.isProfileMenuOpen.update((v) => !v);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.isProfileMenuOpen.set(false);
+      this.isProfileHovered.set(false);
+    }
+  }
 
   getUserInitials(): string {
     const user = this.authService.currentUser();
@@ -202,6 +231,8 @@ export class WorkspaceHeaderComponent {
   }
 
   onSignOut(): void {
+    this.isProfileMenuOpen.set(false);
+    this.isProfileHovered.set(false);
     this.authService.logout();
     this.router.navigate(['/login']);
   }

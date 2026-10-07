@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { RecordService } from '../../core/services/record.service';
+import { DelayService } from '../../core/services/delay.service';
 import { SidebarService } from '../../core/services/sidebar.service';
 import { IEmployeeRecord } from '../../core/models/record.models';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
@@ -43,28 +44,28 @@ import { AddRecordModalComponent } from './add-record-modal.component';
         ></app-workspace-header>
 
         <!-- Edge-to-Edge Workspace Container -->
-        <div class="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+        <div class="w-full px-3.5 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-4 sm:space-y-5">
           
           <!-- Page Header & Access Scope Callout -->
           <div class="space-y-3">
             <div class="space-y-1">
-              <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Employment Verification Directory</h1>
+              <h1 class="text-xl sm:text-2xl font-bold text-[#ffffff] tracking-tight">Employment Verification Directory</h1>
               <p class="text-xs text-[#9b9a97]">
                 Secure RBAC directory of employee screening audits, clearances, and background checks.
               </p>
             </div>
 
             <!-- Active Profile & Scope Callout -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg bg-[#202020] border border-[#2f2f2f] text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-lg bg-[#202020] border border-[#2f2f2f] text-xs">
               <div class="flex items-start sm:items-center gap-3">
                 <div class="w-8 h-8 rounded-md bg-[#292929] border border-[#383838] flex items-center justify-center text-xs font-semibold text-[#e6e6e5] shrink-0">
                   {{ getUserInitials() }}
                 </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-medium text-[#e6e6e5]">{{ authService.currentUser()?.name }}</span>
-                    <span class="text-[#605f5b]">&bull;</span>
-                    <span class="text-[#9b9a97] font-mono text-[11px]">{{ authService.currentUser()?.userId }}</span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span class="font-medium text-[#e6e6e5] truncate">{{ authService.currentUser()?.name }}</span>
+                    <span class="text-[#605f5b] hidden xs:inline">&bull;</span>
+                    <span class="text-[#9b9a97] font-mono text-[11px] truncate">{{ authService.currentUser()?.userId }}</span>
                     
                     @if (authService.isAdmin()) {
                       <span class="tag-bronze">Admin Clearance</span>
@@ -72,7 +73,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                       <span class="tag-blue">General User</span>
                     }
                   </div>
-                  <div class="text-[11px] text-[#787774] mt-0.5">
+                  <div class="text-[11px] text-[#787774] mt-1 sm:mt-0.5 leading-relaxed">
                     Department: {{ authService.currentUser()?.department || 'Operations' }} &bull; Access Policy: 
                     <span class="text-[#e6e6e5]">{{ authService.isAdmin() ? 'Full DB Records & Administration' : 'Restricted Personal Scope' }}</span>
                   </div>
@@ -80,7 +81,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
               </div>
 
               <!-- Scope Indicator Badge & Sync Button -->
-              <div class="flex items-center gap-2 shrink-0">
+              <div class="flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t border-[#292929] sm:border-t-0 shrink-0">
                 <button
                   type="button"
                   (click)="loadRecords()"
@@ -106,14 +107,14 @@ import { AddRecordModalComponent } from './add-record-modal.component';
           <div class="notion-card border-[#2a2a2a] bg-[#202020] overflow-hidden shadow-notion-card">
             
             <!-- Database Controls Bar -->
-            <div class="p-3 sm:px-4 border-b border-[#2a2a2a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="p-3 sm:px-4 border-b border-[#2a2a2a] flex flex-col gap-3">
               
-              <!-- Tab Views Filter (ALL, Verified, Pending, Flagged) -->
-              <div class="flex items-center gap-1 text-xs">
+              <!-- Tab Views Filter (ALL, Verified, Pending, Flagged) with horizontal scroll for small phones -->
+              <div class="flex items-center gap-1 text-xs overflow-x-auto no-scrollbar pb-1 sm:pb-0">
                 <button
                   type="button"
                   (click)="setView('ALL')"
-                  class="px-2.5 py-1 rounded transition-colors"
+                  class="px-2.5 py-1 rounded transition-colors whitespace-nowrap"
                   [ngClass]="activeView() === 'ALL' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
                 >
                   All Records
@@ -122,7 +123,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                 <button
                   type="button"
                   (click)="setView('Verified')"
-                  class="px-2.5 py-1 rounded transition-colors"
+                  class="px-2.5 py-1 rounded transition-colors whitespace-nowrap"
                   [ngClass]="activeView() === 'Verified' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
                 >
                   Verified
@@ -131,7 +132,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                 <button
                   type="button"
                   (click)="setView('Pending Review')"
-                  class="px-2.5 py-1 rounded transition-colors"
+                  class="px-2.5 py-1 rounded transition-colors whitespace-nowrap"
                   [ngClass]="activeView() === 'Pending Review' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
                 >
                   Pending
@@ -140,24 +141,24 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                 <button
                   type="button"
                   (click)="setView('Flagged')"
-                  class="px-2.5 py-1 rounded transition-colors"
+                  class="px-2.5 py-1 rounded transition-colors whitespace-nowrap"
                   [ngClass]="activeView() === 'Flagged' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
                 >
                   Flagged
                 </button>
               </div>
 
-              <!-- Filters & Search Toolbar -->
+              <!-- Filters & Search Toolbar (Flex row on desktop, responsive stack/wrap on mobile) -->
               <div class="flex flex-wrap items-center gap-2">
                 
                 <!-- Search Bar -->
-                <div class="relative">
+                <div class="relative flex-1 min-w-[140px] sm:min-w-0 sm:flex-initial">
                   <input
                     type="text"
                     [value]="searchQuery()"
                     (input)="onSearchInput($event)"
                     placeholder="Search database..."
-                    class="notion-input py-1 px-2.5 w-44 sm:w-56 text-xs"
+                    class="notion-input py-1 px-2.5 w-full sm:w-56 text-xs"
                   />
                   @if (searchQuery()) {
                     <button
@@ -262,8 +263,74 @@ import { AddRecordModalComponent } from './add-record-modal.component';
               </div>
             </div>
 
-            <!-- Database Table -->
-            <div class="overflow-x-auto">
+            <!-- Mobile View: Clean Responsive Cards (Visible on screens < 640px) -->
+            <div class="block sm:hidden divide-y divide-[#262626]">
+              @if (recordService.isLoading()) {
+                <div class="py-12 text-center text-[#787774]">
+                  <span class="inline-block animate-spin text-xl">⏳</span>
+                  <div class="mt-1 text-xs">Streaming records through delay pipeline...</div>
+                </div>
+              } @else if (filteredRecords().length === 0) {
+                <div class="py-8 text-center text-[#787774] text-xs">
+                  No records match the current view and filter parameters.
+                </div>
+              } @else {
+                @for (record of filteredRecords(); track record.recordId) {
+                  <div
+                    (click)="viewRecordDetails(record)"
+                    class="p-3.5 hover:bg-[#252525] active:bg-[#282828] transition-colors cursor-pointer space-y-2.5"
+                  >
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0 flex-1">
+                        <div class="font-medium text-[#ffffff] text-xs truncate">
+                          {{ record.employeeName }}
+                        </div>
+                        <div class="text-[11px] text-[#787774] truncate">
+                          {{ record.position }} &bull; {{ record.department }}
+                        </div>
+                      </div>
+                      
+                      <div class="shrink-0 flex items-center gap-1.5">
+                        @if (record.verificationStatus === 'Verified') {
+                          <span class="tag-green text-[10px]">Verified</span>
+                        } @else if (record.verificationStatus === 'Pending Review') {
+                          <span class="tag-yellow text-[10px]">Pending</span>
+                        } @else {
+                          <span class="tag-red text-[10px]">Flagged</span>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] font-mono pt-1 text-[#8a8986]">
+                      <span class="text-[#bc8c74]">{{ record.recordId }}</span>
+                      
+                      <div class="flex items-center gap-2">
+                        @if (record.accessLevel === 'Executive') {
+                          <span class="tag-bronze text-[10px]">Executive</span>
+                        } @else if (record.accessLevel === 'Confidential') {
+                          <span class="tag-blue text-[10px]">Confidential</span>
+                        } @else {
+                          <span class="tag-default text-[10px]">General</span>
+                        }
+
+                        <span class="text-[#555]">&bull;</span>
+                        <span class="text-[10px] text-[#787774]">{{ record.backgroundCheckDate }}</span>
+                      </div>
+                    </div>
+
+                    @if (authService.isAdmin() && record.riskScore !== undefined) {
+                      <div class="flex items-center justify-between pt-1 border-t border-[#292929] text-[10px] text-[#8a8986]">
+                        <span>Risk Score: <strong class="font-mono text-[#e6e6e5]">{{ record.riskScore }}%</strong></span>
+                        <span>Comp: <strong class="font-mono text-[#e6e6e5]">{{ record.compensationGrade || 'N/A' }}</strong></span>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+
+            <!-- Desktop / Tablet Table View (Visible on screens >= 640px) -->
+            <div class="hidden sm:block overflow-x-auto">
               <table class="w-full text-left text-xs border-collapse">
                 <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
                   <tr>
@@ -395,7 +462,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                           <button
                             type="button"
                             (click)="viewRecordDetails(record)"
-                            class="p-1 rounded text-[#787774] hover:text-[#ffffff] hover:bg-[#2d2d2d] transition-colors"
+                            class="p-1 rounded text-[#787774] hover:text-[#ffffff] hover:bg-[#2d2d2d] transition-colors cursor-pointer"
                             title="Inspect Record Detail"
                           >
                             <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -413,15 +480,15 @@ import { AddRecordModalComponent } from './add-record-modal.component';
             </div>
 
             <!-- Table Footer Status / Count -->
-            <div class="px-4 py-2 bg-[#1b1b1b] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
-              <div class="flex items-center gap-3">
+            <div class="px-3 sm:px-4 py-2 bg-[#1b1b1b] border-t border-[#2a2a2a] flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#787774]">
+              <div class="flex items-center gap-2 sm:gap-3">
                 <span>Count: <strong class="text-[#9b9a97] font-mono">{{ filteredRecords().length }}</strong></span>
                 @if (recordService.meta()) {
                   <span>&bull;</span>
                   <span>Scope: <strong class="text-[#9b9a97]">{{ recordService.meta()?.scope }}</strong></span>
                 }
               </div>
-              <span class="text-[10px] text-[#555552]">MongoDB Mongoose Indexed View</span>
+              <span class="text-[10px] text-[#555552] font-mono hidden xs:inline">MongoDB Mongoose Indexed View</span>
             </div>
 
           </div>
@@ -432,14 +499,14 @@ import { AddRecordModalComponent } from './add-record-modal.component';
 
       <!-- Record Detail Modal -->
       @if (selectedRecord()) {
-        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div class="notion-card max-w-lg w-full p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
+        <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+          <div class="notion-card max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 border-[#383838] bg-[#222222] shadow-notion-dropdown animate-in zoom-in-95 duration-100">
             <div class="flex items-start justify-between pb-3 border-b border-[#2f2f2f]">
-              <div>
-                <h3 class="text-sm font-semibold text-[#ffffff]">{{ selectedRecord()?.employeeName }}</h3>
-                <p class="text-xs text-[#9b9a97] font-mono">{{ selectedRecord()?.recordId }} &bull; {{ selectedRecord()?.position }}</p>
+              <div class="min-w-0 pr-2">
+                <h3 class="text-sm font-semibold text-[#ffffff] truncate">{{ selectedRecord()?.employeeName }}</h3>
+                <p class="text-xs text-[#9b9a97] font-mono truncate">{{ selectedRecord()?.recordId }} &bull; {{ selectedRecord()?.position }}</p>
               </div>
-              <button (click)="selectedRecord.set(null)" class="text-[#787774] hover:text-[#ffffff] text-sm p-1">✕</button>
+              <button (click)="selectedRecord.set(null)" class="text-[#787774] hover:text-[#ffffff] text-sm p-1 cursor-pointer">✕</button>
             </div>
 
             <!-- Properties List -->
@@ -496,7 +563,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
             </div>
 
             <div class="pt-3 border-t border-[#2f2f2f] flex justify-end">
-              <button (click)="selectedRecord.set(null)" class="notion-btn text-xs">Close</button>
+              <button (click)="selectedRecord.set(null)" class="notion-btn text-xs cursor-pointer">Close</button>
             </div>
           </div>
         </div>
@@ -516,6 +583,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
 export class DashboardComponent implements OnInit {
   authService = inject(AuthService);
   recordService = inject(RecordService);
+  delayService = inject(DelayService);
   sidebarService = inject(SidebarService);
 
   activeView = signal<string>('ALL');
@@ -558,12 +626,20 @@ export class DashboardComponent implements OnInit {
           r.employeeName.toLowerCase().includes(q) ||
           r.recordId.toLowerCase().includes(q) ||
           r.department.toLowerCase().includes(q) ||
-          r.position.toLowerCase().includes(q) ||
-          r.userId.toLowerCase().includes(q)
+          r.position.toLowerCase().includes(q)
       );
     }
 
     return list;
+  });
+
+  hasActiveFilters = computed(() => {
+    return (
+      this.selectedStatus() !== 'ALL' ||
+      this.selectedAccessLevel() !== 'ALL' ||
+      this.searchQuery().trim().length > 0 ||
+      this.activeView() !== 'ALL'
+    );
   });
 
   ngOnInit(): void {
@@ -571,7 +647,8 @@ export class DashboardComponent implements OnInit {
   }
 
   loadRecords(): void {
-    this.recordService.getRecords().subscribe();
+    const delay = this.delayService.currentDelay();
+    this.recordService.getRecords(delay).subscribe();
   }
 
   setView(view: string): void {
@@ -603,18 +680,10 @@ export class DashboardComponent implements OnInit {
     this.isAccessMenuOpen.set(false);
   }
 
-  hasActiveFilters(): boolean {
-    return (
-      this.selectedStatus() !== 'ALL' ||
-      this.selectedAccessLevel() !== 'ALL' ||
-      !!this.searchQuery().trim()
-    );
-  }
-
   resetFilters(): void {
+    this.searchQuery.set('');
     this.selectedStatus.set('ALL');
     this.selectedAccessLevel.set('ALL');
-    this.searchQuery.set('');
     this.activeView.set('ALL');
   }
 
@@ -623,13 +692,11 @@ export class DashboardComponent implements OnInit {
   }
 
   onHeaderAction(): void {
-    if (this.authService.isAdmin()) {
-      this.isAddRecordModalOpen.set(true);
-    }
+    this.isAddRecordModalOpen.set(true);
   }
 
   getUserInitials(): string {
-    const name = this.authService.currentUser()?.name || 'User';
+    const name = this.authService.currentUser()?.name || 'Alexander Vance';
     return name
       .split(' ')
       .map((n) => n[0])
