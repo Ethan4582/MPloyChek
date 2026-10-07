@@ -15,7 +15,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.error && typeof error.error === 'object' && error.error.error) {
         errorMessage = error.error.error;
       } else if (error.status === 0) {
-        errorMessage = 'Cannot reach backend server. Please verify backend is running on port 3000.';
+        errorMessage = 'Cannot reach backend server. Please verify your backend API URL and ensure it is running.';
       }
 
       if (error.status === 401 && !req.url.includes('/api/auth/login')) {
