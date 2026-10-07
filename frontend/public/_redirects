@@ -3,7 +3,7 @@
 
 # 1. Reverse-proxy /api/* requests to your deployed backend
 # (Replace https://mploychek-api.onrender.com with your actual backend URL once deployed on Render/Railway)
-/api/*  https://mploychek-api.onrender.com/api/:splat  200
+/api/*  https://mploychek-api-ouqv.onrender.com/api/:splat  200
 
 # 2. Angular SPA deep routing fallback (ensures /docs, /dashboard, /creator load without 404s)
 /*      /index.html                                    200
