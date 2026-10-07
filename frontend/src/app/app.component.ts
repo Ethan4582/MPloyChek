@@ -4,7 +4,6 @@ import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { ToastComponent } from './shared/components/toast/toast.component';
-import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +26,6 @@ import { AuthService } from './core/services/auth.service';
 export class AppComponent {
   title = 'MPloyChek';
   private router = inject(Router);
-  private authService = inject(AuthService);
 
   currentUrl = '';
 
@@ -40,19 +38,8 @@ export class AppComponent {
   }
 
   showPublicNavbar(): boolean {
-    const url = this.currentUrl || this.router.url;
-    // Hide floating public navbar on protected workspace views
-    if (
-      url.startsWith('/dashboard') ||
-      url.startsWith('/admin') ||
-      url.startsWith('/telemetry')
-    ) {
-      return false;
-    }
-    // On docs and creator pages, if user is logged in, the sidebar is used instead
-    if ((url.startsWith('/docs') || url.startsWith('/creator')) && this.authService.isAuthenticated()) {
-      return false;
-    }
-    return true;
+    const rawUrl = this.currentUrl || this.router.url || '';
+    const cleanUrl = rawUrl.split('?')[0].split('#')[0];
+    return cleanUrl === '/' || cleanUrl === '';
   }
 }

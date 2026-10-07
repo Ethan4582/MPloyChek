@@ -125,10 +125,7 @@ export interface BreadcrumbItem {
 
               <div class="flex items-center justify-between text-[11px]">
                 <span class="text-[#787774]">Status</span>
-                <span class="text-[#5cb87a] font-medium flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#5cb87a]"></span>
-                  <span>Active</span>
-                </span>
+                <span class="text-[#5cb87a] font-medium">Active</span>
               </div>
 
               <!-- Sign Out Button -->

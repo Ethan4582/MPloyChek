@@ -32,12 +32,14 @@ export interface TocItem {
         [class.md:pl-60]="authService.isAuthenticated() && sidebarService.isOpen()"
         [class.md:pl-0]="!authService.isAuthenticated() || !sidebarService.isOpen()"
       >
-        <!-- Workspace Header -->
-        <app-workspace-header
-          [breadcrumbs]="[{ label: 'System Design & Architecture' }]"
-          actionLabel="Download Spec"
-          (actionClicked)="downloadRawSpec()"
-        ></app-workspace-header>
+        <!-- Workspace Header (Shown when authenticated) -->
+        @if (authService.isAuthenticated()) {
+          <app-workspace-header
+            [breadcrumbs]="[{ label: 'System Design & Architecture' }]"
+            actionLabel="Download Spec"
+            (actionClicked)="downloadRawSpec()"
+          ></app-workspace-header>
+        }
 
         <!-- Main Blog / Documentation Two-Column View -->
         <div class="w-full px-4 sm:px-6 lg:px-8 py-8">
@@ -59,10 +61,34 @@ export interface TocItem {
                 </p>
 
                 <!-- Document Author Strip -->
-                <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-[#8a8986] font-mono">
-                  <div>Author: <span class="text-[#e6e6e5]">Ashirwad Singh</span></div>
-                  <div>&bull;</div>
-                  <div>Source: <span class="text-[#bc8c74]">system-design.md</span></div>
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs text-[#8a8986] font-mono">
+                  <div class="flex flex-wrap items-center gap-3">
+                    @if (!authService.isAuthenticated()) {
+                      <a routerLink="/" class="text-[#8a8986] hover:text-[#ffffff] transition-colors flex items-center gap-1 font-sans">
+                        <span>&larr;</span>
+                        <span>Home</span>
+                      </a>
+                      <div>&bull;</div>
+                    }
+                    <div>Author: <span class="text-[#e6e6e5]">Ashirwad Singh</span></div>
+                    <div>&bull;</div>
+                    <div>Source: <span class="text-[#bc8c74]">system-design.md</span></div>
+                  </div>
+
+                  @if (!authService.isAuthenticated()) {
+                    <button
+                      type="button"
+                      (click)="downloadRawSpec()"
+                      class="notion-btn text-xs py-1 px-2.5 flex items-center gap-1.5 text-[#e6e6e5] cursor-pointer"
+                    >
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      <span>Download Spec</span>
+                    </button>
+                  }
                 </div>
 
                 <!-- Mobile Floating TOC Button (Small Screens Only) -->
@@ -150,198 +176,130 @@ export interface TocItem {
                   <span class="text-[#bc8c74]">Dual DB</span>
                 </div>
 
-                <div class="pt-2 border-t border-[#262626] space-y-1.5 text-[11px] text-[#9b9a97]">
-                  <div class="flex justify-between">
-                    <span>Frontend</span>
-                    <span class="text-[#ffffff] font-mono">Angular 19 Signals</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>Backend</span>
-                    <span class="text-[#ffffff] font-mono">Node.js / Express</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>Database</span>
-                    <span class="text-[#bc8c74] font-mono">MongoDB / DynamoDB</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>Telemetry</span>
-                    <span class="text-[#5cb87a] font-mono">Real-Time ?delay=</span>
-                  </div>
+                <p class="text-[11px] text-[#8a8986] leading-relaxed">
+                  Decoupled repository seam with MongoDB In-Memory embedded zero-config runtime and DynamoDB integration.
+                </p>
+              </div>
+
+              <!-- Quick Jump Links -->
+              <div class="p-3.5 rounded-xl bg-[#1e1e1e] border border-[#2a2a2a] space-y-2 text-xs">
+                <div class="flex items-center gap-1.5 font-mono text-[11px] text-[#8a8986]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#bc8c74]"></span>
+                  <span class="text-[#e6e6e5] font-semibold">Quick References</span>
+                </div>
+
+                <div class="space-y-1.5 pt-1 text-[11px]">
+                  <a
+                    href="https://github.com/Ethan4582/MPloyChek"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-between text-[#8a8986] hover:text-[#ffffff] transition-colors"
+                  >
+                    <span>GitHub Repository</span>
+                    <span>&nearr;</span>
+                  </a>
+                  <a
+                    routerLink="/creator"
+                    class="flex items-center justify-between text-[#8a8986] hover:text-[#ffffff] transition-colors"
+                  >
+                    <span>Creator Profile</span>
+                    <span>&rarr;</span>
+                  </a>
+                  <button
+                    type="button"
+                    (click)="downloadRawSpec()"
+                    class="w-full text-left flex items-center justify-between text-[#bc8c74] hover:underline cursor-pointer pt-1"
+                  >
+                    <span>Download Markdown (.md)</span>
+                    <span>&darr;</span>
+                  </button>
                 </div>
               </div>
 
             </aside>
 
           </div>
-
         </div>
 
       </div>
 
-      <!-- Mobile TOC Slide-Over Modal -->
-      @if (isMobileTocOpen()) {
-        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end" (click)="toggleMobileToc()">
-          <div
-            class="w-full max-w-xs h-full bg-[#1e1e1e] border-l border-[#2e2e2e] shadow-2xl p-5 overflow-y-auto"
-            (click)="$event.stopPropagation()"
-          >
-            <div class="space-y-4">
-              <div class="flex items-center justify-between pb-3 border-b border-[#2c2c2c]">
-                <div class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#bc8c74]"></span>
-                  <span class="text-xs font-semibold uppercase tracking-wider text-[#e6e6e5]">Table of Contents</span>
-                </div>
+    </div>
+
+    <!-- Mobile Slide-out Drawer for TOC -->
+    @if (isMobileTocOpen()) {
+      <div
+        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end xl:hidden"
+        (click)="toggleMobileToc()"
+      >
+        <div
+          class="w-80 max-w-[85vw] h-full bg-[#1e1e1e] border-l border-[#2e2e2e] shadow-2xl p-5 flex flex-col justify-between"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-[#2d2d2d]">
+              <span class="text-xs font-semibold uppercase tracking-wider text-[#e6e6e5]">Table of Contents</span>
+              <button
+                type="button"
+                (click)="toggleMobileToc()"
+                class="p-1 rounded-md text-[#787774] hover:text-[#ffffff] hover:bg-[#2a2a2a] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <nav class="space-y-1 max-h-[75vh] overflow-y-auto pr-1">
+              @for (item of tocList(); track item.id) {
                 <button
                   type="button"
-                  (click)="toggleMobileToc()"
-                  class="p-1 rounded-md text-[#888885] hover:text-[#ffffff] hover:bg-[#2a2a2a]"
+                  (click)="scrollTo(item.id); toggleMobileToc()"
+                  class="w-full text-left py-2 px-2.5 rounded-md text-xs transition-colors truncate block"
+                  [class.pl-5]="item.level === 3"
+                  [ngClass]="activeHeadingId() === item.id 
+                    ? 'text-[#ffffff] bg-[#282828] font-medium border-l-2 border-[#bc8c74]' 
+                    : 'text-[#8a8986] hover:text-[#e6e6e5] hover:bg-[#252525] border-l-2 border-transparent'"
                 >
-                  ✕
+                  {{ item.title }}
                 </button>
-              </div>
+              }
+            </nav>
+          </div>
 
-              <nav class="space-y-1 max-h-[75vh] overflow-y-auto pr-1">
-                @for (item of tocList(); track item.id) {
-                  <button
-                    type="button"
-                    (click)="scrollTo(item.id); toggleMobileToc()"
-                    class="w-full text-left py-1.5 px-2 rounded-md text-xs transition-colors truncate block cursor-pointer"
-                    [class.pl-4]="item.level === 3"
-                    [ngClass]="activeHeadingId() === item.id 
-                      ? 'text-[#ffffff] bg-[#292929] font-medium border-l-2 border-[#bc8c74]' 
-                      : 'text-[#8a8986] hover:text-[#e6e6e5] border-l-2 border-transparent'"
-                  >
-                    {{ item.title }}
-                  </button>
-                }
-              </nav>
-            </div>
+          <div class="pt-4 border-t border-[#2d2d2d]">
+            <button
+              type="button"
+              (click)="downloadRawSpec()"
+              class="w-full notion-btn py-2 text-xs flex items-center justify-center gap-2 text-[#bc8c74]"
+            >
+              <span>Download Raw Markdown</span>
+              <span>↓</span>
+            </button>
           </div>
         </div>
-      }
-
-    </div>
+      </div>
+    }
   `,
-  styles: [
-    `
-      ::ng-deep .markdown-body h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: -0.025em;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid #2a2a2a;
-      }
-      ::ng-deep .markdown-body h2 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #f0ede6;
-        margin-top: 2rem;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.35rem;
-        border-bottom: 1px solid #262626;
-        scroll-margin-top: 5rem;
-      }
-      ::ng-deep .markdown-body h3 {
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: #e6e6e5;
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
-        scroll-margin-top: 5rem;
-      }
-      ::ng-deep .markdown-body p {
-        margin-bottom: 1rem;
-        line-height: 1.7;
-        color: #b5b4b0;
-      }
-      ::ng-deep .markdown-body code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 0.8125rem;
-        background-color: #242424;
-        color: #bc8c74;
-        padding: 0.15rem 0.35rem;
-        border-radius: 0.25rem;
-        border: 1px solid #303030;
-      }
-      ::ng-deep .markdown-body pre {
-        background-color: #171717;
-        border: 1px solid #282828;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        overflow-x: auto;
-        margin: 1.25rem 0;
-      }
-      ::ng-deep .markdown-body pre code {
-        border: 0;
-        background-color: transparent;
-        padding: 0;
-        color: inherit;
-      }
-      ::ng-deep .markdown-body table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1.25rem 0;
-        font-size: 0.8125rem;
-        border: 1px solid #2c2c2c;
-        border-radius: 0.5rem;
-        overflow: hidden;
-      }
-      ::ng-deep .markdown-body th {
-        background-color: #222222;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #2c2c2c;
-        color: #e6e6e5;
-        font-weight: 600;
-        text-align: left;
-      }
-      ::ng-deep .markdown-body td {
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #282828;
-        color: #a8a7a3;
-      }
-      ::ng-deep .markdown-body tr:hover td {
-        background-color: #1f1f1f;
-      }
-      ::ng-deep .markdown-body hr {
-        border: 0;
-        height: 1px;
-        background-color: #292929;
-        margin: 2rem 0;
-      }
-      ::ng-deep .markdown-body ul,
-      ::ng-deep .markdown-body ol {
-        margin: 0.75rem 0 1rem 1.5rem;
-        color: #b5b4b0;
-      }
-      ::ng-deep .markdown-body li {
-        margin-bottom: 0.35rem;
-      }
-    `,
-  ],
 })
 export class DocsComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   authService = inject(AuthService);
   sidebarService = inject(SidebarService);
 
-  isLoading = signal<boolean>(true);
   rawMarkdown = signal<string>('');
   renderedHtml = signal<string>('');
   tocList = signal<TocItem[]>([]);
   activeHeadingId = signal<string>('');
+  isLoading = signal<boolean>(true);
   isMobileTocOpen = signal<boolean>(false);
 
-  private observer: IntersectionObserver | null = null;
+  private intersectionObserver?: IntersectionObserver;
 
   ngOnInit(): void {
-    this.loadMarkdown();
+    this.fetchSystemDesign();
   }
 
   ngOnDestroy(): void {
-    if (this.observer) {
-      this.observer.disconnect();
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
     }
   }
 
@@ -349,106 +307,129 @@ export class DocsComponent implements OnInit, OnDestroy {
     this.isMobileTocOpen.update((v) => !v);
   }
 
-  loadMarkdown(): void {
+  fetchSystemDesign(): void {
     this.isLoading.set(true);
-    this.http.get<{ success: boolean; data: { markdown: string } }>('/api/docs/system-design').subscribe({
-      next: (res) => {
-        if (res.success && res.data?.markdown) {
-          this.rawMarkdown.set(res.data.markdown);
-          this.parseAndRender(res.data.markdown);
-        }
+
+    this.http.get('/system-design.md', { responseType: 'text' }).subscribe({
+      next: (markdown) => {
+        this.rawMarkdown.set(markdown);
+        this.parseAndRender(markdown);
         this.isLoading.set(false);
+
+        setTimeout(() => {
+          this.setupIntersectionObserver();
+        }, 150);
       },
       error: () => {
+        const fallback = `# MPloyChek System Design Document\n\nUnable to load the raw \`system-design.md\` file from public assets.\nPlease review the repository root on GitHub.`;
+        this.rawMarkdown.set(fallback);
+        this.renderedHtml.set('<p class="text-sm text-[#e05757]">Error loading documentation. Please retry.</p>');
         this.isLoading.set(false);
-        this.renderedHtml.set('<p class="text-red-400">Failed to load system-design.md from backend.</p>');
       },
     });
   }
 
-  private parseAndRender(md: string): void {
-    const html = marked.parse(md) as string;
-    this.renderedHtml.set(html);
+  private parseAndRender(rawText: string): void {
+    const headings: TocItem[] = [];
 
-    // After DOM update, assign IDs to headings and set up scroll spy
-    setTimeout(() => {
-      this.attachHeadingsAndInitSpy();
-    }, 100);
-  }
+    const renderer = new marked.Renderer();
 
-  private attachHeadingsAndInitSpy(): void {
-    const headings = document.querySelectorAll('.markdown-body h2, .markdown-body h3');
-    const toc: TocItem[] = [];
-    const usedSlugs = new Set<string>();
+    renderer.heading = ({ text, depth }) => {
+      if (depth === 2 || depth === 3) {
+        const cleanText = text.replace(/<[^>]*>?/gm, '');
+        const id = cleanText
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-');
 
-    headings.forEach((heading) => {
-      const text = (heading.textContent || '').trim();
-      let slug = text
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+        headings.push({
+          id,
+          title: cleanText,
+          level: depth,
+        });
 
-      if (!slug) slug = 'section';
-      let uniqueSlug = slug;
-      let counter = 1;
-      while (usedSlugs.has(uniqueSlug)) {
-        uniqueSlug = `${slug}-${counter++}`;
+        return `<h${depth} id="${id}" class="group flex items-center justify-between scroll-mt-24 border-b border-[#292929] pb-1.5 mt-8 mb-3 font-semibold text-[#ffffff]">
+          <span>${text}</span>
+          <a href="#${id}" class="opacity-0 group-hover:opacity-100 text-[#787774] hover:text-[#bc8c74] text-xs font-mono transition-opacity ml-2">#</a>
+        </h${depth}>`;
       }
-      usedSlugs.add(uniqueSlug);
 
-      heading.id = uniqueSlug;
-      toc.push({
-        id: uniqueSlug,
-        title: text,
-        level: heading.tagName === 'H2' ? 2 : 3,
-      });
-    });
+      return `<h${depth} class="mt-6 mb-3 font-bold text-[#ffffff]">${text}</h${depth}>`;
+    };
 
-    this.tocList.set(toc);
-    if (toc.length > 0 && !this.activeHeadingId()) {
-      this.activeHeadingId.set(toc[0].id);
+    renderer.table = ({ header, rows }) => {
+      return `
+        <div class="overflow-x-auto my-5 rounded-lg border border-[#2c2c2c] bg-[#1d1d1d]">
+          <table class="min-w-full divide-y divide-[#2a2a2a] text-xs font-mono">
+            <thead class="bg-[#242424] text-[#bc8c74]">${header}</thead>
+            <tbody class="divide-y divide-[#262626] text-[#b0afab]">${rows}</tbody>
+          </table>
+        </div>
+      `;
+    };
+
+    renderer.code = ({ text, lang }) => {
+      const language = lang || 'text';
+      return `
+        <div class="my-4 rounded-lg overflow-hidden border border-[#2d2d2d] bg-[#141414]">
+          <div class="px-3 py-1.5 bg-[#202020] border-b border-[#2a2a2a] flex items-center justify-between text-[11px] font-mono text-[#8a8986]">
+            <span>${language}</span>
+          </div>
+          <pre class="p-3.5 overflow-x-auto text-xs text-[#e6e6e5] font-mono leading-relaxed"><code>${text}</code></pre>
+        </div>
+      `;
+    };
+
+    const parsedHtml = marked.parse(rawText, { renderer }) as string;
+    this.renderedHtml.set(parsedHtml);
+    this.tocList.set(headings);
+
+    if (headings.length > 0) {
+      this.activeHeadingId.set(headings[0].id);
     }
-
-    this.setupScrollSpy();
-  }
-
-  private setupScrollSpy(): void {
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
-    
-    if (this.observer) {
-      this.observer.disconnect();
-    }
-
-    this.observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.find((e) => e.isIntersecting);
-        if (visible && visible.target.id) {
-          this.activeHeadingId.set(visible.target.id);
-        }
-      },
-      { rootMargin: '-80px 0px -70% 0px', threshold: 0.1 }
-    );
-
-    const headings = document.querySelectorAll('.markdown-body h2, .markdown-body h3');
-    headings.forEach((h) => this.observer?.observe(h));
   }
 
   scrollTo(id: string): void {
     this.activeHeadingId.set(id);
     const element = document.getElementById(id);
     if (element) {
-      const top = element.getBoundingClientRect().top + window.scrollY - 80;
-      window.scrollTo({ top, behavior: 'smooth' });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
+  private setupIntersectionObserver(): void {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const headingElements = document.querySelectorAll('h2[id], h3[id]');
+    if (headingElements.length === 0) return;
+
+    this.intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            this.activeHeadingId.set(entry.target.id);
+            break;
+          }
+        }
+      },
+      {
+        rootMargin: '-80px 0px -60% 0px',
+        threshold: 0.1,
+      }
+    );
+
+    headingElements.forEach((el) => {
+      this.intersectionObserver?.observe(el);
+    });
+  }
+
   downloadRawSpec(): void {
-    const blob = new Blob([this.rawMarkdown()], { type: 'text/markdown' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'system-design.md';
-    a.click();
-    window.URL.revokeObjectURL(url);
+    const blob = new Blob([this.rawMarkdown()], { type: 'text/markdown;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'MPloyChek-System-Design.md';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }

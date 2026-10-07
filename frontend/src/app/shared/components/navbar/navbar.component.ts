@@ -43,7 +43,7 @@ import { AuthService } from '../../../core/services/auth.service';
             routerLinkActive="text-[#ffffff] font-medium"
             class="hover:text-[#ffffff] transition-colors"
           >
-            System Design
+            Docs
           </a>
 
           <a
