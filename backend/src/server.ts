@@ -29,6 +29,23 @@ app.use(express.json());
 // Global Telemetry & Simulated Delay Engine (?delay=ms)
 app.use(telemetryMiddleware);
 
+// Root route friendly status
+app.get('/', (req, res) => {
+  res.json({
+    service: 'MPloyChek API',
+    status: 'online',
+    version: '1.0.0',
+    database: isUsingInMemoryDB() ? 'MongoDB (Embedded In-Memory)' : 'MongoDB (Atlas Configured)',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth/login',
+      records: '/api/records',
+      telemetry: '/api/telemetry',
+      docs: '/api/docs/system-design',
+    },
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -67,17 +84,17 @@ async function bootstrap() {
     });
 
     const shutdown = async () => {
-      console.log('\n[Server] Gracefully shutting down...');
+      console.log('\n[Server] Graceful shutdown initiated...');
       server.close(async () => {
         await disconnectDB();
-        console.log('[Server] MongoDB and HTTP server shut down.');
+        console.log('[Server] Service closed. Exiting process.');
         process.exit(0);
       });
     };
 
-    process.on('SIGINT', shutdown);
     process.on('SIGTERM', shutdown);
-  } catch (error) {
+    process.on('SIGINT', shutdown);
+  } catch (error: any) {
     console.error('[Bootstrap] Critical startup error:', error);
     process.exit(1);
   }
