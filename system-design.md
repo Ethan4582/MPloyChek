@@ -62,27 +62,7 @@ A single Node.js runtime and single-node or embedded database handles this throu
 
 The architecture separates the frontend single-page application from the backend through an API gateway proxy, routing requests through authentication, authorization, business services, and a swappable repository layer.
 
-```
-Client (Angular 19)
-      │
-      ▼  HTTP /api (Vite reverse proxy)
-API Gateway / Express Server
-      │
-      ▼
-Delay Middleware (non-blocking timer)
-      │
-      ▼
-JWT & RBAC Middleware (token validation & role check)
-      │
-      ▼
-Service Layer (business logic & validation)
-      │
-      ▼
-Repository Interface (storage abstraction)
-      ├── Embedded In-Memory MongoDB (default zero-config fallback)
-      ├── Local / Remote MongoDB Daemon (configured via MONGO_URI)
-      └── AWS DynamoDB Client (interface-compatible implementation)
-```
+![High Level Architecture](./High-level-design.png)
 
 ### Component responsibilities
 
@@ -280,13 +260,13 @@ The application manages distinct, bounded state: user authentication, active del
 
 ## Reliability and failure handling
 
-| Component | Failure mode | Mitigation |
-|---|---|---|
-| Database connection | External MongoDB unreachable | 2000ms connection timeout triggers fallback to embedded in-memory database. |
-| Authentication | Token expired or invalid | HTTP interceptor catches 401, clears local session storage, and redirects to login. |
-| Authorization | Role claim mismatch at login | Server compares requested role against stored database role and rejects spoofed requests with HTTP 403. |
-| Network latency | Delay parameter exceeds limit | Middleware clamps input between 0 and 10,000 ms to prevent denial of service through arbitrary timeouts. |
-| Frontend HTTP | Backend process stopped | Interceptor detects connection refusal and displays actionable terminal restart commands in UI banner. |
+![Reliability and Failure Handling](./Reliability.png)
+
+- **Database fallback**: External MongoDB connectivity timeouts (2000ms) automatically fallback to the embedded in-memory database.
+- **Session safety**: 401 response interceptor purges stored JWT credentials and redirects to login.
+- **RBAC validation**: Token role claims are verified directly against database records, returning HTTP 403 on tampering.
+- **Latency clamping**: Middleware bounds simulated delays between 0ms and 10,000ms to prevent connection exhaustion.
+- **Backend outage handling**: Frontend interceptor detects service unavailability and displays inline remediation steps.
 
 ## Open questions
 

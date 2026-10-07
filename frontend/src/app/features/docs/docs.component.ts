@@ -440,13 +440,16 @@ export class DocsComponent implements OnInit, OnDestroy {
       return `<blockquote class="my-4 p-3.5 rounded-lg bg-[#202020] border-l-2 border-[#bc8c74] text-xs text-[#cfceca] leading-relaxed">${text}</blockquote>`;
     };
 
-    renderer.table = ({ header, rows }) => {
+    renderer.image = ({ href, text, title }) => {
+      let src = href || '';
+      if (src.startsWith('./')) {
+        src = '/' + src.slice(2);
+      }
+      const titleAttr = title ? ` title="${title}"` : '';
       return `
-        <div class="overflow-x-auto no-scrollbar my-4 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a]">
-          <table class="min-w-full divide-y divide-[#262626] text-xs font-mono">
-            <thead class="bg-[#222222] text-[#bc8c74]">${header}</thead>
-            <tbody class="divide-y divide-[#242424] text-[#a8a7a3]">${rows}</tbody>
-          </table>
+        <div class="my-6 rounded-xl overflow-hidden border border-[#2c2c2c] bg-[#161616] p-2 sm:p-3 shadow-lg flex flex-col items-center">
+          <img src="${src}" alt="${text || ''}"${titleAttr} class="max-w-full h-auto rounded-lg border border-[#242424] object-contain" />
+          ${text ? `<div class="mt-2 text-[11px] text-[#8a8986] font-mono text-center">${text}</div>` : ''}
         </div>
       `;
     };

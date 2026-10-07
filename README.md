@@ -1,7 +1,5 @@
 # MPloyChek
 
-> **Quick Navigation:** &nbsp; [📋 System Design Specification](./system-design.md) &nbsp;•&nbsp; [⚖️ MIT License](./LICENSE) &nbsp;•&nbsp; [👨‍💻 Creator Portfolio](https://www.aash7.xyz/)
-
 [![System Design](https://img.shields.io/badge/Architecture-System%20Design%20Spec-bc8c74?style=flat-square&logo=gitbook&logoColor=white)](./system-design.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
 [![Angular 19](https://img.shields.io/badge/Angular-19.0-dd0031?style=flat-square&logo=angular)](https://angular.dev/)
