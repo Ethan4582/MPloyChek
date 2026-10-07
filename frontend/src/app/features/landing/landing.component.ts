@@ -81,7 +81,7 @@ import { AuthService } from '../../core/services/auth.service';
               class="px-3 py-1.5 rounded transition-colors flex items-center gap-1.5"
               [ngClass]="activePreviewTab() === 'architecture' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#8a8986] hover:text-[#e6e6e5] hover:bg-[#202020]'"
             >
-              <span class="w-1.5 h-1.5 rounded-full bg-[#bc8c74]"></span>
+  
               <span>System Design Document</span>
             </button>
           </div>
