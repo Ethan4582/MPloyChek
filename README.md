@@ -1,10 +1,10 @@
 # MPloyChek
 
-[![System Design](https://img.shields.io/badge/Architecture-System%20Design%20Spec-bc8c74?style=flat-square&logo=gitbook&logoColor=white)](./system-design.md)
+[![System Design](https://img.shields.io/badge/Architecture-System%20Design%20Spec-bc8c74?style=flat-square&logo=gitbook&logoColor=white)](./frontend/public/system-design.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
 [![Angular 19](https://img.shields.io/badge/Angular-19.0-dd0031?style=flat-square&logo=angular)](https://angular.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=nodedotjs)](https://nodejs.org/)
-[![Database](https://img.shields.io/badge/Database-In--Memory%20Embedded%20MongoDB-47a248?style=flat-square&logo=mongodb)](./system-design.md)
+[![Database](https://img.shields.io/badge/Database-In--Memory%20Embedded%20MongoDB-47a248?style=flat-square&logo=mongodb)](./frontend/public/system-design.md)
 
 ![MPloyChek Hero](./frontend/public/hero.png)
 
@@ -14,7 +14,7 @@ A lightweight role-based employment verification platform built with Angular 19,
 
 ## Architecture & features
 
-📄 **[Full System Design Specification](./system-design.md)**
+📄 **[Full System Design Specification](./frontend/public/system-design.md)**
 
 - **Frontend**: Angular 19 standalone SPA with Signals state management & functional HTTP interceptors.
 - **Backend**: TypeScript REST API (Express) with layered architecture and Zod request validation.
@@ -74,5 +74,5 @@ docker compose up --build
 
 ## Documentation
 
-- **[System Design Specification](./system-design.md)**: Architectural patterns, repository abstraction, query projection RBAC, capacity estimation, and failure modes.
+- **[System Design Specification](./frontend/public/system-design.md)**: Architectural patterns, repository abstraction, query projection RBAC, capacity estimation, and failure modes.
 - **[MIT License](./LICENSE)**: Open source licensing terms.

@@ -6,8 +6,10 @@ const router = Router();
 
 router.get('/system-design', (req, res) => {
   try {
-    // Look for system-design.md in project root or current directory
+    // Look for system-design.md in frontend public, project root or parent directory
     const candidates = [
+      path.resolve(process.cwd(), 'frontend', 'public', 'system-design.md'),
+      path.resolve(process.cwd(), '..', 'frontend', 'public', 'system-design.md'),
       path.resolve(process.cwd(), 'system-design.md'),
       path.resolve(process.cwd(), '..', 'system-design.md'),
     ];
