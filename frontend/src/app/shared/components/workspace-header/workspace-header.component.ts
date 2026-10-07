@@ -18,8 +18,29 @@ export interface BreadcrumbItem {
   template: `
     <header class="h-12 border-b border-[#252525] bg-[#191919] px-4 flex items-center justify-between sticky top-0 z-30 select-none">
       
-      <!-- Left: Breadcrumb Navigation Only (No duplicate panel toggle) -->
-      <div class="flex items-center gap-2 min-w-0">
+      <!-- Left: Sidebar Toggle Button & Breadcrumb Navigation -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <!-- Sidebar Toggle Icon Button (Always accessible to toggle or re-open sidebar) -->
+        @if (authService.isAuthenticated()) {
+          <button
+            type="button"
+            (click)="sidebarService.toggle()"
+            class="p-1.5 rounded-md text-[#8a8986] hover:text-[#ffffff] hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-colors cursor-pointer shrink-0"
+            [title]="sidebarService.isOpen() ? 'Collapse Sidebar' : 'Open Sidebar'"
+            [attr.aria-label]="sidebarService.isOpen() ? 'Collapse Sidebar' : 'Open Sidebar'"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 4v16" stroke-linecap="round" stroke-linejoin="round" />
+              @if (!sidebarService.isOpen()) {
+                <path d="M14 9l3 3-3 3" stroke-linecap="round" stroke-linejoin="round" />
+              } @else {
+                <path d="M16 9l-3 3 3 3" stroke-linecap="round" stroke-linejoin="round" />
+              }
+            </svg>
+          </button>
+        }
+
         <nav class="flex items-center gap-1.5 text-xs font-mono text-[#8a8986] overflow-hidden whitespace-nowrap">
           <span class="text-[#555552]">MPloyChek</span>
           <span class="text-[#3c3c3c]">/</span>

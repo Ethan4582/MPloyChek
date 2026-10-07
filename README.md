@@ -1,19 +1,29 @@
 # MPloyChek
 
+> **Quick Navigation:** &nbsp; [📋 System Design Specification](./system-design.md) &nbsp;•&nbsp; [⚖️ MIT License](./LICENSE) &nbsp;•&nbsp; [👨‍💻 Creator Portfolio](https://www.aash7.xyz/)
+
+[![System Design](https://img.shields.io/badge/Architecture-System%20Design%20Spec-bc8c74?style=flat-square&logo=gitbook&logoColor=white)](./system-design.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![Angular 19](https://img.shields.io/badge/Angular-19.0-dd0031?style=flat-square&logo=angular)](https://angular.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=nodedotjs)](https://nodejs.org/)
+[![Database](https://img.shields.io/badge/Database-In--Memory%20Embedded%20MongoDB-47a248?style=flat-square&logo=mongodb)](./system-design.md)
+
 ![MPloyChek Hero](./frontend/public/hero.png)
 
-A lightweight RBAC employment verification platform built with Angular 18, Node.js, and MongoDB (with zero-config in-memory fallback).
+A lightweight role-based employment verification platform built with Angular 19, Express/Node.js, and dual-mode persistence (in-memory embedded database with external MongoDB support).
 
 ---
 
 ## Architecture & features
 
-📄 **[System Design Specification](./system-design.md)**
+📄 **[Full System Design Specification](./system-design.md)**
 
-- **Frontend**: Angular 18 standalone SPA with Signals state management & functional HTTP interceptors.
+- **Frontend**: Angular 19 standalone SPA with Signals state management & functional HTTP interceptors.
 - **Backend**: TypeScript REST API (Express) with layered architecture and Zod request validation.
-- **Database**: MongoDB/Mongoose with auto-fallback to embedded in-memory database and auto-seeded records.
-- **RBAC**: Admin tier (full org records, risk scores, user management) vs. Employee tier (self-records only).
+- **Database**: MongoDB/Mongoose with zero-configuration auto-fallback to embedded in-memory database and auto-seeded records.
+- **RBAC**: Admin tier (full organization records, risk scores, user management) vs. Employee tier (self-records only).
+- **Security**: Field-level query projections at the database layer (confidential fields are never transmitted over the wire to standard users).
+- **Telemetry & Latency Simulation**: Parameterized `?delay=<ms>` query support executing non-blocking timers on the server event loop.
 - **Directory & Filters**: Multi-attribute filtering (department, clearance, verification status) with search.
 - **Deployment**: Zero-config local boot and multi-container Docker Compose support.
 
@@ -58,74 +68,13 @@ The frontend runs at `http://localhost:4200` and the API runs at `http://localho
 
 ### Option 2: Docker Compose
 
-If you have Docker installed, start the entire stack including a dedicated MongoDB container:
-
 ```bash
 docker compose up --build
 ```
 
-- Web application: `http://localhost:4200`
-- Backend API: `http://localhost:3000`
-- MongoDB: `localhost:27017`
-
 ---
 
-### Option 3: Manual startup
+## Documentation
 
-#### Backend
-
-```bash
-cd backend
-npm install
-npm run build
-npm start
-```
-
-#### Frontend
-
-```bash
-cd frontend
-npm install
-npm run build
-npm start
-```
-
----
-
-## Environment variables
-
-To connect an external MongoDB instance, create a `.env` file in the `backend/` directory:
-
-```env
-PORT=3000
-NODE_ENV=development
-JWT_SECRET=mploychek-production-grade-jwt-secret-key-2026
-JWT_EXPIRES_IN=8h
-
-# Optional. If omitted, MPloyChek runs an embedded in-memory MongoDB database.
-MONGO_URI=mongodb://localhost:27017/mploychek
-```
-
-To re-seed an external database at any time, run:
-
-```bash
-cd backend
-npm run seed
-```
-
----
-
-## License
-
-Distributed under the [MIT License](LICENSE). See `LICENSE` for more information.
-
----
-
-## Author
-
-**Ashirwad Singh**
-
-- Portfolio: [https://www.aash7.xyz/](https://www.aash7.xyz/)
-- LinkedIn: [https://www.linkedin.com/in/ashirwad08singh/](https://www.linkedin.com/in/ashirwad08singh/)
-- X (Twitter): [https://x.com/ashirwadsingh_](https://x.com/ashirwadsingh_)
-- Email: [singhashirwad2003@gmail.com](mailto:singhashirwad2003@gmail.com)
+- **[System Design Specification](./system-design.md)**: Architectural patterns, repository abstraction, query projection RBAC, capacity estimation, and failure modes.
+- **[MIT License](./LICENSE)**: Open source licensing terms.
