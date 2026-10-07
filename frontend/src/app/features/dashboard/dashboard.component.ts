@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { RecordService } from '../../core/services/record.service';
+import { SidebarService } from '../../core/services/sidebar.service';
 import { IEmployeeRecord } from '../../core/models/record.models';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { WorkspaceHeaderComponent } from '../../shared/components/workspace-header/workspace-header.component';
@@ -27,7 +28,11 @@ import { AddRecordModalComponent } from './add-record-modal.component';
       <app-sidebar></app-sidebar>
 
       <!-- Main Workspace View Container -->
-      <div class="flex-1 flex flex-col min-w-0 md:pl-64 transition-all duration-200">
+      <div
+        class="flex-1 flex flex-col min-w-0 transition-all duration-200"
+        [class.md:pl-60]="sidebarService.isOpen()"
+        [class.md:pl-0]="!sidebarService.isOpen()"
+      >
         
         <!-- Breadcrumb & Contextual Header (Top-Right Action Button) -->
         <app-workspace-header
@@ -69,63 +74,38 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                       <span class="tag-blue">General User</span>
                     }
                   </div>
-                  <p class="text-[11px] text-[#787774] mt-0.5">
-                    {{ authService.currentUser()?.department }} &bull;
-                    @if (authService.isAdmin()) {
-                      <span class="text-[#bc8c74]">Organization-wide scope: Viewing all records including confidential compensation & risk audit notes.</span>
-                    } @else {
-                      <span class="text-[#529cca]">User-restricted scope: Restricted strictly to your records. Confidential data is stripped at the API.</span>
-                    }
-                  </p>
+                  <div class="text-[11px] text-[#787774] mt-0.5">
+                    Department: {{ authService.currentUser()?.department || 'Operations' }} &bull; Access Policy: 
+                    <span class="text-[#e6e6e5]">{{ authService.isAdmin() ? 'Full DB Records & Administration' : 'Restricted Personal Scope' }}</span>
+                  </div>
                 </div>
               </div>
 
-              <div class="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                @if (authService.isAdmin()) {
-                  <button
-                    type="button"
-                    (click)="isAddRecordModalOpen.set(true)"
-                    class="notion-btn-primary text-xs py-1 px-3 flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>➕</span>
-                    <span>New Record</span>
-                  </button>
-                  <a routerLink="/admin/users" class="notion-btn text-xs py-1 px-2.5">
-                    Manage DB Users
-                  </a>
-                }
-                <button
-                  (click)="loadRecords()"
-                  [disabled]="recordService.isLoading()"
-                  class="notion-btn text-xs py-1 px-2.5 flex items-center gap-1"
-                >
-                  <span>🔄</span>
-                  @if (recordService.isLoading()) {
-                    <span>Fetching...</span>
-                  } @else {
-                    <span>Reload</span>
-                  }
-                </button>
+              <!-- Scope Indicator Badge -->
+              <div class="flex items-center gap-2">
+                <span class="tag-default text-[11px]">
+                  <span>Status: </span>
+                  <strong class="text-[#e6e6e5] font-mono">Active</strong>
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Records Database Container -->
-          <div class="notion-card overflow-hidden">
+          <!-- Main Directory Data View (Notion Database Layout) -->
+          <div class="notion-card border-[#2a2a2a] bg-[#202020] overflow-hidden shadow-notion-card">
             
-            <!-- Controls: View Tabs, Filters, and Search -->
-            <div class="p-3 border-b border-[#2f2f2f] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs bg-[#202020]">
+            <!-- Database Controls Bar -->
+            <div class="p-3 sm:px-4 border-b border-[#2a2a2a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               
-              <!-- View Tabs -->
-              <div class="flex items-center gap-1">
+              <!-- Tab Views Filter (ALL, Verified, Pending, Flagged) -->
+              <div class="flex items-center gap-1 text-xs">
                 <button
                   type="button"
                   (click)="setView('ALL')"
-                  class="px-2.5 py-1 rounded transition-colors flex items-center gap-1.5"
+                  class="px-2.5 py-1 rounded transition-colors"
                   [ngClass]="activeView() === 'ALL' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#9b9a97] hover:text-[#e6e6e5] hover:bg-[#252525]'"
                 >
-                  <span>All Records</span>
-                  <span class="text-[10px] text-[#6b6b68]">({{ recordService.records().length }})</span>
+                  All Records
                 </button>
 
                 <button
@@ -170,9 +150,8 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                   />
                   @if (searchQuery()) {
                     <button
-                      type="button"
                       (click)="searchQuery.set('')"
-                      class="absolute right-2 top-1.5 text-[#6b6b68] hover:text-[#e6e6e5] text-xs"
+                      class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[#787774] hover:text-[#e6e6e5]"
                     >
                       ✕
                     </button>
@@ -197,7 +176,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                   <!-- Popover Menu -->
                   @if (isStatusMenuOpen()) {
                     <div (click)="isStatusMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
-                    <div class="absolute right-0 mt-1 w-44 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div class="absolute right-0 mt-1 w-40 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
                       <div class="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[#6b6b68]">Filter by Status</div>
                       @for (status of statusOptions; track status) {
                         <button
@@ -299,59 +278,55 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                     <!-- Admin Protected Columns -->
                     @if (authService.isAdmin()) {
                       <th class="py-2.5 px-3 border-r border-[#2a2a2a] text-[#bc8c74]">
-                        Comp Grade
+                        Compensation
                       </th>
                       <th class="py-2.5 px-3 border-r border-[#2a2a2a] text-[#bc8c74]">
-                        Risk
+                        Risk Score
                       </th>
                       <th class="py-2.5 px-3 border-r border-[#2a2a2a] text-[#bc8c74]">
                         Audit Notes
                       </th>
                     }
 
-                    <th class="py-2.5 px-3 text-right">Action</th>
+                    <th class="py-2.5 px-3 w-16 text-right">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
 
                 <tbody class="divide-y divide-[#262626]">
                   @if (recordService.isLoading()) {
-                    @for (i of [1, 2, 3, 4, 5]; track i) {
-                      <tr class="animate-pulse bg-[#202020]">
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-20 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-28 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-36 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-20 bg-[#2a2a2a] rounded"></div></td>
-                        @if (authService.isAdmin()) {
-                          <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-12 bg-[#2a2a2a] rounded"></div></td>
-                          <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-10 bg-[#2a2a2a] rounded"></div></td>
-                          <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-32 bg-[#2a2a2a] rounded"></div></td>
-                        }
-                        <td class="py-2.5 px-3 text-right"><div class="h-5 w-12 bg-[#2a2a2a] rounded ml-auto"></div></td>
-                      </tr>
-                    }
+                    <tr>
+                      <td [attr.colspan]="authService.isAdmin() ? 10 : 7" class="py-12 text-center text-[#787774]">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                          <span class="inline-block animate-spin text-xl">⏳</span>
+                          <span class="text-xs">Fetching records from MongoDB...</span>
+                        </div>
+                      </td>
+                    </tr>
                   } @else if (filteredRecords().length === 0) {
                     <tr>
                       <td [attr.colspan]="authService.isAdmin() ? 10 : 7" class="py-12 text-center text-[#787774]">
                         <div class="flex flex-col items-center justify-center gap-1.5">
-                          <p class="text-xs font-medium text-[#9b9a97]">No records match the current filters.</p>
-                          <button (click)="resetFilters()" class="text-xs text-[#529cca] hover:underline mt-1">
-                            Clear all filters
-                          </button>
+                          <span class="text-2xl">📋</span>
+                          <p class="text-xs font-medium text-[#9b9a97]">No verification records found</p>
+                          <p class="text-[11px] text-[#605f5b]">Try adjusting your search query or status filter.</p>
                         </div>
                       </td>
                     </tr>
                   } @else {
                     @for (record of filteredRecords(); track record._id) {
-                      <tr class="hover:bg-[#262626] transition-colors group">
-                        <td class="py-2 px-3 font-mono text-[11px] text-[#9b9a97] border-r border-[#262626]">
+                      <tr
+                        class="hover:bg-[#232323] transition-colors group cursor-pointer"
+                        (click)="viewRecordDetails(record)"
+                      >
+                        <td class="py-2 px-3 font-mono text-[11px] text-[#7da0ca] border-r border-[#262626]">
                           {{ record.recordId }}
                         </td>
 
                         <td class="py-2 px-3 border-r border-[#262626]">
-                          <div class="font-medium text-[#ffffff]">{{ record.employeeName }}</div>
-                          <div class="text-[10px] text-[#605f5b] font-mono">{{ record.userId }}</div>
+                          <div class="font-medium text-[#e6e6e5]">{{ record.employeeName }}</div>
+                          <div class="text-[10px] text-[#787774] font-mono">{{ record.userId }}</div>
                         </td>
 
                         <td class="py-2 px-3 border-r border-[#262626]">
@@ -410,14 +385,21 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                           </td>
                         }
 
-                        <td class="py-2 px-3 text-right">
+                        <!-- Action Cell -->
+                        <td class="py-2 px-3 text-right" (click)="$event.stopPropagation()">
                           <button
-                            (click)="selectRecord(record)"
-                            class="notion-btn-ghost text-[11px] py-0.5 px-2 opacity-80 group-hover:opacity-100"
+                            type="button"
+                            (click)="viewRecordDetails(record)"
+                            class="p-1 rounded text-[#787774] hover:text-[#ffffff] hover:bg-[#2d2d2d] transition-colors"
+                            title="Inspect Record Detail"
                           >
-                            Inspect
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                            </svg>
                           </button>
                         </td>
+
                       </tr>
                     }
                   }
@@ -425,8 +407,8 @@ import { AddRecordModalComponent } from './add-record-modal.component';
               </table>
             </div>
 
-            <!-- Database Footer -->
-            <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
+            <!-- Table Footer Status / Count -->
+            <div class="px-4 py-2 bg-[#1b1b1b] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
               <div class="flex items-center gap-3">
                 <span>Count: <strong class="text-[#9b9a97] font-mono">{{ filteredRecords().length }}</strong></span>
                 @if (recordService.meta()) {
@@ -468,7 +450,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                   @if (selectedRecord()?.verificationStatus === 'Verified') {
                     <span class="tag-green">Verified</span>
                   } @else if (selectedRecord()?.verificationStatus === 'Pending Review') {
-                    <span class="tag-yellow">Pending Review</span>
+                    <span class="tag-yellow">Pending</span>
                   } @else {
                     <span class="tag-red">Flagged</span>
                   }
@@ -476,23 +458,21 @@ import { AddRecordModalComponent } from './add-record-modal.component';
               </div>
 
               <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
-                <span class="text-[#787774]">Clearance</span>
-                <div class="col-span-2">
-                  @if (selectedRecord()?.accessLevel === 'General') {
-                    <span class="tag-blue">{{ selectedRecord()?.accessLevel }}</span>
-                  } @else if (selectedRecord()?.accessLevel === 'Confidential') {
-                    <span class="tag-bronze">{{ selectedRecord()?.accessLevel }}</span>
-                  } @else {
-                    <span class="tag-orange">{{ selectedRecord()?.accessLevel }}</span>
-                  }
-                </div>
+                <span class="text-[#787774]">Access Level</span>
+                <span class="col-span-2 text-[#e6e6e5]">{{ selectedRecord()?.accessLevel }} Clearance</span>
               </div>
 
               <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
-                <span class="text-[#787774]">Screen Date</span>
+                <span class="text-[#787774]">Check Date</span>
                 <span class="col-span-2 font-mono text-[#e6e6e5]">{{ selectedRecord()?.backgroundCheckDate }}</span>
               </div>
 
+              <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
+                <span class="text-[#787774]">Masked ID</span>
+                <span class="col-span-2 font-mono text-[#e6e6e5]">{{ selectedRecord()?.govIdMasked || 'XXX-XX-####' }}</span>
+              </div>
+
+              <!-- Admin Only Sensitive Section in Modal -->
               @if (authService.isAdmin()) {
                 <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
                   <span class="text-[#bc8c74]">Comp Grade</span>
@@ -536,6 +516,7 @@ import { AddRecordModalComponent } from './add-record-modal.component';
 export class DashboardComponent implements OnInit {
   authService = inject(AuthService);
   recordService = inject(RecordService);
+  sidebarService = inject(SidebarService);
 
   activeView = signal<string>('ALL');
   searchQuery = signal<string>('');
@@ -554,41 +535,35 @@ export class DashboardComponent implements OnInit {
   filteredRecords = computed(() => {
     let list = this.recordService.records();
 
-    const view = this.activeView();
-    if (view !== 'ALL') {
-      list = list.filter((r) => r.verificationStatus === view);
+    // 1. Tab view filter
+    if (this.activeView() !== 'ALL') {
+      list = list.filter((r) => r.verificationStatus === this.activeView());
     }
 
-    const q = this.searchQuery().toLowerCase().trim();
+    // 2. Status dropdown filter
+    if (this.selectedStatus() !== 'ALL') {
+      list = list.filter((r) => r.verificationStatus === this.selectedStatus());
+    }
+
+    // 3. Access level dropdown filter
+    if (this.selectedAccessLevel() !== 'ALL') {
+      list = list.filter((r) => r.accessLevel === this.selectedAccessLevel());
+    }
+
+    // 4. Search query
+    const q = this.searchQuery().trim().toLowerCase();
     if (q) {
       list = list.filter(
         (r) =>
-          r.employeeName?.toLowerCase().includes(q) ||
-          r.position?.toLowerCase().includes(q) ||
-          r.department?.toLowerCase().includes(q) ||
-          r.recordId?.toLowerCase().includes(q)
+          r.employeeName.toLowerCase().includes(q) ||
+          r.recordId.toLowerCase().includes(q) ||
+          r.department.toLowerCase().includes(q) ||
+          r.position.toLowerCase().includes(q) ||
+          r.userId.toLowerCase().includes(q)
       );
     }
 
-    const status = this.selectedStatus();
-    if (status !== 'ALL') {
-      list = list.filter((r) => r.verificationStatus === status);
-    }
-
-    const access = this.selectedAccessLevel();
-    if (access !== 'ALL') {
-      list = list.filter((r) => r.accessLevel === access);
-    }
-
     return list;
-  });
-
-  hasActiveFilters = computed(() => {
-    return (
-      this.selectedStatus() !== 'ALL' ||
-      this.selectedAccessLevel() !== 'ALL' ||
-      this.searchQuery().trim() !== ''
-    );
   });
 
   ngOnInit(): void {
@@ -597,24 +572,6 @@ export class DashboardComponent implements OnInit {
 
   loadRecords(): void {
     this.recordService.getRecords().subscribe();
-  }
-
-  onHeaderAction(): void {
-    if (this.authService.isAdmin()) {
-      this.isAddRecordModalOpen.set(true);
-    } else {
-      this.loadRecords();
-    }
-  }
-
-  getUserInitials(): string {
-    const name = this.authService.currentUser()?.name || 'User';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
   }
 
   setView(view: string): void {
@@ -646,14 +603,40 @@ export class DashboardComponent implements OnInit {
     this.isAccessMenuOpen.set(false);
   }
 
+  hasActiveFilters(): boolean {
+    return (
+      this.selectedStatus() !== 'ALL' ||
+      this.selectedAccessLevel() !== 'ALL' ||
+      !!this.searchQuery().trim()
+    );
+  }
+
   resetFilters(): void {
-    this.searchQuery.set('');
     this.selectedStatus.set('ALL');
     this.selectedAccessLevel.set('ALL');
+    this.searchQuery.set('');
     this.activeView.set('ALL');
   }
 
-  selectRecord(record: IEmployeeRecord): void {
+  viewRecordDetails(record: IEmployeeRecord): void {
     this.selectedRecord.set(record);
+  }
+
+  onHeaderAction(): void {
+    if (this.authService.isAdmin()) {
+      this.isAddRecordModalOpen.set(true);
+    } else {
+      this.loadRecords();
+    }
+  }
+
+  getUserInitials(): string {
+    const name = this.authService.currentUser()?.name || 'User';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
   }
 }

@@ -4,6 +4,7 @@ import { LoginComponent } from './features/auth/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { AdminUsersComponent } from './features/admin/admin-users.component';
 import { DocsComponent } from './features/docs/docs.component';
+import { TelemetryComponent } from './features/telemetry/telemetry.component';
 import { authGuard, adminGuard, publicGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -34,7 +35,18 @@ export const routes: Routes = [
   {
     path: 'docs',
     component: DocsComponent,
-    title: 'Architecture Documentation • MPloyChek',
+    title: 'System Design • MPloyChek',
+  },
+  {
+    path: 'system-design',
+    redirectTo: 'docs',
+    pathMatch: 'full',
+  },
+  {
+    path: 'telemetry',
+    component: TelemetryComponent,
+    canActivate: [authGuard],
+    title: 'Telemetry & Latency • MPloyChek',
   },
   {
     path: '**',

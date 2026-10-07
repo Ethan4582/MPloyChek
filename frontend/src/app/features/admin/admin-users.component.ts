@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angu
 import { RouterLink } from '@angular/router';
 import { UserService, CreateUserData } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
+import { SidebarService } from '../../core/services/sidebar.service';
 import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { WorkspaceHeaderComponent } from '../../shared/components/workspace-header/workspace-header.component';
@@ -26,7 +27,11 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
       <app-sidebar></app-sidebar>
 
       <!-- Main Workspace View Container -->
-      <div class="flex-1 flex flex-col min-w-0 md:pl-64 transition-all duration-200">
+      <div
+        class="flex-1 flex flex-col min-w-0 transition-all duration-200"
+        [class.md:pl-60]="sidebarService.isOpen()"
+        [class.md:pl-0]="!sidebarService.isOpen()"
+      >
         
         <!-- Breadcrumb & Contextual Header (Top-Right Action Button) -->
         <app-workspace-header
@@ -58,195 +63,150 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
                 <button (click)="loadUsers()" [disabled]="userService.isLoading()" class="notion-btn text-xs py-1.5 px-3">
                   <span>Refresh</span>
                 </button>
-                <button (click)="openCreateModal()" class="notion-btn-primary text-xs py-1.5 px-3">
-                  <span>+ New Account</span>
-                </button>
               </div>
             </div>
           </div>
 
-          <!-- Users Database Container -->
-          <div class="notion-card overflow-hidden">
+          <!-- Users Database Card -->
+          <div class="notion-card border-[#2a2a2a] bg-[#202020] overflow-hidden shadow-notion-card">
             
-            <!-- Toolbar & Filter Popover -->
-            <div class="p-3 border-b border-[#2f2f2f] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#202020]">
-              <div class="flex items-center gap-2">
-                <span class="text-[#787774]">Registered DB Users:</span>
-                <span class="font-mono font-medium text-[#ffffff]">{{ filteredUsers().length }}</span>
+            <!-- Filter & Toolbar -->
+            <div class="p-3 sm:px-4 border-b border-[#2a2a2a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="relative">
+                <input
+                  type="text"
+                  [value]="searchQuery()"
+                  (input)="onSearchInput($event)"
+                  placeholder="Search user accounts..."
+                  class="notion-input py-1 px-2.5 w-64 text-xs"
+                />
               </div>
 
               <div class="flex items-center gap-2">
-                <!-- Search Input -->
-                <div class="relative">
-                  <input
-                    type="text"
-                    [value]="searchQuery()"
-                    (input)="onSearchInput($event)"
-                    placeholder="Filter by name, ID..."
-                    class="notion-input py-1 px-2.5 w-44 sm:w-56 text-xs"
-                  />
-                  @if (searchQuery()) {
+                <button
+                  type="button"
+                  (click)="toggleRoleMenu()"
+                  class="notion-btn py-1 px-2.5 text-xs flex items-center gap-1.5"
+                  [class.text-[#529cca]]="selectedRole() !== 'ALL'"
+                >
+                  <span>Role: <strong>{{ selectedRole() === 'ALL' ? 'All Roles' : selectedRole() }}</strong></span>
+                  <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                @if (isRoleMenuOpen()) {
+                  <div (click)="isRoleMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
+                  <div class="absolute right-6 mt-24 w-40 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in duration-100">
                     <button
                       type="button"
-                      (click)="searchQuery.set('')"
-                      class="absolute right-2 top-1.5 text-[#6b6b68] hover:text-[#e6e6e5] text-xs"
+                      (click)="selectRole('ALL')"
+                      class="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-[#2f2f2f] transition-colors"
                     >
-                      ✕
+                      All Roles
                     </button>
-                  }
-                </div>
-
-                <!-- Role Filter Dropdown Trigger -->
-                <div class="relative">
-                  <button
-                    type="button"
-                    (click)="toggleRoleMenu()"
-                    class="notion-btn py-1 px-2.5 text-xs flex items-center gap-1.5"
-                    [class.border-[#529cca]]="selectedRole() !== 'ALL'"
-                    [class.text-[#529cca]]="selectedRole() !== 'ALL'"
-                  >
-                    <span>Role: <strong>{{ selectedRole() === 'ALL' ? 'All' : selectedRole() }}</strong></span>
-                    <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  <!-- Popover Menu -->
-                  @if (isRoleMenuOpen()) {
-                    <div (click)="isRoleMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
-                    <div class="absolute right-0 mt-1 w-44 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                      <div class="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[#6b6b68]">Filter Role</div>
-                      @for (role of ['ALL', 'Admin', 'General User']; track role) {
-                        <button
-                          type="button"
-                          (click)="selectRole(role)"
-                          class="w-full flex items-center justify-between px-2 py-1.5 rounded text-xs text-left hover:bg-[#2f2f2f] transition-colors"
-                          [class.text-[#529cca]]="selectedRole() === role"
-                        >
-                          <span>{{ role === 'ALL' ? 'All Roles' : role }}</span>
-                          @if (selectedRole() === role) {
-                            <svg class="w-3.5 h-3.5 text-[#529cca]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                          }
-                        </button>
-                      }
-                    </div>
-                  }
-                </div>
-
-                @if (searchQuery() || selectedRole() !== 'ALL') {
-                  <button
-                    type="button"
-                    (click)="resetFilters()"
-                    class="notion-btn-ghost text-xs py-1 px-2 text-[#9b9a97] hover:text-[#ffffff]"
-                  >
-                    Reset
-                  </button>
+                    <button
+                      type="button"
+                      (click)="selectRole('Admin')"
+                      class="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-[#2f2f2f] transition-colors"
+                    >
+                      Admin
+                    </button>
+                    <button
+                      type="button"
+                      (click)="selectRole('General User')"
+                      class="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-[#2f2f2f] transition-colors"
+                    >
+                      General User
+                    </button>
+                  </div>
                 }
               </div>
             </div>
 
-            <!-- Users Table -->
+            <!-- Table of Users -->
             <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse">
+              <table class="w-full text-left text-xs border-collapse font-mono">
                 <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
                   <tr>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">User ID (Email)</th>
                     <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Name</th>
-                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">User ID / Email</th>
                     <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Department</th>
-                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Role Assignment</th>
-                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Status</th>
-                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Last Login</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Role</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Account Status</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Created</th>
                     <th class="py-2.5 px-3 text-right">Actions</th>
                   </tr>
                 </thead>
-
                 <tbody class="divide-y divide-[#262626]">
                   @if (userService.isLoading()) {
-                    @for (i of [1, 2, 3, 4]; track i) {
-                      <tr class="animate-pulse bg-[#202020]">
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-28 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-36 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-20 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
-                        <td class="py-2.5 px-3 text-right"><div class="h-4 w-12 bg-[#2a2a2a] rounded ml-auto"></div></td>
-                      </tr>
-                    }
-                  } @else if (filteredUsers().length === 0) {
                     <tr>
                       <td colspan="7" class="py-12 text-center text-[#787774]">
-                        No users matching criteria.
+                        <span class="inline-block animate-spin text-xl">⏳</span>
+                        <div class="mt-1 text-xs">Querying MongoDB users collection...</div>
+                      </td>
+                    </tr>
+                  } @else if (filteredUsers().length === 0) {
+                    <tr>
+                      <td colspan="7" class="py-8 text-center text-[#787774] text-xs">
+                        No user accounts match the search criteria.
                       </td>
                     </tr>
                   } @else {
-                    @for (user of filteredUsers(); track user._id) {
-                      <tr class="hover:bg-[#262626] transition-colors group">
-                        <td class="py-2 px-3 border-r border-[#262626]">
-                          <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-md bg-[#2a2a2a] border border-[#333333] flex items-center justify-center font-medium text-[11px] text-[#e6e6e5]">
-                              {{ user.name.substring(0, 1).toUpperCase() }}
-                            </div>
-                            <span class="font-medium text-[#ffffff]">{{ user.name }}</span>
-                            @if (user.userId === authService.currentUser()?.userId) {
-                              <span class="text-[10px] text-[#529cca] font-mono">(You)</span>
-                            }
-                          </div>
-                        </td>
-
-                        <td class="py-2 px-3 font-mono text-[11px] text-[#9b9a97] border-r border-[#262626]">
+                    @for (user of filteredUsers(); track user.userId) {
+                      <tr class="hover:bg-[#242424] transition-colors">
+                        <td class="py-2 px-3 text-[#e6e6e5] border-r border-[#262626]">
                           {{ user.userId }}
                         </td>
-
-                        <td class="py-2 px-3 text-[#e6e6e5] border-r border-[#262626]">
-                          {{ user.department }}
+                        <td class="py-2 px-3 text-[#e6e6e5] font-sans font-medium border-r border-[#262626]">
+                          {{ user.name }}
                         </td>
-
-                        <td class="py-2 px-3 border-r border-[#262626]">
-                          <div class="flex items-center gap-1.5">
-                            @if (user.role === 'Admin') {
-                              <span class="tag-bronze">Admin</span>
-                            } @else {
-                              <span class="tag-blue">General User</span>
-                            }
-
-                            <button
-                              (click)="toggleRole(user)"
-                              [disabled]="user.userId === authService.currentUser()?.userId"
-                              title="Switch between General User and Admin"
-                              class="notion-btn-ghost py-0.5 px-1 text-[11px] text-[#787774] hover:text-[#ffffff] disabled:opacity-30"
-                            >
-                              ⇄
-                            </button>
-                          </div>
+                        <td class="py-2 px-3 text-[#9b9a97] font-sans border-r border-[#262626]">
+                          {{ user.department || 'Operations' }}
                         </td>
-
                         <td class="py-2 px-3 border-r border-[#262626]">
+                          @if (user.role === 'Admin') {
+                            <span class="tag-bronze text-[10px]">Admin</span>
+                          } @else {
+                            <span class="tag-blue text-[10px]">General User</span>
+                          }
+                        </td>
+                        <td class="py-2 px-3 border-r border-[#262626]">
+                          @if (user.status === 'Active') {
+                            <span class="tag-green text-[10px]">Active</span>
+                          } @else {
+                            <span class="tag-red text-[10px]">Disabled</span>
+                          }
+                        </td>
+                        <td class="py-2 px-3 text-[#787774] text-[11px] border-r border-[#262626]">
+                          {{ user.createdAt ? (user.createdAt | date:'shortDate') : 'System Seed' }}
+                        </td>
+                        <td class="py-2 px-3 text-right space-x-1 whitespace-nowrap">
+                          <!-- Toggle Role -->
                           <button
-                            (click)="toggleStatus(user)"
-                            [disabled]="user.userId === authService.currentUser()?.userId"
-                            class="cursor-pointer disabled:cursor-not-allowed"
-                            title="Click to toggle status"
+                            type="button"
+                            (click)="onToggleRole(user)"
+                            class="px-2 py-0.5 rounded text-[10px] font-sans bg-[#2a2a2a] text-[#bc8c74] hover:bg-[#353535] transition-colors"
+                            title="Flip role between Admin and General User"
                           >
-                            @if (user.status === 'Active') {
-                              <span class="tag-green">Active</span>
-                            } @else {
-                              <span class="tag-red">Disabled</span>
-                            }
+                            Set {{ user.role === 'Admin' ? 'General' : 'Admin' }}
                           </button>
-                        </td>
 
-                        <td class="py-2 px-3 font-mono text-[11px] text-[#787774] border-r border-[#262626]">
-                          {{ user.lastLoginAt ? (user.lastLoginAt | date: 'short') : 'Never' }}
-                        </td>
-
-                        <td class="py-2 px-3 text-right">
+                          <!-- Toggle Status -->
                           <button
-                            (click)="confirmDeleteUser(user)"
-                            [disabled]="user.userId === authService.currentUser()?.userId"
-                            class="text-[#787774] hover:text-[#e05757] p-1 transition-colors disabled:opacity-20 disabled:hover:text-[#787774]"
+                            type="button"
+                            (click)="onToggleStatus(user)"
+                            class="px-2 py-0.5 rounded text-[10px] font-sans bg-[#2a2a2a] text-[#8a8986] hover:text-[#e6e6e5] hover:bg-[#353535] transition-colors"
+                            title="Toggle active status"
+                          >
+                            {{ user.status === 'Active' ? 'Disable' : 'Enable' }}
+                          </button>
+
+                          <!-- Delete -->
+                          <button
+                            type="button"
+                            (click)="onDeleteUser(user)"
+                            class="p-1 rounded text-[#787774] hover:text-[#e05757] hover:bg-[#353535] transition-colors"
                             title="Delete user from database"
                           >
                             <svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -301,24 +261,25 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
                 />
               </div>
 
-              <div>
-                <label class="block text-[#9b9a97] mb-1 font-medium">Department</label>
-                <input
-                  type="text"
-                  formControlName="department"
-                  placeholder="e.g. Security Engineering"
-                  class="notion-input"
-                />
-              </div>
-
-              <div>
-                <label class="block text-[#9b9a97] mb-1 font-medium">Password</label>
-                <input
-                  type="password"
-                  formControlName="password"
-                  placeholder="At least 6 characters"
-                  class="notion-input"
-                />
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[#9b9a97] mb-1 font-medium">Password</label>
+                  <input
+                    type="password"
+                    formControlName="password"
+                    placeholder="Min 6 characters"
+                    class="notion-input"
+                  />
+                </div>
+                <div>
+                  <label class="block text-[#9b9a97] mb-1 font-medium">Department</label>
+                  <input
+                    type="text"
+                    formControlName="department"
+                    placeholder="Engineering"
+                    class="notion-input"
+                  />
+                </div>
               </div>
 
               <div class="grid grid-cols-2 gap-2">
@@ -371,6 +332,7 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
 export class AdminUsersComponent implements OnInit {
   userService = inject(UserService);
   authService = inject(AuthService);
+  sidebarService = inject(SidebarService);
   private fb = inject(FormBuilder);
 
   searchQuery = signal<string>('');
@@ -382,30 +344,29 @@ export class AdminUsersComponent implements OnInit {
   createError = signal<string | null>(null);
 
   userForm = this.fb.group({
-    userId: ['', [Validators.required]],
-    name: ['', [Validators.required]],
-    department: ['', [Validators.required]],
+    userId: ['', [Validators.required, Validators.email]],
+    name: ['', [Validators.required, Validators.minLength(2)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     role: ['General User' as UserRole, [Validators.required]],
+    department: ['Engineering', [Validators.required]],
     status: ['Active' as UserStatus, [Validators.required]],
   });
 
   filteredUsers = computed(() => {
-    const list = this.userService.users();
-    const query = this.searchQuery().toLowerCase().trim();
-    const role = this.selectedRole();
-
-    return list.filter((u) => {
-      const matchesQuery =
-        !query ||
-        u.name.toLowerCase().includes(query) ||
-        u.userId.toLowerCase().includes(query) ||
-        u.department.toLowerCase().includes(query);
-
-      const matchesRole = role === 'ALL' || u.role === role;
-
-      return matchesQuery && matchesRole;
-    });
+    let list = this.userService.users();
+    if (this.selectedRole() !== 'ALL') {
+      list = list.filter((u) => u.role === this.selectedRole());
+    }
+    const q = this.searchQuery().trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (u) =>
+          u.userId.toLowerCase().includes(q) ||
+          u.name.toLowerCase().includes(q) ||
+          (u.department && u.department.toLowerCase().includes(q))
+      );
+    }
+    return list;
   });
 
   ngOnInit(): void {
@@ -430,18 +391,13 @@ export class AdminUsersComponent implements OnInit {
     this.isRoleMenuOpen.set(false);
   }
 
-  resetFilters(): void {
-    this.searchQuery.set('');
-    this.selectedRole.set('ALL');
-  }
-
   openCreateModal(): void {
     this.userForm.reset({
       userId: '',
       name: '',
-      department: '',
       password: '',
       role: 'General User',
+      department: 'Engineering',
       status: 'Active',
     });
     this.createError.set(null);
@@ -458,32 +414,31 @@ export class AdminUsersComponent implements OnInit {
     this.isSubmitting.set(true);
     this.createError.set(null);
 
-    const formData = this.userForm.value as CreateUserData;
-
-    this.userService.createUser(formData).subscribe({
+    const val = this.userForm.value as CreateUserData;
+    this.userService.createUser(val).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.closeCreateModal();
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.createError.set(err?.error?.error || 'Failed to create user. Please try again.');
+        this.createError.set(err.error?.message || 'Failed to create user account.');
       },
     });
   }
 
-  toggleRole(user: IUser): void {
-    const newRole: UserRole = user.role === 'Admin' ? 'General User' : 'Admin';
+  onToggleRole(user: IUser): void {
+    const newRole = user.role === 'Admin' ? 'General User' : 'Admin';
     this.userService.updateUser(user.userId, { role: newRole }).subscribe();
   }
 
-  toggleStatus(user: IUser): void {
-    const newStatus: UserStatus = user.status === 'Active' ? 'Disabled' : 'Active';
+  onToggleStatus(user: IUser): void {
+    const newStatus = user.status === 'Active' ? 'Disabled' : 'Active';
     this.userService.updateUser(user.userId, { status: newStatus }).subscribe();
   }
 
-  confirmDeleteUser(user: IUser): void {
-    if (confirm(`Are you sure you want to delete user ${user.name} (${user.userId}) from the database?`)) {
+  onDeleteUser(user: IUser): void {
+    if (confirm(`Permanently remove ${user.name} (${user.userId}) from the database?`)) {
       this.userService.deleteUser(user.userId).subscribe();
     }
   }

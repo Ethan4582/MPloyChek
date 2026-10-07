@@ -1,10 +1,11 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { marked } from 'marked';
 import { WorkspaceHeaderComponent } from '../../shared/components/workspace-header/workspace-header.component';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { AuthService } from '../../core/services/auth.service';
+import { SidebarService } from '../../core/services/sidebar.service';
 
 interface TocItem {
   id: string;
@@ -27,11 +28,12 @@ interface TocItem {
       <!-- Main Content Area -->
       <div
         class="flex-1 flex flex-col min-w-0 transition-all duration-200"
-        [class.md:pl-64]="authService.isAuthenticated()"
+        [class.md:pl-60]="authService.isAuthenticated() && sidebarService.isOpen()"
+        [class.md:pl-0]="!authService.isAuthenticated() || !sidebarService.isOpen()"
       >
         <!-- Top Workspace Header with Breadcrumb -->
         <app-workspace-header
-          [breadcrumbs]="[{ label: 'System Architecture & Engineering Thought Process' }]"
+          [breadcrumbs]="[{ label: 'System Design & Architecture' }]"
           actionLabel="Raw Spec"
           actionIcon="📄"
           (actionClicked)="downloadRawSpec()"
@@ -40,67 +42,55 @@ interface TocItem {
         ></app-workspace-header>
 
         <!-- Docs Layout Container -->
-        <div class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8">
+        <div class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           
-          <!-- Sticky Mini Table of Contents (Desktop Sidebar) -->
-          <aside class="hidden lg:block w-64 shrink-0">
-            <div class="sticky top-20 p-4 rounded-xl bg-[#202020] border border-[#2f2f2f] space-y-3">
-              <div class="flex items-center justify-between pb-2 border-b border-[#2d2d2d]">
-                <span class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
-                  Table of Contents
-                </span>
-                <span class="text-[10px] text-[#7da0ca] font-mono">{{ tocList().length }} Sections</span>
-              </div>
-
-              <nav class="space-y-1 text-xs max-h-[70vh] overflow-y-auto pr-1">
-                @for (item of tocList(); track item.id) {
-                  <button
-                    type="button"
-                    (click)="scrollTo(item.id)"
-                    class="w-full text-left py-1 px-2 rounded transition-colors truncate block select-none"
-                    [ngClass]="
-                      activeHeadingId() === item.id
-                        ? 'bg-[#2f2f2f] text-[#bc8c74] font-medium border-l-2 border-[#bc8c74]'
-                        : 'text-[#9b9a97] hover:text-[#ffffff] hover:bg-[#252525]'
-                    "
-                    [class.pl-4]="item.level === 3"
-                    [title]="item.title"
-                  >
-                    {{ item.title }}
-                  </button>
-                }
-              </nav>
-
-              <div class="pt-2 border-t border-[#2d2d2d] text-[10px] text-[#6b6b68] flex items-center justify-between">
-                <span>Auto-synced with system-design.md</span>
-              </div>
+          <!-- Header Row with Title & Compact Top-Right Architecture/Table Preview -->
+          <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6 pb-4 border-b border-[#262626]">
+            <div>
+              <h1 class="text-xl font-bold text-[#ffffff] tracking-tight">System Design Specification</h1>
+              <p class="text-xs text-[#9b9a97] mt-0.5">
+                Technical architecture, database query projections, and latency simulation.
+              </p>
             </div>
-          </aside>
 
-          <!-- Main Document Content -->
-          <main class="flex-1 min-w-0">
-            
-            <!-- Mobile TOC Accordion -->
-            <div class="lg:hidden mb-6 p-3 rounded-lg bg-[#202020] border border-[#2f2f2f]">
-              <button
-                type="button"
-                (click)="toggleMobileToc()"
-                class="w-full flex items-center justify-between text-xs font-medium text-[#e6e6e5]"
-              >
-                <span class="flex items-center gap-2">
-                  <span>📑</span>
-                  <span>Table of Contents ({{ tocList().length }} Sections)</span>
-                </span>
-                <span>{{ isMobileTocOpen() ? '▲' : '▼' }}</span>
-              </button>
+            <!-- Compact Top-Right Architecture & Table Preview -->
+            <div class="shrink-0 w-full lg:w-72 p-2.5 rounded-lg bg-[#202020] border border-[#2c2c2c] text-xs space-y-2 shadow-sm">
+              <div class="flex items-center justify-between text-[11px]">
+                <div class="flex items-center gap-1.5 font-mono text-[#8a8986]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#5cb87a]"></span>
+                  <span class="text-[#e6e6e5] font-semibold">Dual-Mode Architecture</span>
+                </div>
+                <button
+                  type="button"
+                  (click)="toggleTocDropdown()"
+                  class="text-[10px] font-mono text-[#bc8c74] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{{ tocList().length }} Sections</span>
+                  <span>{{ isTocDropdownOpen() ? '▲' : '▼' }}</span>
+                </button>
+              </div>
 
-              @if (isMobileTocOpen()) {
-                <div class="mt-3 pt-3 border-t border-[#2d2d2d] space-y-1 max-h-56 overflow-y-auto">
+              <!-- Compact Architecture Pipeline Preview -->
+              <div class="flex items-center justify-between py-1 px-2 rounded bg-[#171717] border border-[#262626] font-mono text-[10px] text-[#9b9a97]">
+                <span>SPA</span>
+                <span class="text-[#555]">→</span>
+                <span>Gateway</span>
+                <span class="text-[#555]">→</span>
+                <span>Delay</span>
+                <span class="text-[#555]">→</span>
+                <span class="text-[#bc8c74]">Dual DB</span>
+              </div>
+
+              <!-- Collapsible Section Outline -->
+              @if (isTocDropdownOpen()) {
+                <div class="pt-2 border-t border-[#2a2a2a] max-h-48 overflow-y-auto space-y-0.5 pr-1">
                   @for (item of tocList(); track item.id) {
                     <button
                       type="button"
-                      (click)="scrollTo(item.id); isMobileTocOpen.set(false)"
-                      class="w-full text-left py-1 px-2 text-xs rounded text-[#9b9a97] hover:text-[#ffffff] hover:bg-[#282828] truncate block"
+                      (click)="scrollTo(item.id)"
+                      class="w-full text-left py-1 px-1.5 rounded text-[11px] text-[#8a8986] hover:text-[#ffffff] hover:bg-[#282828] truncate block transition-colors"
+                      [class.pl-3]="item.level === 3"
+                      [title]="item.title"
                     >
                       {{ item.title }}
                     </button>
@@ -108,7 +98,10 @@ interface TocItem {
                 </div>
               }
             </div>
+          </div>
 
+          <!-- Main Document Content -->
+          <main class="w-full min-w-0">
             <!-- Loading State -->
             @if (isLoading()) {
               <div class="p-12 text-center space-y-3">
@@ -122,7 +115,6 @@ interface TocItem {
                 [innerHTML]="renderedHtml()"
               ></article>
             }
-
           </main>
 
         </div>
@@ -243,16 +235,21 @@ interface TocItem {
 export class DocsComponent implements OnInit {
   private http = inject(HttpClient);
   authService = inject(AuthService);
+  sidebarService = inject(SidebarService);
 
   isLoading = signal<boolean>(true);
   rawMarkdown = signal<string>('');
   renderedHtml = signal<string>('');
   tocList = signal<TocItem[]>([]);
   activeHeadingId = signal<string>('');
-  isMobileTocOpen = signal<boolean>(false);
+  isTocDropdownOpen = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadMarkdown();
+  }
+
+  toggleTocDropdown(): void {
+    this.isTocDropdownOpen.update((v) => !v);
   }
 
   loadMarkdown(): void {
@@ -307,10 +304,6 @@ export class DocsComponent implements OnInit {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }
-
-  toggleMobileToc(): void {
-    this.isMobileTocOpen.update((v) => !v);
   }
 
   downloadRawSpec(): void {

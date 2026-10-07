@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SidebarService } from '../../../core/services/sidebar.service';
 import { DelayService } from '../../../core/services/delay.service';
-import { TelemetryService } from '../../../core/services/telemetry.service';
 
 export interface BreadcrumbItem {
   label: string;
@@ -17,16 +16,19 @@ export interface BreadcrumbItem {
   template: `
     <header class="sticky top-0 z-30 w-full h-14 bg-[#191919]/95 backdrop-blur-md border-b border-[#2a2a2a] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       
-      <!-- Left: Mobile Toggle & Breadcrumbs -->
-      <div class="flex items-center gap-3 min-w-0">
-        <!-- Mobile Sidebar Hamburger Toggle -->
+      <!-- Left: Open/Close Sidebar Toggle & Breadcrumbs -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <!-- Sidebar Open / Close Button -->
         <button
           type="button"
           (click)="sidebarService.toggle()"
-          class="p-1.5 -ml-1 rounded-md text-[#8a8986] hover:text-[#ffffff] hover:bg-[#252525] md:hidden transition-colors cursor-pointer"
+          class="p-1.5 -ml-1 rounded-md text-[#8a8986] hover:text-[#ffffff] hover:bg-[#252525] transition-colors cursor-pointer"
+          [title]="sidebarService.isOpen() ? 'Collapse Sidebar' : 'Open Sidebar'"
           aria-label="Toggle Sidebar"
         >
-          <span class="text-base leading-none">☰</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </button>
 
         <!-- Breadcrumbs -->
@@ -50,21 +52,20 @@ export interface BreadcrumbItem {
         </nav>
       </div>
 
-      <!-- Right: Contextual Page Action & Live Delay Pill -->
+      <!-- Right: Contextual Page Action & Live Delay Badge -->
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         
-        <!-- Live Parameterized Delay Pill -->
-        <button
-          type="button"
-          (click)="telemetryService.toggleInspector()"
+        <!-- Live Parameterized Delay Link to Telemetry Page -->
+        <a
+          routerLink="/telemetry"
           class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono bg-[#222222] border border-[#2f2f2f] text-[#bc8c74] hover:border-[#bc8c74]/50 transition-all cursor-pointer"
-          title="Click to view live telemetry metrics"
+          title="Open Telemetry & Latency Page"
         >
-          <span class="w-1.5 h-1.5 rounded-full bg-[#5cb87a] animate-pulse"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-[#5cb87a]"></span>
           <span>Delay: {{ delayService.currentDelay() }}ms</span>
-        </button>
+        </a>
 
-        <!-- Contextual Action Button (Top-Right requirement) -->
+        <!-- Contextual Action Button -->
         @if (actionLabel) {
           <button
             type="button"
@@ -101,7 +102,6 @@ export interface BreadcrumbItem {
 export class WorkspaceHeaderComponent {
   sidebarService = inject(SidebarService);
   delayService = inject(DelayService);
-  telemetryService = inject(TelemetryService);
 
   @Input() breadcrumbs: BreadcrumbItem[] = [];
   @Input() actionLabel: string | null = null;
