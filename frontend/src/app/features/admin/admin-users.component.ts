@@ -5,245 +5,270 @@ import { RouterLink } from '@angular/router';
 import { UserService, CreateUserData } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { IUser, UserRole, UserStatus } from '../../core/models/auth.models';
+import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
+import { WorkspaceHeaderComponent } from '../../shared/components/workspace-header/workspace-header.component';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterLink,
+    SidebarComponent,
+    WorkspaceHeaderComponent,
+  ],
   template: `
-    <!-- Edge-to-Edge Workspace Container -->
-    <div class="w-full px-4 sm:px-8 lg:px-10 py-6 space-y-5">
+    <div class="min-h-screen flex bg-[#191919] text-[#e6e6e5] w-full">
       
-      <!-- Top Breadcrumbs & Header -->
-      <div class="space-y-3">
-        <div class="flex items-center gap-2 text-xs text-[#9b9a97]">
-          <a routerLink="/dashboard" class="hover:text-[#ffffff] transition-colors">Workspace</a>
-          <span class="text-[#444444]">/</span>
-          <span class="text-[#ffffff] font-medium">User Management</span>
-        </div>
+      <!-- Collapsible Vertical Sidebar -->
+      <app-sidebar></app-sidebar>
 
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
-              <span class="tag-bronze">Admin Restricted</span>
-            </div>
-            <p class="text-xs text-[#9b9a97] mt-0.5">
-              Manage accounts, assign roles (General User / Admin), and toggle security state in MongoDB.
-            </p>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button (click)="loadUsers()" [disabled]="userService.isLoading()" class="notion-btn text-xs py-1.5 px-3">
-              <span>Refresh</span>
-            </button>
-            <button (click)="openCreateModal()" class="notion-btn-primary text-xs py-1.5 px-3">
-              <span>+ New Account</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Users Database Container -->
-      <div class="notion-card overflow-hidden">
+      <!-- Main Workspace View Container -->
+      <div class="flex-1 flex flex-col min-w-0 md:pl-64 transition-all duration-200">
         
-        <!-- Toolbar & Filter Popover -->
-        <div class="p-3 border-b border-[#2f2f2f] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#202020]">
-          <div class="flex items-center gap-2">
-            <span class="text-[#787774]">Registered DB Users:</span>
-            <span class="font-mono font-medium text-[#ffffff]">{{ filteredUsers().length }}</span>
+        <!-- Breadcrumb & Contextual Header (Top-Right Action Button) -->
+        <app-workspace-header
+          [breadcrumbs]="[{ label: 'Verification Directory', url: '/dashboard' }, { label: 'User Administration' }]"
+          actionLabel="+ New Account"
+          actionIcon="👤"
+          [isActionLoading]="userService.isLoading()"
+          (actionClicked)="openCreateModal()"
+          (refreshClicked)="loadUsers()"
+        ></app-workspace-header>
+
+        <!-- Edge-to-Edge Workspace Container -->
+        <div class="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+          
+          <!-- Top Header -->
+          <div class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h1 class="text-2xl font-bold text-[#ffffff] tracking-tight">Database User Administration</h1>
+                  <span class="tag-bronze">Admin Restricted</span>
+                </div>
+                <p class="text-xs text-[#9b9a97] mt-0.5">
+                  Manage accounts, assign roles (General User / Admin), and toggle security state in MongoDB.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button (click)="loadUsers()" [disabled]="userService.isLoading()" class="notion-btn text-xs py-1.5 px-3">
+                  <span>Refresh</span>
+                </button>
+                <button (click)="openCreateModal()" class="notion-btn-primary text-xs py-1.5 px-3">
+                  <span>+ New Account</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <!-- Search Input -->
-            <div class="relative">
-              <input
-                type="text"
-                [value]="searchQuery()"
-                (input)="onSearchInput($event)"
-                placeholder="Filter by name, ID..."
-                class="notion-input py-1 px-2.5 w-44 sm:w-56 text-xs"
-              />
-              @if (searchQuery()) {
-                <button
-                  type="button"
-                  (click)="searchQuery.set('')"
-                  class="absolute right-2 top-1.5 text-[#6b6b68] hover:text-[#e6e6e5] text-xs"
-                >
-                  ✕
-                </button>
-              }
-            </div>
+          <!-- Users Database Container -->
+          <div class="notion-card overflow-hidden">
+            
+            <!-- Toolbar & Filter Popover -->
+            <div class="p-3 border-b border-[#2f2f2f] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-[#202020]">
+              <div class="flex items-center gap-2">
+                <span class="text-[#787774]">Registered DB Users:</span>
+                <span class="font-mono font-medium text-[#ffffff]">{{ filteredUsers().length }}</span>
+              </div>
 
-            <!-- Role Filter Dropdown Trigger -->
-            <div class="relative">
-              <button
-                type="button"
-                (click)="toggleRoleMenu()"
-                class="notion-btn py-1 px-2.5 text-xs flex items-center gap-1.5"
-                [class.border-[#529cca]]="selectedRole() !== 'ALL'"
-                [class.text-[#529cca]]="selectedRole() !== 'ALL'"
-              >
-                <span>Role: <strong>{{ selectedRole() === 'ALL' ? 'All' : selectedRole() }}</strong></span>
-                <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              <!-- Popover Menu -->
-              @if (isRoleMenuOpen()) {
-                <div (click)="isRoleMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
-                <div class="absolute right-0 mt-1 w-44 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <div class="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[#6b6b68]">Filter Role</div>
-                  @for (role of ['ALL', 'Admin', 'General User']; track role) {
+              <div class="flex items-center gap-2">
+                <!-- Search Input -->
+                <div class="relative">
+                  <input
+                    type="text"
+                    [value]="searchQuery()"
+                    (input)="onSearchInput($event)"
+                    placeholder="Filter by name, ID..."
+                    class="notion-input py-1 px-2.5 w-44 sm:w-56 text-xs"
+                  />
+                  @if (searchQuery()) {
                     <button
                       type="button"
-                      (click)="selectRole(role)"
-                      class="w-full flex items-center justify-between px-2 py-1.5 rounded text-xs text-left hover:bg-[#2f2f2f] transition-colors"
-                      [class.text-[#529cca]]="selectedRole() === role"
+                      (click)="searchQuery.set('')"
+                      class="absolute right-2 top-1.5 text-[#6b6b68] hover:text-[#e6e6e5] text-xs"
                     >
-                      <span>{{ role === 'ALL' ? 'All Roles' : role }}</span>
-                      @if (selectedRole() === role) {
-                        <svg class="w-3.5 h-3.5 text-[#529cca]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                      }
+                      ✕
                     </button>
                   }
                 </div>
-              }
+
+                <!-- Role Filter Dropdown Trigger -->
+                <div class="relative">
+                  <button
+                    type="button"
+                    (click)="toggleRoleMenu()"
+                    class="notion-btn py-1 px-2.5 text-xs flex items-center gap-1.5"
+                    [class.border-[#529cca]]="selectedRole() !== 'ALL'"
+                    [class.text-[#529cca]]="selectedRole() !== 'ALL'"
+                  >
+                    <span>Role: <strong>{{ selectedRole() === 'ALL' ? 'All' : selectedRole() }}</strong></span>
+                    <svg class="w-3 h-3 text-[#787774]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <!-- Popover Menu -->
+                  @if (isRoleMenuOpen()) {
+                    <div (click)="isRoleMenuOpen.set(false)" class="fixed inset-0 z-40"></div>
+                    <div class="absolute right-0 mt-1 w-44 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <div class="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-[#6b6b68]">Filter Role</div>
+                      @for (role of ['ALL', 'Admin', 'General User']; track role) {
+                        <button
+                          type="button"
+                          (click)="selectRole(role)"
+                          class="w-full flex items-center justify-between px-2 py-1.5 rounded text-xs text-left hover:bg-[#2f2f2f] transition-colors"
+                          [class.text-[#529cca]]="selectedRole() === role"
+                        >
+                          <span>{{ role === 'ALL' ? 'All Roles' : role }}</span>
+                          @if (selectedRole() === role) {
+                            <svg class="w-3.5 h-3.5 text-[#529cca]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                          }
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                @if (searchQuery() || selectedRole() !== 'ALL') {
+                  <button
+                    type="button"
+                    (click)="resetFilters()"
+                    class="notion-btn-ghost text-xs py-1 px-2 text-[#9b9a97] hover:text-[#ffffff]"
+                  >
+                    Reset
+                  </button>
+                }
+              </div>
             </div>
 
-            @if (searchQuery() || selectedRole() !== 'ALL') {
-              <button
-                type="button"
-                (click)="resetFilters()"
-                class="notion-btn-ghost text-xs py-1 px-2 text-[#9b9a97] hover:text-[#ffffff]"
-              >
-                Reset
-              </button>
-            }
+            <!-- Users Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
+                  <tr>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Name</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">User ID / Email</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Department</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Role Assignment</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Status</th>
+                    <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Last Login</th>
+                    <th class="py-2.5 px-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody class="divide-y divide-[#262626]">
+                  @if (userService.isLoading()) {
+                    @for (i of [1, 2, 3, 4]; track i) {
+                      <tr class="animate-pulse bg-[#202020]">
+                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-28 bg-[#2a2a2a] rounded"></div></td>
+                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-36 bg-[#2a2a2a] rounded"></div></td>
+                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
+                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-20 bg-[#2a2a2a] rounded"></div></td>
+                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
+                        <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
+                        <td class="py-2.5 px-3 text-right"><div class="h-4 w-12 bg-[#2a2a2a] rounded ml-auto"></div></td>
+                      </tr>
+                    }
+                  } @else if (filteredUsers().length === 0) {
+                    <tr>
+                      <td colspan="7" class="py-12 text-center text-[#787774]">
+                        No users matching criteria.
+                      </td>
+                    </tr>
+                  } @else {
+                    @for (user of filteredUsers(); track user._id) {
+                      <tr class="hover:bg-[#262626] transition-colors group">
+                        <td class="py-2 px-3 border-r border-[#262626]">
+                          <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-md bg-[#2a2a2a] border border-[#333333] flex items-center justify-center font-medium text-[11px] text-[#e6e6e5]">
+                              {{ user.name.substring(0, 1).toUpperCase() }}
+                            </div>
+                            <span class="font-medium text-[#ffffff]">{{ user.name }}</span>
+                            @if (user.userId === authService.currentUser()?.userId) {
+                              <span class="text-[10px] text-[#529cca] font-mono">(You)</span>
+                            }
+                          </div>
+                        </td>
+
+                        <td class="py-2 px-3 font-mono text-[11px] text-[#9b9a97] border-r border-[#262626]">
+                          {{ user.userId }}
+                        </td>
+
+                        <td class="py-2 px-3 text-[#e6e6e5] border-r border-[#262626]">
+                          {{ user.department }}
+                        </td>
+
+                        <td class="py-2 px-3 border-r border-[#262626]">
+                          <div class="flex items-center gap-1.5">
+                            @if (user.role === 'Admin') {
+                              <span class="tag-bronze">Admin</span>
+                            } @else {
+                              <span class="tag-blue">General User</span>
+                            }
+
+                            <button
+                              (click)="toggleRole(user)"
+                              [disabled]="user.userId === authService.currentUser()?.userId"
+                              title="Switch between General User and Admin"
+                              class="notion-btn-ghost py-0.5 px-1 text-[11px] text-[#787774] hover:text-[#ffffff] disabled:opacity-30"
+                            >
+                              ⇄
+                            </button>
+                          </div>
+                        </td>
+
+                        <td class="py-2 px-3 border-r border-[#262626]">
+                          <button
+                            (click)="toggleStatus(user)"
+                            [disabled]="user.userId === authService.currentUser()?.userId"
+                            class="cursor-pointer disabled:cursor-not-allowed"
+                            title="Click to toggle status"
+                          >
+                            @if (user.status === 'Active') {
+                              <span class="tag-green">Active</span>
+                            } @else {
+                              <span class="tag-red">Disabled</span>
+                            }
+                          </button>
+                        </td>
+
+                        <td class="py-2 px-3 font-mono text-[11px] text-[#787774] border-r border-[#262626]">
+                          {{ user.lastLoginAt ? (user.lastLoginAt | date: 'short') : 'Never' }}
+                        </td>
+
+                        <td class="py-2 px-3 text-right">
+                          <button
+                            (click)="confirmDeleteUser(user)"
+                            [disabled]="user.userId === authService.currentUser()?.userId"
+                            class="text-[#787774] hover:text-[#e05757] p-1 transition-colors disabled:opacity-20 disabled:hover:text-[#787774]"
+                            title="Delete user from database"
+                          >
+                            <svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
+              <span>Total: <strong class="text-[#9b9a97]">{{ filteredUsers().length }}</strong> Accounts</span>
+              <span class="text-[10px] text-[#555552]">MongoDB User Model Collection</span>
+            </div>
           </div>
+
         </div>
 
-        <!-- Users Table -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-[#1c1c1c] text-[#787774] font-medium border-b border-[#2a2a2a] text-[11px] select-none">
-              <tr>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Name</th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">User ID / Email</th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Department</th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Role Assignment</th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Status</th>
-                <th class="py-2.5 px-3 border-r border-[#2a2a2a]">Last Login</th>
-                <th class="py-2.5 px-3 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody class="divide-y divide-[#262626]">
-              @if (userService.isLoading()) {
-                @for (i of [1, 2, 3, 4]; track i) {
-                  <tr class="animate-pulse bg-[#202020]">
-                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-28 bg-[#2a2a2a] rounded"></div></td>
-                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-36 bg-[#2a2a2a] rounded"></div></td>
-                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
-                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-20 bg-[#2a2a2a] rounded"></div></td>
-                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-4 w-16 bg-[#2a2a2a] rounded"></div></td>
-                    <td class="py-2.5 px-3 border-r border-[#262626]"><div class="h-3 w-24 bg-[#2a2a2a] rounded"></div></td>
-                    <td class="py-2.5 px-3 text-right"><div class="h-4 w-12 bg-[#2a2a2a] rounded ml-auto"></div></td>
-                  </tr>
-                }
-              } @else if (filteredUsers().length === 0) {
-                <tr>
-                  <td colspan="7" class="py-12 text-center text-[#787774]">
-                    No users matching criteria.
-                  </td>
-                </tr>
-              } @else {
-                @for (user of filteredUsers(); track user._id) {
-                  <tr class="hover:bg-[#262626] transition-colors group">
-                    <td class="py-2 px-3 border-r border-[#262626]">
-                      <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-md bg-[#2a2a2a] border border-[#333333] flex items-center justify-center font-medium text-[11px] text-[#e6e6e5]">
-                          {{ user.name.substring(0, 1).toUpperCase() }}
-                        </div>
-                        <span class="font-medium text-[#ffffff]">{{ user.name }}</span>
-                        @if (user.userId === authService.currentUser()?.userId) {
-                          <span class="text-[10px] text-[#529cca] font-mono">(You)</span>
-                        }
-                      </div>
-                    </td>
-
-                    <td class="py-2 px-3 font-mono text-[11px] text-[#9b9a97] border-r border-[#262626]">
-                      {{ user.userId }}
-                    </td>
-
-                    <td class="py-2 px-3 text-[#e6e6e5] border-r border-[#262626]">
-                      {{ user.department }}
-                    </td>
-
-                    <td class="py-2 px-3 border-r border-[#262626]">
-                      <div class="flex items-center gap-1.5">
-                        @if (user.role === 'Admin') {
-                          <span class="tag-bronze">Admin</span>
-                        } @else {
-                          <span class="tag-blue">General User</span>
-                        }
-
-                        <button
-                          (click)="toggleRole(user)"
-                          [disabled]="user.userId === authService.currentUser()?.userId"
-                          title="Switch between General User and Admin"
-                          class="notion-btn-ghost py-0.5 px-1 text-[11px] text-[#787774] hover:text-[#ffffff] disabled:opacity-30"
-                        >
-                          ⇄
-                        </button>
-                      </div>
-                    </td>
-
-                    <td class="py-2 px-3 border-r border-[#262626]">
-                      <button
-                        (click)="toggleStatus(user)"
-                        [disabled]="user.userId === authService.currentUser()?.userId"
-                        class="cursor-pointer disabled:cursor-not-allowed"
-                        title="Click to toggle status"
-                      >
-                        @if (user.status === 'Active') {
-                          <span class="tag-green">Active</span>
-                        } @else {
-                          <span class="tag-red">Disabled</span>
-                        }
-                      </button>
-                    </td>
-
-                    <td class="py-2 px-3 font-mono text-[11px] text-[#787774] border-r border-[#262626]">
-                      {{ user.lastLoginAt ? (user.lastLoginAt | date: 'short') : 'Never' }}
-                    </td>
-
-                    <td class="py-2 px-3 text-right">
-                      <button
-                        (click)="confirmDeleteUser(user)"
-                        [disabled]="user.userId === authService.currentUser()?.userId"
-                        class="text-[#787774] hover:text-[#e05757] p-1 transition-colors disabled:opacity-20 disabled:hover:text-[#787774]"
-                        title="Delete user from database"
-                      >
-                        <svg class="w-3.5 h-3.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <div class="p-2.5 bg-[#1c1c1c] border-t border-[#2a2a2a] flex items-center justify-between text-[11px] text-[#787774]">
-          <span>Total: <strong class="text-[#9b9a97]">{{ filteredUsers().length }}</strong> Accounts</span>
-          <span class="text-[10px] text-[#555552]">MongoDB User Model Collection</span>
-        </div>
       </div>
 
       <!-- Create User Modal -->

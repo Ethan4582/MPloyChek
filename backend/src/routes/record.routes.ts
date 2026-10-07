@@ -9,5 +9,6 @@ const router = Router();
 router.use(authenticateJWT);
 
 router.get('/', (req, res, next) => recordController.getRecords(req, res, next));
+router.post('/', (req, res, next) => recordController.createRecord(req, res, next));
 
 export default router;

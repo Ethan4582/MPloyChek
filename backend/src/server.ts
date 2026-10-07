@@ -4,9 +4,12 @@ import morgan from 'morgan';
 import { config } from './config/env.js';
 import { connectDB, disconnectDB, isUsingInMemoryDB } from './db/connection.js';
 import { errorHandler } from './middleware/error.middleware.js';
+import { telemetryMiddleware } from './middleware/telemetry.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import recordRoutes from './routes/record.routes.js';
+import telemetryRoutes from './routes/telemetry.routes.js';
+import docsRoutes from './routes/docs.routes.js';
 
 const app = express();
 
@@ -23,6 +26,9 @@ app.use(morgan('dev'));
 // JSON parsing
 app.use(express.json());
 
+// Global Telemetry & Simulated Delay Engine (?delay=ms)
+app.use(telemetryMiddleware);
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
@@ -38,6 +44,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/records', recordRoutes);
+app.use('/api/telemetry', telemetryRoutes);
+app.use('/api/docs', docsRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
@@ -50,8 +58,11 @@ async function bootstrap() {
       console.log(`====================================================`);
       console.log(`🚀 MPloyChek Backend API running on port ${config.port}`);
       console.log(`📡 Health Check: http://localhost:${config.port}/api/health`);
+      console.log(`📊 Live Telemetry: http://localhost:${config.port}/api/telemetry`);
+      console.log(`📖 System Design: http://localhost:${config.port}/api/docs/system-design`);
       console.log(`🔐 Environment: ${config.nodeEnv}`);
       console.log(`💾 Database: ${isUsingInMemoryDB() ? 'Embedded In-Memory MongoDB' : 'External MongoDB'}`);
+      console.log(`⏱️ Simulated Delay Engine: Active (via ?delay=ms parameter)`);
       console.log(`====================================================`);
     });
 

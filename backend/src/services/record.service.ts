@@ -37,6 +37,24 @@ export class RecordService {
       },
     };
   }
+
+  async createRecord(data: Partial<IEmployeeRecord>): Promise<IEmployeeRecord> {
+    const recordCount = await recordRepository.findForUser('', 'Admin');
+    const seq = String(recordCount.length + 1).padStart(3, '0');
+    const recordId = data.recordId || `REC-2026-${seq}`;
+
+    const { _id, ...cleanData } = data;
+
+    const created = await recordRepository.create({
+      ...(cleanData as any),
+      recordId,
+      backgroundCheckDate: data.backgroundCheckDate || new Date().toISOString().split('T')[0],
+      verificationStatus: data.verificationStatus || 'Verified',
+      accessLevel: data.accessLevel || 'General',
+    });
+
+    return created.toObject() as IEmployeeRecord;
+  }
 }
 
 export const recordService = new RecordService();

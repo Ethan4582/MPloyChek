@@ -3,6 +3,7 @@ import { LandingComponent } from './features/landing/landing.component';
 import { LoginComponent } from './features/auth/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { AdminUsersComponent } from './features/admin/admin-users.component';
+import { DocsComponent } from './features/docs/docs.component';
 import { authGuard, adminGuard, publicGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -29,6 +30,11 @@ export const routes: Routes = [
     component: AdminUsersComponent,
     canActivate: [authGuard, adminGuard],
     title: 'User Management • MPloyChek Admin',
+  },
+  {
+    path: 'docs',
+    component: DocsComponent,
+    title: 'Architecture Documentation • MPloyChek',
   },
   {
     path: '**',

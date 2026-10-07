@@ -18,13 +18,28 @@ export class RecordService {
   private metaSignal = signal<RecordAccessSummary | null>(null);
   readonly meta = this.metaSignal.asReadonly();
 
-  getRecords(): Observable<RecordsResponse> {
+  getRecords(delay?: number): Observable<RecordsResponse> {
     this.loadingSignal.set(true);
-    return this.http.get<RecordsResponse>('/api/records').pipe(
+    const url = delay !== undefined ? `/api/records?delay=${delay}` : '/api/records';
+    return this.http.get<RecordsResponse>(url).pipe(
       tap((res) => {
         if (res.success) {
           this.recordsSignal.set(res.data);
           this.metaSignal.set(res.meta);
+        }
+      }),
+      finalize(() => {
+        this.loadingSignal.set(false);
+      })
+    );
+  }
+
+  createRecord(recordData: Partial<IEmployeeRecord>): Observable<{ success: boolean; data: IEmployeeRecord }> {
+    this.loadingSignal.set(true);
+    return this.http.post<{ success: boolean; data: IEmployeeRecord }>('/api/records', recordData).pipe(
+      tap((res) => {
+        if (res.success && res.data) {
+          this.recordsSignal.update((list) => [res.data, ...list]);
         }
       }),
       finalize(() => {
