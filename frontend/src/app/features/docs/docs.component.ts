@@ -113,7 +113,7 @@ export interface TocItem {
                 
                 <div class="flex items-center justify-between pb-2 border-b border-[#2b2b2b]">
                   <div class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#bc8c74]"></span>
+                    
                     <span class="text-[11px] font-semibold uppercase tracking-wider text-[#e6e6e5]">
                       On This Page
                     </span>
