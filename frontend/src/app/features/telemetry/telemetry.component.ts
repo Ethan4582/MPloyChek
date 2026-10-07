@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { WorkspaceHeaderComponent } from '../../shared/components/workspace-header/workspace-header.component';
-import { TelemetryService } from '../../core/services/telemetry.service';
+import { TelemetryService, TelemetryMetric } from '../../core/services/telemetry.service';
 import { DelayService } from '../../core/services/delay.service';
 import { SidebarService } from '../../core/services/sidebar.service';
 
@@ -78,69 +78,63 @@ import { SidebarService } from '../../core/services/sidebar.service';
               </div>
             </div>
 
-            <!-- Heap Memory -->
+            <!-- Total Recorded Traffic -->
             <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
-              <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Heap Memory</div>
-              <div class="text-sm font-semibold text-[#ffffff] font-mono">
-                {{ telemetryService.data()?.system?.memory?.heapUsedMb || 0 }} MB
-              </div>
-              <div class="text-xs text-[#8a8986]">
-                RSS: {{ telemetryService.data()?.system?.memory?.rssMb || 0 }} MB
-              </div>
-            </div>
-
-            <!-- Server Latency -->
-            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
-              <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Average Latency</div>
-              <div class="text-sm font-semibold text-[#bc8c74] font-mono">
-                {{ telemetryService.data()?.traffic?.avgLatencyMs || 0 }} ms
-              </div>
-              <div class="text-xs text-[#8a8986]">
-                Simulated: +{{ delayService.currentDelay() }}ms
-              </div>
-            </div>
-
-            <!-- Total Requests -->
-            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
-              <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Recorded Requests</div>
-              <div class="text-sm font-semibold text-[#7da0ca] font-mono">
+              <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Total Requests</div>
+              <div class="text-xl font-bold text-[#ffffff]">
                 {{ telemetryService.data()?.traffic?.totalRequests || 0 }}
               </div>
               <div class="text-xs text-[#8a8986] font-mono">
-                2xx: {{ telemetryService.data()?.traffic?.statusCodes?.['2xx'] || 0 }} • 4xx: {{ telemetryService.data()?.traffic?.statusCodes?.['4xx'] || 0 }}
+                Active in Flight: {{ telemetryService.data()?.traffic?.activeRequests || 0 }}
+              </div>
+            </div>
+
+            <!-- Average Event Latency -->
+            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
+              <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Average Latency</div>
+              <div class="text-xl font-bold text-[#bc8c74]">
+                {{ telemetryService.data()?.traffic?.avgLatencyMs || 0 }}ms
+              </div>
+              <div class="text-xs text-[#8a8986] font-mono">
+                Current Delay: {{ delayService.currentDelay() }}ms
+              </div>
+            </div>
+
+            <!-- Server Node Runtime & Memory -->
+            <div class="p-4 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-1">
+              <div class="text-[10px] uppercase font-mono tracking-wider text-[#8a8986]">Process Memory</div>
+              <div class="text-sm font-semibold text-[#ffffff]">
+                {{ telemetryService.data()?.system?.memory?.heapUsedMb || 0 }} MB / {{ telemetryService.data()?.system?.memory?.rssMb || 0 }} MB
+              </div>
+              <div class="text-xs text-[#8a8986] font-mono">
+                Uptime: {{ telemetryService.data()?.uptimeSeconds || 0 }}s
               </div>
             </div>
           </div>
 
-          <!-- Parameterized Delay Controller -->
-          <div class="p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3.5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <!-- Interactive Latency Simulator Preset Strip -->
+          <div class="p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3">
+            <div class="flex items-center justify-between">
               <div>
                 <h2 class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
-                  Asynchronous Delay Controller
+                  Parameterized Latency Engine (?delay=ms)
                 </h2>
-                <p class="text-xs text-[#9b9a97] mt-0.5">
-                  Appends <span class="font-mono text-[#bc8c74]">?delay=ms</span> to all outbound API calls to test asynchronous loaders and loaders without blocking the server event loop.
+                <p class="text-xs text-[#8a8986] mt-0.5">
+                  Adjust simulated latency across all portal API calls. Uses non-blocking Express middleware timers.
                 </p>
               </div>
-              <div class="text-right">
-                <span class="text-xs text-[#8a8986]">Current Parameter: </span>
-                <span class="text-sm font-mono font-bold text-[#bc8c74]">{{ delayService.currentDelay() }}ms</span>
-              </div>
+              <span class="text-xs font-mono font-bold text-[#bc8c74] px-2.5 py-1 rounded bg-[#2a2420] border border-[#48372f]">
+                {{ delayService.currentDelay() }}ms
+              </span>
             </div>
 
-            <!-- Preset Buttons -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="flex flex-wrap items-center gap-2 pt-1">
               @for (preset of presets; track preset.ms) {
                 <button
                   type="button"
                   (click)="delayService.setDelay(preset.ms)"
-                  class="py-2 px-3 rounded-md text-xs font-mono transition-all text-center border cursor-pointer"
-                  [ngClass]="
-                    delayService.currentDelay() === preset.ms
-                      ? 'bg-[#332924] text-[#bc8c74] border-[#48372f] font-semibold shadow-sm'
-                      : 'bg-[#191919] text-[#8a8986] hover:text-[#ffffff] border-[#2c2c2c]'
-                  "
+                  class="notion-btn text-xs py-1 px-3 cursor-pointer"
+                  [ngClass]="delayService.currentDelay() === preset.ms ? 'bg-[#ffffff] text-[#141414] font-semibold border-white' : ''"
                 >
                   {{ preset.label }}
                 </button>
@@ -148,14 +142,66 @@ import { SidebarService } from '../../core/services/sidebar.service';
             </div>
           </div>
 
-          <!-- Raw Endpoint Latency List -->
+          <!-- Paginated Endpoint Latency Log -->
           <div class="p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3">
-            <h2 class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
-              Endpoint Latency Log (Last 10 Requests)
-            </h2>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <h2 class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
+                  Endpoint Latency Log
+                </h2>
+                <span class="text-[11px] font-mono text-[#8a8986] px-2 py-0.5 rounded bg-[#191919] border border-[#2a2a2a]">
+                  {{ allRequests().length }} Total Records
+                </span>
+              </div>
 
+              <!-- Pagination Controls & Page Size Selector -->
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <!-- Page size selector -->
+                <div class="flex items-center gap-1 text-[#8a8986]">
+                  <span>Show:</span>
+                  <select
+                    [value]="pageSize()"
+                    (change)="onPageSizeChange($event)"
+                    class="bg-[#191919] border border-[#2c2c2c] rounded px-1.5 py-0.5 text-xs text-[#e6e6e5] focus:outline-none"
+                  >
+                    <option [value]="5">5</option>
+                    <option [value]="10">10</option>
+                    <option [value]="20">20</option>
+                  </select>
+                </div>
+
+                <!-- Page indicator -->
+                <span class="text-[#8a8986] px-1">
+                  Page <span class="text-[#ffffff] font-medium">{{ currentPage() }}</span> of {{ totalPages() }}
+                </span>
+
+                <!-- Prev / Next Buttons -->
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    (click)="prevPage()"
+                    [disabled]="currentPage() <= 1"
+                    class="notion-btn py-0.5 px-2 text-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    title="Previous Page"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    (click)="nextPage()"
+                    [disabled]="currentPage() >= totalPages()"
+                    class="notion-btn py-0.5 px-2 text-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    title="Next Page"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Paginated Request List -->
             <div class="space-y-1.5 font-mono text-xs">
-              @for (req of telemetryService.data()?.traffic?.recentRequests || []; track req.id || $index) {
+              @for (req of paginatedRequests(); track req.id || $index) {
                 <div class="flex items-center justify-between p-2 rounded bg-[#171717] border border-[#262626]">
                   <div class="flex items-center gap-2">
                     <span
@@ -192,11 +238,56 @@ import { SidebarService } from '../../core/services/sidebar.service';
                   </div>
                 </div>
               } @empty {
-                <div class="text-[#8a8986] py-3 text-center text-xs">
+                <div class="text-[#8a8986] py-4 text-center text-xs">
                   No requests captured yet. Trigger actions across the portal to see live telemetry.
                 </div>
               }
             </div>
+
+            <!-- Bottom pagination footer if multiple pages exist -->
+            @if (totalPages() > 1) {
+              <div class="flex items-center justify-between pt-2 border-t border-[#262626] text-xs font-mono text-[#8a8986]">
+                <div>
+                  Showing {{ (currentPage() - 1) * pageSize() + 1 }} to {{ Math.min(currentPage() * pageSize(), allRequests().length) }} of {{ allRequests().length }} requests
+                </div>
+
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    (click)="goToPage(1)"
+                    [disabled]="currentPage() === 1"
+                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    First
+                  </button>
+                  <button
+                    type="button"
+                    (click)="prevPage()"
+                    [disabled]="currentPage() <= 1"
+                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    Prev
+                  </button>
+                  <span class="px-2 text-[#e6e6e5] font-semibold">{{ currentPage() }} / {{ totalPages() }}</span>
+                  <button
+                    type="button"
+                    (click)="nextPage()"
+                    [disabled]="currentPage() >= totalPages()"
+                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    Next
+                  </button>
+                  <button
+                    type="button"
+                    (click)="goToPage(totalPages())"
+                    [disabled]="currentPage() === totalPages()"
+                    class="notion-btn py-0.5 px-2 text-[11px] disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    Last
+                  </button>
+                </div>
+              </div>
+            }
           </div>
 
         </div>
@@ -212,7 +303,26 @@ export class TelemetryComponent implements OnInit {
   sidebarService = inject(SidebarService);
   private http = inject(HttpClient);
 
+  readonly Math = Math;
+
   isPinging = signal<boolean>(false);
+  currentPage = signal<number>(1);
+  pageSize = signal<number>(10);
+
+  allRequests = computed<TelemetryMetric[]>(() => {
+    return this.telemetryService.data()?.traffic?.recentRequests || [];
+  });
+
+  totalPages = computed<number>(() => {
+    const total = this.allRequests().length;
+    return total === 0 ? 1 : Math.ceil(total / this.pageSize());
+  });
+
+  paginatedRequests = computed<TelemetryMetric[]>(() => {
+    const list = this.allRequests();
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return list.slice(start, start + this.pageSize());
+  });
 
   presets = [
     { label: '0ms (Instant)', ms: 0 },
@@ -231,7 +341,10 @@ export class TelemetryComponent implements OnInit {
 
   clearBuffer(): void {
     this.http.post('/api/telemetry/reset', {}).subscribe({
-      next: () => this.telemetryService.refresh(),
+      next: () => {
+        this.currentPage.set(1);
+        this.telemetryService.refresh();
+      },
     });
   }
 
@@ -243,5 +356,29 @@ export class TelemetryComponent implements OnInit {
       },
       error: () => this.isPinging.set(false),
     });
+  }
+
+  onPageSizeChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.pageSize.set(Number(select.value));
+    this.currentPage.set(1);
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.update((p) => p - 1);
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update((p) => p + 1);
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
   }
 }
