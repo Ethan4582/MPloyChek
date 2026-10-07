@@ -13,10 +13,10 @@ import { UserRole } from '../../core/models/auth.models';
     <div class="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-14 bg-[#191919] w-full">
       <div class="w-full max-w-[440px] mx-auto animate-in fade-in zoom-in-95 duration-150">
         
-        <!-- Notion Header -->
+        <!-- Notion Header with Logo -->
         <div class="text-center mb-6">
-          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#222222] border border-[#2f2f2f] text-2xl mb-3 shadow-notion-card select-none">
-            🛡️
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#222222] border border-[#2f2f2f] mb-3 shadow-notion-card select-none overflow-hidden p-2">
+            <img src="/logo.png" alt="MPloyChek Logo" class="w-full h-full object-contain" />
           </div>
           <h1 class="text-xl font-bold text-[#ffffff] tracking-tight">MPloyChek Workspace</h1>
           <p class="text-xs text-[#9b9a97] mt-1">Employment Verification & RBAC Portal</p>
@@ -86,7 +86,7 @@ import { UserRole } from '../../core/models/auth.models';
                   (click)="fillPreset('Admin')"
                   class="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#2a221c] hover:bg-[#332924] text-[#bc8c74] border border-[#48372f] transition-all flex items-center justify-center gap-1.5"
                 >
-                  <span>🛡️</span>
+                  <img src="/logo.png" alt="Admin" class="w-3.5 h-3.5 object-contain" />
                   <span>Admin User</span>
                 </button>
 
@@ -95,7 +95,9 @@ import { UserRole } from '../../core/models/auth.models';
                   (click)="fillPreset('General User')"
                   class="px-2.5 py-1.5 rounded-md text-xs font-medium bg-[#1a2530] hover:bg-[#202f3d] text-[#7da0ca] border border-[#283f57] transition-all flex items-center justify-center gap-1.5"
                 >
-                  <span>👤</span>
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                  </svg>
                   <span>General User</span>
                 </button>
               </div>
@@ -164,7 +166,7 @@ import { UserRole } from '../../core/models/auth.models';
                         : 'text-[#787774] hover:text-[#e6e6e5] border border-transparent'
                     "
                   >
-                    <span>🛡️</span>
+                    <img src="/logo.png" alt="Admin" class="w-3.5 h-3.5 object-contain" />
                     <span>Administrator</span>
                   </button>
                 </div>
@@ -282,7 +284,7 @@ import { UserRole } from '../../core/models/auth.models';
                         : 'text-[#787774] hover:text-[#e6e6e5] border border-transparent'
                     "
                   >
-                    <span>🛡️</span>
+                    <img src="/logo.png" alt="Admin" class="w-3.5 h-3.5 object-contain" />
                     <span>Administrator</span>
                   </button>
                 </div>
