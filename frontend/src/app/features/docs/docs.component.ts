@@ -132,7 +132,6 @@ export interface TocItem {
                 
                 <div class="flex items-center justify-between pb-2 border-b border-[#2b2b2b]">
                   <div class="flex items-center gap-2">
-                    
                     <span class="text-[11px] font-semibold uppercase tracking-wider text-[#e6e6e5]">
                       On This Page
                     </span>
@@ -162,7 +161,6 @@ export interface TocItem {
               <!-- Compact Stack Architecture Summary -->
               <div class="p-3.5 rounded-xl bg-[#1e1e1e] border border-[#2a2a2a] space-y-2 text-xs">
                 <div class="flex items-center gap-1.5 font-mono text-[11px] text-[#8a8986]">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#5cb87a]"></span>
                   <span class="text-[#e6e6e5] font-semibold">Dual-Mode Architecture</span>
                 </div>
 
@@ -184,7 +182,6 @@ export interface TocItem {
               <!-- Quick Jump Links -->
               <div class="p-3.5 rounded-xl bg-[#1e1e1e] border border-[#2a2a2a] space-y-2 text-xs">
                 <div class="flex items-center gap-1.5 font-mono text-[11px] text-[#8a8986]">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#bc8c74]"></span>
                   <span class="text-[#e6e6e5] font-semibold">Quick References</span>
                 </div>
 
@@ -310,23 +307,86 @@ export class DocsComponent implements OnInit, OnDestroy {
   fetchSystemDesign(): void {
     this.isLoading.set(true);
 
+    // Primary: fetch static asset /system-design.md
     this.http.get('/system-design.md', { responseType: 'text' }).subscribe({
       next: (markdown) => {
-        this.rawMarkdown.set(markdown);
-        this.parseAndRender(markdown);
-        this.isLoading.set(false);
+        if (markdown && !markdown.trim().startsWith('<!DOCTYPE html>')) {
+          this.rawMarkdown.set(markdown);
+          this.parseAndRender(markdown);
+          this.isLoading.set(false);
 
-        setTimeout(() => {
-          this.setupIntersectionObserver();
-        }, 150);
+          setTimeout(() => {
+            this.setupIntersectionObserver();
+          }, 150);
+        } else {
+          this.fetchFromApi();
+        }
       },
       error: () => {
-        const fallback = `# MPloyChek System Design Document\n\nUnable to load the raw \`system-design.md\` file from public assets.\nPlease review the repository root on GitHub.`;
-        this.rawMarkdown.set(fallback);
-        this.renderedHtml.set('<p class="text-sm text-[#e05757]">Error loading documentation. Please retry.</p>');
-        this.isLoading.set(false);
+        this.fetchFromApi();
       },
     });
+  }
+
+  private fetchFromApi(): void {
+    this.http.get<{ success: boolean; data: { markdown: string } }>('/api/docs/system-design').subscribe({
+      next: (res) => {
+        if (res.success && res.data?.markdown) {
+          this.rawMarkdown.set(res.data.markdown);
+          this.parseAndRender(res.data.markdown);
+          this.isLoading.set(false);
+
+          setTimeout(() => {
+            this.setupIntersectionObserver();
+          }, 150);
+        } else {
+          this.showFallbackDoc();
+        }
+      },
+      error: () => {
+        this.showFallbackDoc();
+      },
+    });
+  }
+
+  private showFallbackDoc(): void {
+    const fallback = `# MPloyChek: System Design Specification
+
+> Role-based employment verification platform that isolates sensitive records through database-level query projections, abstract repository seams, and non-blocking asynchronous latency simulation.
+
+---
+
+## Problem Statement
+
+Organizations handling employee verification must give administrators and standard employees access to the same portal while enforcing strict boundaries around data visibility. Standard employees require access only to their own verification status. Sensitive attributes such as compensation grades, risk scores, and internal audit notes must never reach non-administrative users.
+
+When access control relies on frontend filtering, the backend transmits full records over the network and leaves confidential data exposed in browser inspection tools. The system must enforce authorization and data redaction at the database layer before payloads serialize.
+
+---
+
+## Dual-Database Architecture Seam
+
+The data tier is abstracted behind a generic repository interface, allowing the application to run against MongoDB, AWS DynamoDB, or an embedded zero-configuration in-memory database runtime seamlessly.
+
+---
+
+## Role-Based Access Control (RBAC)
+
+- **General User**: Query projections exclude sensitive fields (\`salaryGrade\`, \`riskScore\`, \`auditNotes\`).
+- **Admin**: Full visibility across all organizational employee records and user administration capabilities.
+
+---
+
+## Parameterized Delay Simulation
+
+Simulates real-world network latency using the \`?delay=<ms>\` parameter across all API endpoints without blocking the Node.js event loop.`;
+
+    this.rawMarkdown.set(fallback);
+    this.parseAndRender(fallback);
+    this.isLoading.set(false);
+    setTimeout(() => {
+      this.setupIntersectionObserver();
+    }, 150);
   }
 
   private parseAndRender(rawText: string): void {

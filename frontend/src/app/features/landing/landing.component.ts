@@ -81,7 +81,6 @@ import { AuthService } from '../../core/services/auth.service';
               class="px-3 py-1.5 rounded transition-colors flex items-center gap-1.5"
               [ngClass]="activePreviewTab() === 'architecture' ? 'bg-[#292929] text-[#ffffff] font-medium' : 'text-[#8a8986] hover:text-[#e6e6e5] hover:bg-[#202020]'"
             >
-  
               <span>System Design Document</span>
             </button>
           </div>
@@ -144,22 +143,18 @@ import { AuthService } from '../../core/services/auth.service';
               <!-- Pipeline Flow Visual -->
               <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded bg-[#171717] border border-[#282828] font-mono text-[11px]">
                 <div class="flex items-center gap-1.5 text-[#e6e6e5]">
-                  <span class="w-2 h-2 rounded-full bg-[#529cca]"></span>
                   <span>Angular 18 SPA</span>
                 </div>
                 <span class="text-[#555]">&rarr;</span>
                 <div class="flex items-center gap-1.5 text-[#e6e6e5]">
-                  <span class="w-2 h-2 rounded-full bg-[#e6c15c]"></span>
                   <span>Express Gateway</span>
                 </div>
                 <span class="text-[#555]">&rarr;</span>
                 <div class="flex items-center gap-1.5 text-[#e6e6e5]">
-                  <span class="w-2 h-2 rounded-full bg-[#bc8c74]"></span>
                   <span>Delay Middleware</span>
                 </div>
                 <span class="text-[#555]">&rarr;</span>
                 <div class="flex items-center gap-1.5 text-[#5cb87a]">
-                  <span class="w-2 h-2 rounded-full bg-[#5cb87a]"></span>
                   <span>Dual DB Fallback</span>
                 </div>
               </div>

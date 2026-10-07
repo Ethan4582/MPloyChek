@@ -26,7 +26,6 @@ import { DelayService } from '../../../core/services/delay.service';
                 <h2 class="text-sm font-semibold text-[#ffffff] flex items-center gap-2">
                   <span>Backend Telemetry & Async Metrics</span>
                   <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#1c2e22] text-[#5cb87a] border border-[#2d5238]">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#5cb87a] animate-pulse"></span>
                     Live Streaming
                   </span>
                 </h2>
@@ -37,7 +36,7 @@ import { DelayService } from '../../../core/services/delay.service';
             <div class="flex items-center gap-2">
               <button
                 (click)="sendTestPing()"
-                [disabled]="isPinging"
+                [disabled]=\"isPinging\"
                 class="notion-btn text-[11px] py-1 px-2.5 flex items-center gap-1.5 cursor-pointer"
                 title="Send a sample request with current simulated delay"
               >
@@ -199,20 +198,16 @@ import { DelayService } from '../../../core/services/delay.service';
                             {{ req.durationMs }}ms
                           </td>
                           <td class="py-2 px-3 text-[#8a8986]">
-                            @if (req.delayMs > 0) {
-                              <span class="text-[#7da0ca]">+{{ req.delayMs }}ms</span>
-                            } @else {
-                              <span>0ms</span>
-                            }
+                            +{{ req.simulatedDelayMs }}ms
                           </td>
-                          <td class="py-2 px-3 text-right text-[#6e6d6a]">
+                          <td class="py-2 px-3 text-[#8a8986] text-right">
                             {{ formatTime(req.timestamp) }}
                           </td>
                         </tr>
                       } @empty {
                         <tr>
-                          <td colspan="6" class="py-8 text-center text-[#6e6d6a]">
-                            No requests logged yet. Click "Send Test Ping" or interact with the app.
+                          <td colspan="6" class="py-8 text-center text-[#8a8986] text-xs">
+                            No requests recorded yet. Perform actions across the workspace.
                           </td>
                         </tr>
                       }
@@ -224,14 +219,14 @@ import { DelayService } from '../../../core/services/delay.service';
 
           </div>
 
-          <!-- Footer -->
-          <div class="px-5 py-2.5 border-t border-[#2d2d2d] bg-[#222222] flex items-center justify-between text-[11px] text-[#787774]">
-            <span>Active Node Runtime: {{ telemetryService.data()?.system?.nodeVersion }} ({{ telemetryService.data()?.system?.platform }})</span>
+          <!-- Footer Actions -->
+          <div class="px-5 py-3 border-t border-[#2d2d2d] bg-[#222222] flex items-center justify-between text-xs text-[#8a8986]">
+            <span>Auto-refreshing every 1.5s</span>
             <button
               (click)="telemetryService.closeInspector()"
-              class="notion-btn text-xs py-1 px-3 cursor-pointer"
+              class="notion-btn px-3 py-1 text-xs text-[#e6e6e5]"
             >
-              Close Inspector
+              Done
             </button>
           </div>
 
@@ -249,44 +244,50 @@ export class TelemetryModalComponent {
   isPinging = false;
 
   delayOptions = [
-    { label: '0ms (Fast)', ms: 0 },
-    { label: '500ms', ms: 500 },
-    { label: '1.5s (Demo)', ms: 1500 },
-    { label: '3.0s (Slow)', ms: 3000 },
+    { label: '0ms (Instant)', ms: 0 },
+    { label: '500ms (Fast)', ms: 500 },
+    { label: '1500ms (Default)', ms: 1500 },
+    { label: '3000ms (Slow)', ms: 3000 },
   ];
 
   setDelay(ms: number): void {
     this.delayService.setDelay(ms);
   }
 
+  resetLogs(): void {
+    this.http.post('/api/telemetry/reset', {}).subscribe({
+      next: () => this.telemetryService.refresh(),
+    });
+  }
+
   sendTestPing(): void {
     this.isPinging = true;
-    const delay = this.delayService.currentDelay();
-    this.http.get(`/api/health?delay=${delay}`).subscribe({
+    this.http.get('/api/health').subscribe({
       next: () => {
-        this.isPinging = false;
-        this.telemetryService.fetchMetrics().subscribe();
+        setTimeout(() => {
+          this.isPinging = false;
+        }, 300);
       },
       error: () => {
         this.isPinging = false;
-        this.telemetryService.fetchMetrics().subscribe();
       },
     });
   }
 
-  resetLogs(): void {
-    this.telemetryService.resetMetrics().subscribe();
-  }
-
   formatTime(isoString: string): string {
     if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleTimeString();
+    try {
+      const d = new Date(isoString);
+      return d.toTimeString().split(' ')[0] + '.' + String(d.getMilliseconds()).padStart(3, '0');
+    } catch {
+      return isoString;
+    }
   }
 
-  formatUptime(sec = 0): string {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
+  formatUptime(seconds?: number): string {
+    if (!seconds) return '0s';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
     return `${m}m ${s}s`;
   }
 }

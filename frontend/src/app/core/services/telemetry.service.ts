@@ -54,7 +54,7 @@ export class TelemetryService implements OnDestroy {
   private pollIntervalId: any = null;
 
   constructor() {
-    this.fetchMetrics();
+    this.fetchMetrics().subscribe();
     // Auto-poll metrics every 5 seconds to keep sidebar telemetry real-time
     this.startPolling(5000);
   }
@@ -74,6 +74,10 @@ export class TelemetryService implements OnDestroy {
         },
       })
     );
+  }
+
+  refresh(): void {
+    this.fetchMetrics().subscribe();
   }
 
   resetMetrics(): Observable<any> {

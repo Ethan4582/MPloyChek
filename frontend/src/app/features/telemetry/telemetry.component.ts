@@ -44,7 +44,6 @@ import { SidebarService } from '../../core/services/sidebar.service';
 
             <div class="flex items-center gap-2">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono bg-[#1c2e22] text-[#5cb87a] border border-[#2d5238]">
-                <span class="w-2 h-2 rounded-full bg-[#5cb87a] animate-pulse"></span>
                 <span>Live Streaming</span>
               </span>
               <button
@@ -149,88 +148,61 @@ import { SidebarService } from '../../core/services/sidebar.service';
             </div>
           </div>
 
-          <!-- Live Request History Buffer -->
+          <!-- Raw Endpoint Latency List -->
           <div class="p-5 rounded-lg bg-[#202020] border border-[#2c2c2c] space-y-3">
-            <div class="flex items-center justify-between">
-              <h2 class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
-                Recent Request Stream
-              </h2>
-              <span class="text-[11px] text-[#787774] font-mono">
-                Buffer: {{ telemetryService.data()?.traffic?.recentRequests?.length || 0 }} events
-              </span>
-            </div>
+            <h2 class="text-xs font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
+              Endpoint Latency Log (Last 10 Requests)
+            </h2>
 
-            <div class="overflow-x-auto rounded border border-[#2a2a2a]">
-              <table class="w-full text-left text-xs font-mono">
-                <thead class="bg-[#191919] text-[#787774] text-[10px] uppercase border-b border-[#2a2a2a]">
-                  <tr>
-                    <th class="py-2.5 px-3">Timestamp</th>
-                    <th class="py-2.5 px-3">Method</th>
-                    <th class="py-2.5 px-3">Endpoint</th>
-                    <th class="py-2.5 px-3">Status</th>
-                    <th class="py-2.5 px-3 text-right">Server Duration</th>
-                    <th class="py-2.5 px-3 text-right">Injected Delay</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-[#262626]">
-                  @if (telemetryService.data()?.traffic?.recentRequests?.length) {
-                    @for (req of telemetryService.data()!.traffic.recentRequests; track req.id) {
-                      <tr class="hover:bg-[#252525]/60 transition-colors">
-                        <td class="py-2 px-3 text-[#8a8986] whitespace-nowrap text-[11px]">
-                          {{ formatTime(req.timestamp) }}
-                        </td>
-                        <td class="py-2 px-3 whitespace-nowrap">
-                          <span
-                            class="px-1.5 py-0.5 rounded text-[10px] font-semibold"
-                            [ngClass]="{
-                              'bg-[#1a2e22] text-[#5cb87a]': req.method === 'GET',
-                              'bg-[#1a2530] text-[#7da0ca]': req.method === 'POST',
-                              'bg-[#302619] text-[#e0a857]': req.method === 'PATCH',
-                              'bg-[#301a1a] text-[#e05757]': req.method === 'DELETE'
-                            }"
-                          >
-                            {{ req.method }}
-                          </span>
-                        </td>
-                        <td class="py-2 px-3 text-[#e6e6e5] truncate max-w-xs">
-                          {{ req.path }}
-                        </td>
-                        <td class="py-2 px-3 whitespace-nowrap">
-                          <span
-                            class="text-[11px]"
-                            [ngClass]="
-                              req.status < 400
-                                ? 'text-[#5cb87a]'
-                                : req.status === 401 || req.status === 403
-                                ? 'text-[#e0a857]'
-                                : 'text-[#e05757]'
-                            "
-                          >
-                            {{ req.status }}
-                          </span>
-                        </td>
-                        <td class="py-2 px-3 text-right text-[#e6e6e5] whitespace-nowrap">
-                          {{ req.durationMs }}ms
-                        </td>
-                        <td class="py-2 px-3 text-right text-[#bc8c74] whitespace-nowrap">
-                          +{{ req.delayMs }}ms
-                        </td>
-                      </tr>
-                    }
-                  } @else {
-                    <tr>
-                      <td colspan="6" class="py-8 text-center text-[#787774] text-xs">
-                        No telemetry events recorded yet. Click "Send Ping" to trigger an event.
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+            <div class="space-y-1.5 font-mono text-xs">
+              @for (req of telemetryService.data()?.traffic?.recentRequests || []; track req.id || $index) {
+                <div class="flex items-center justify-between p-2 rounded bg-[#171717] border border-[#262626]">
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="px-1.5 py-0.5 rounded text-[10px] font-bold"
+                      [ngClass]="
+                        req.method === 'GET'
+                          ? 'bg-[#1e2d3d] text-[#529cca]'
+                          : req.method === 'POST'
+                            ? 'bg-[#1c2e22] text-[#5cb87a]'
+                            : req.method === 'DELETE'
+                              ? 'bg-[#331f1f] text-[#e05757]'
+                              : 'bg-[#332924] text-[#bc8c74]'
+                      "
+                    >
+                      {{ req.method }}
+                    </span>
+                    <span class="text-[#e6e6e5]">{{ req.path }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-3">
+                    <span class="text-[#8a8986]">{{ req.durationMs }}ms</span>
+                    <span
+                      class="px-1.5 py-0.2 rounded text-[10px]"
+                      [ngClass]="
+                        req.status < 300
+                          ? 'text-[#5cb87a]'
+                          : req.status < 400
+                            ? 'text-[#529cca]'
+                            : 'text-[#e05757]'
+                      "
+                    >
+                      {{ req.status }}
+                    </span>
+                  </div>
+                </div>
+              } @empty {
+                <div class="text-[#8a8986] py-3 text-center text-xs">
+                  No requests captured yet. Trigger actions across the portal to see live telemetry.
+                </div>
+              }
             </div>
           </div>
 
         </div>
+
       </div>
+
     </div>
   `,
 })
@@ -243,46 +215,33 @@ export class TelemetryComponent implements OnInit {
   isPinging = signal<boolean>(false);
 
   presets = [
-    { label: '0ms (Baseline)', ms: 0 },
-    { label: '500ms (Fast)', ms: 500 },
-    { label: '1,500ms (Noticeable)', ms: 1500 },
-    { label: '3,000ms (Heavy)', ms: 3000 },
+    { label: '0ms (Instant)', ms: 0 },
+    { label: '500ms (Quick)', ms: 500 },
+    { label: '1500ms (Default)', ms: 1500 },
+    { label: '3000ms (Heavy)', ms: 3000 },
   ];
 
   ngOnInit(): void {
-    this.telemetryService.fetchMetrics();
+    this.telemetryService.startPolling(2000);
   }
 
   refreshMetrics(): void {
-    this.telemetryService.fetchMetrics();
-  }
-
-  sendTestPing(): void {
-    this.isPinging.set(true);
-    const delay = this.delayService.currentDelay();
-    this.http.get(`/api/health?delay=${delay}`).subscribe({
-      next: () => {
-        this.isPinging.set(false);
-        this.telemetryService.fetchMetrics();
-      },
-      error: () => {
-        this.isPinging.set(false);
-        this.telemetryService.fetchMetrics();
-      },
-    });
+    this.telemetryService.refresh();
   }
 
   clearBuffer(): void {
     this.http.post('/api/telemetry/reset', {}).subscribe({
-      next: () => {
-        this.telemetryService.fetchMetrics();
-      },
+      next: () => this.telemetryService.refresh(),
     });
   }
 
-  formatTime(isoString: string): string {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleTimeString();
+  sendTestPing(): void {
+    this.isPinging.set(true);
+    this.http.get('/api/health').subscribe({
+      next: () => {
+        setTimeout(() => this.isPinging.set(false), 300);
+      },
+      error: () => this.isPinging.set(false),
+    });
   }
 }

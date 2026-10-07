@@ -1,34 +1,21 @@
 # MPloyChek
 
-![MPloyChek Hero](./hero.png)
+![MPloyChek Hero](./frontend/public/hero.png)
 
-A role-based employment verification portal built with Angular 18 and a Node.js Express backend. It separates access between administrators and standard employees, backed by MongoDB with an automatic fallback to an embedded in-memory database when no database URL is set.
-
----
-
-## System design & architecture
-
-For an in-depth breakdown of the architecture, data modeling, RBAC security boundaries, and asynchronous latency injection, see the dedicated specification:
-
-📄 **[System Design Specification (system-design.md)](./system-design.md)**
-
-### High-level architecture
-
-MPloyChek consists of three layers:
-
-1. **Frontend (Angular 18)**: A standalone single-page application using Angular Signals for state management and functional HTTP interceptors for JWT token handling and error reporting.
-2. **Backend (Node.js & Express)**: A TypeScript REST API structured around controllers, services, and repositories, with Zod for request validation.
-3. **Database (MongoDB)**: Mongoose schemas store users and verification records. If no `MONGO_URI` is provided, the backend starts an embedded in-memory MongoDB instance and seeds demo data on boot.
+A lightweight RBAC employment verification platform built with Angular 18, Node.js, and MongoDB (with zero-config in-memory fallback).
 
 ---
 
-## Features
+## Architecture & features
 
-- **Role-based access control**: Administrators can inspect organizational records, sensitive compensation tiers, risk scores, and audit notes. General users can only view their own verification records.
-- **Records directory**: Search and filter employment records by candidate name, department, clearance level, and verification status.
-- **User management**: Dedicated administrator view to create users, update roles, toggle active status, and delete accounts.
-- **Zero-config database**: Boots out of the box without installing MongoDB or Docker. Seed data is inserted automatically.
-- **Docker support**: Single-command startup with multi-container Docker Compose.
+📄 **[System Design Specification](./system-design.md)**
+
+- **Frontend**: Angular 18 standalone SPA with Signals state management & functional HTTP interceptors.
+- **Backend**: TypeScript REST API (Express) with layered architecture and Zod request validation.
+- **Database**: MongoDB/Mongoose with auto-fallback to embedded in-memory database and auto-seeded records.
+- **RBAC**: Admin tier (full org records, risk scores, user management) vs. Employee tier (self-records only).
+- **Directory & Filters**: Multi-attribute filtering (department, clearance, verification status) with search.
+- **Deployment**: Zero-config local boot and multi-container Docker Compose support.
 
 ---
 
