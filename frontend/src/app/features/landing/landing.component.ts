@@ -206,12 +206,12 @@ import { AuthService } from '../../core/services/auth.service';
           <!-- Creator Credentials -->
           <div class="flex flex-col sm:items-end gap-1.5">
             <div class="text-[11px] text-[#9b9a97]">
-              Created by <a href="https://aash7.xyz/" target="_blank" rel="noopener noreferrer" class="text-[#ffffff] font-medium hover:underline">Ashirwad Singh</a>
+              Created by <a href="https://www.aash7.xyz/" target="_blank" rel="noopener noreferrer" class="text-[#ffffff] font-medium hover:underline">Ashirwad Singh</a>
             </div>
             
             <div class="flex items-center gap-3 text-[11px]">
               <a
-                href="https://aash7.xyz/"
+                href="https://www.aash7.xyz/"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="hover:text-[#ffffff] transition-colors"
@@ -238,12 +238,10 @@ import { AuthService } from '../../core/services/auth.service';
               </a>
               <span class="text-[#3a3a3a]">&bull;</span>
               <a
-                href="https://github.com/Ethan4582"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="mailto:singhashirwad2003@gmail.com"
                 class="hover:text-[#ffffff] transition-colors"
               >
-                GitHub
+                Email
               </a>
             </div>
           </div>

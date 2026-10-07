@@ -99,6 +99,7 @@ npm start
 ```bash
 cd frontend
 npm install
+npm run build
 npm start
 ```
 
@@ -137,7 +138,7 @@ Distributed under the [MIT License](LICENSE). See `LICENSE` for more information
 
 **Ashirwad Singh**
 
-- Portfolio: [https://aash7.xyz/](https://aash7.xyz/)
+- Portfolio: [https://www.aash7.xyz/](https://www.aash7.xyz/)
 - LinkedIn: [https://www.linkedin.com/in/ashirwad08singh/](https://www.linkedin.com/in/ashirwad08singh/)
-- X (Twitter): [https://x.com/ashirwadsingh_](https://x.com/ashirwadsingh_/)
-- GitHub: [https://github.com/Ethan4582](https://github.com/Ethan4582)
+- X (Twitter): [https://x.com/ashirwadsingh_](https://x.com/ashirwadsingh_)
+- Email: [singhashirwad2003@gmail.com](mailto:singhashirwad2003@gmail.com)

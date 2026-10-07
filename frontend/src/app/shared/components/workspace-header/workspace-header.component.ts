@@ -17,22 +17,8 @@ export interface BreadcrumbItem {
   template: `
     <header class="sticky top-0 z-30 w-full h-14 bg-[#191919]/95 backdrop-blur-md border-b border-[#2a2a2a] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
       
-      <!-- Left: Notion-Style Sidebar Toggle & Breadcrumbs -->
+      <!-- Left: Breadcrumbs -->
       <div class="flex items-center gap-2.5 min-w-0">
-        <!-- Sidebar Toggle Icon (Notion Panel Icon) -->
-        <button
-          type="button"
-          (click)="sidebarService.toggle()"
-          class="p-1.5 -ml-1 rounded-md text-[#8a8986] hover:text-[#ffffff] hover:bg-[#252525] transition-colors cursor-pointer"
-          [title]="sidebarService.isOpen() ? 'Collapse Sidebar' : 'Expand Sidebar'"
-          aria-label="Toggle Sidebar"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
-            <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M9 4v16" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-
         <!-- Breadcrumbs -->
         <nav class="flex items-center gap-1.5 text-xs text-[#8a8986] truncate select-none">
           <a routerLink="/" class="hover:text-[#ffffff] transition-colors shrink-0">
@@ -93,180 +79,79 @@ export interface BreadcrumbItem {
           </button>
         }
 
-        <!-- Profile Button Trigger -->
-        <button
-          type="button"
-          (click)="toggleProfileSheet()"
-          class="flex items-center gap-2 p-1 pl-1.5 rounded-md hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-colors cursor-pointer select-none"
-          title="Account Profile & Information"
-          aria-label="User Profile"
-        >
-          <div class="w-7 h-7 rounded-md bg-[#2a2a2a] border border-[#383838] flex items-center justify-center text-xs font-semibold text-[#e6e6e5] shadow-xs">
-            {{ getUserInitials() }}
+        <!-- Profile Hover Card (Shadcn-style Hover Card) -->
+        <div class="relative group">
+          <button
+            type="button"
+            class="flex items-center gap-2 p-1 rounded-md hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-colors cursor-pointer select-none"
+            title="Profile"
+            aria-label="User Profile"
+          >
+            <div class="w-7 h-7 rounded-md bg-[#2a2a2a] border border-[#383838] flex items-center justify-center text-xs font-semibold text-[#e6e6e5] shadow-xs">
+              {{ getUserInitials() }}
+            </div>
+          </button>
+
+          <!-- Shadcn Popover / Hover Card Content -->
+          <div
+            class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 delay-75 absolute right-0 top-full pt-1.5 z-50 pointer-events-none group-hover:pointer-events-auto"
+          >
+            <div class="w-64 rounded-lg bg-[#202020] border border-[#2f2f2f] shadow-xl p-3.5 space-y-3 text-xs">
+              
+              <!-- Basic Profile Identity -->
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-md bg-[#292929] border border-[#383838] flex items-center justify-center text-xs font-bold text-[#ffffff] shrink-0">
+                  {{ getUserInitials() }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="font-medium text-[#ffffff] truncate">
+                    {{ authService.currentUser()?.name || 'User' }}
+                  </div>
+                  <div class="text-[11px] text-[#8a8986] font-mono truncate">
+                    {{ authService.currentUser()?.userId }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Clearance & Role Tag -->
+              <div class="flex items-center justify-between pt-2 border-t border-[#292929] text-[11px]">
+                <span class="text-[#787774]">Role</span>
+                @if (authService.isAdmin()) {
+                  <span class="tag-bronze text-[10px]">Admin</span>
+                } @else {
+                  <span class="tag-blue text-[10px]">General User</span>
+                }
+              </div>
+
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-[#787774]">Status</span>
+                <span class="text-[#5cb87a] font-medium flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#5cb87a]"></span>
+                  <span>Active</span>
+                </span>
+              </div>
+
+              <!-- Sign Out Button -->
+              <div class="pt-2 border-t border-[#292929]">
+                <button
+                  type="button"
+                  (click)="onSignOut()"
+                  class="w-full py-1.5 px-2.5 rounded-md hover:bg-[#2c2222] text-[#e05757] hover:text-[#ff6b6b] text-[11px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign out</span>
+                </button>
+              </div>
+
+            </div>
           </div>
-        </button>
+        </div>
 
       </div>
 
     </header>
-
-    <!-- Profile Slide-Over Sheet / Drawer -->
-    @if (isProfileSheetOpen()) {
-      <div
-        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-150"
-        (click)="closeProfileSheet()"
-      >
-        <div
-          class="w-full max-w-sm h-full bg-[#1e1e1e] border-l border-[#2e2e2e] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-200"
-          (click)="$event.stopPropagation()"
-        >
-          <!-- Sheet Top -->
-          <div class="space-y-6">
-            
-            <!-- Sheet Header -->
-            <div class="flex items-center justify-between pb-4 border-b border-[#2d2d2d]">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-medium uppercase tracking-wider text-[#787774]">Account Profile</span>
-              </div>
-              <button
-                type="button"
-                (click)="closeProfileSheet()"
-                class="p-1 rounded-md text-[#787774] hover:text-[#ffffff] hover:bg-[#2a2a2a] transition-colors cursor-pointer"
-                title="Close"
-              >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <!-- User Card Overview -->
-            <div class="flex items-center gap-3.5 p-3.5 rounded-lg bg-[#252525] border border-[#333333]">
-              <div class="w-12 h-12 rounded-lg bg-[#2f2f2f] border border-[#404040] flex items-center justify-center text-sm font-bold text-[#ffffff] shadow-inner shrink-0">
-                {{ getUserInitials() }}
-              </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-semibold text-[#ffffff] truncate">
-                  {{ authService.currentUser()?.name || 'Authorized User' }}
-                </h3>
-                <p class="text-xs text-[#9b9a97] font-mono truncate">
-                  {{ authService.currentUser()?.userId }}
-                </p>
-                <div class="mt-1.5 flex items-center gap-1.5">
-                  @if (authService.isAdmin()) {
-                    <span class="tag-bronze text-[10px]">Admin Clearance</span>
-                  } @else {
-                    <span class="tag-blue text-[10px]">General User</span>
-                  }
-                  <span class="tag-green text-[10px]">Active</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Detail Properties Table -->
-            <div class="space-y-3 text-xs">
-              <div class="text-[11px] font-medium uppercase tracking-wider text-[#787774]">
-                Security Clearance & Details
-              </div>
-
-              <div class="p-3 rounded-lg bg-[#222222] border border-[#2c2c2c] space-y-2.5">
-                <div class="flex items-center justify-between text-xs py-1 border-b border-[#2a2a2a]">
-                  <span class="text-[#787774]">Department</span>
-                  <span class="font-medium text-[#e6e6e5]">{{ authService.currentUser()?.department || 'Operations' }}</span>
-                </div>
-
-                <div class="flex items-center justify-between text-xs py-1 border-b border-[#2a2a2a]">
-                  <span class="text-[#787774]">Database Access</span>
-                  <span class="font-mono text-[#bc8c74] text-[11px]">
-                    {{ authService.isAdmin() ? 'Full Read/Write (Unrestricted)' : 'Row-Level Restrictive' }}
-                  </span>
-                </div>
-
-                <div class="flex items-center justify-between text-xs py-1 border-b border-[#2a2a2a]">
-                  <span class="text-[#787774]">Simulated Latency</span>
-                  <span class="font-mono text-[#5cb87a] text-[11px]">{{ delayService.currentDelay() }}ms</span>
-                </div>
-
-                <div class="flex items-center justify-between text-xs py-1">
-                  <span class="text-[#787774]">Session Status</span>
-                  <span class="text-[#529cca] font-medium">Valid JWT</span>
-                </div>
-              </div>
-
-              <!-- Scope Callout -->
-              <div class="p-3 rounded-lg bg-[#242424] border border-[#303030] text-[11px] text-[#9b9a97] leading-relaxed">
-                @if (authService.isAdmin()) {
-                  <span class="text-[#bc8c74] font-medium">Admin Scope:</span> You have authorization to manage database user records, inspect confidential compensation tiers, and view background check risk scores.
-                } @else {
-                  <span class="text-[#529cca] font-medium">General Scope:</span> Access is strictly filtered to your candidate records. Sensitive audit notes and compensation data are stripped by backend query projections.
-                }
-              </div>
-            </div>
-
-            <!-- Quick Navigation Shortcuts -->
-            <div class="space-y-1.5 text-xs">
-              <div class="text-[11px] font-medium uppercase tracking-wider text-[#787774] mb-1">
-                Quick Shortcuts
-              </div>
-
-              <a
-                routerLink="/dashboard"
-                (click)="closeProfileSheet()"
-                class="flex items-center justify-between p-2 rounded-md hover:bg-[#282828] text-[#9b9a97] hover:text-[#ffffff] transition-colors"
-              >
-                <span>Verification Directory</span>
-                <span class="text-[#555]">→</span>
-              </a>
-
-              <a
-                routerLink="/docs"
-                (click)="closeProfileSheet()"
-                class="flex items-center justify-between p-2 rounded-md hover:bg-[#282828] text-[#9b9a97] hover:text-[#ffffff] transition-colors"
-              >
-                <span>System Design Specification</span>
-                <span class="text-[#555]">→</span>
-              </a>
-
-              <a
-                routerLink="/creator"
-                (click)="closeProfileSheet()"
-                class="flex items-center justify-between p-2 rounded-md hover:bg-[#282828] text-[#9b9a97] hover:text-[#ffffff] transition-colors"
-              >
-                <span>Creator Profile & Socials</span>
-                <span class="text-[#bc8c74]">★</span>
-              </a>
-
-              @if (authService.isAdmin()) {
-                <a
-                  routerLink="/admin/users"
-                  (click)="closeProfileSheet()"
-                  class="flex items-center justify-between p-2 rounded-md hover:bg-[#282828] text-[#9b9a97] hover:text-[#ffffff] transition-colors"
-                >
-                  <span>User Administration</span>
-                  <span class="text-[#555]">→</span>
-                </a>
-              }
-            </div>
-
-          </div>
-
-          <!-- Sheet Bottom: Sign Out Action -->
-          <div class="pt-4 border-t border-[#2d2d2d] space-y-2">
-            <button
-              type="button"
-              (click)="onSignOut()"
-              class="w-full py-2 px-3 rounded-md bg-[#2c2222] border border-[#4a2828] text-[#e05757] hover:bg-[#382626] text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-2"
-            >
-              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span>Sign Out of Workspace</span>
-            </button>
-          </div>
-
-        </div>
-      </div>
-    }
   `,
 })
 export class WorkspaceHeaderComponent {
@@ -281,18 +166,8 @@ export class WorkspaceHeaderComponent {
 
   @Output() actionClicked = new EventEmitter<void>();
 
-  isProfileSheetOpen = signal<boolean>(false);
-
   onActionClick(): void {
     this.actionClicked.emit();
-  }
-
-  toggleProfileSheet(): void {
-    this.isProfileSheetOpen.update((v) => !v);
-  }
-
-  closeProfileSheet(): void {
-    this.isProfileSheetOpen.set(false);
   }
 
   getUserInitials(): string {
@@ -306,7 +181,6 @@ export class WorkspaceHeaderComponent {
   }
 
   onSignOut(): void {
-    this.closeProfileSheet();
     this.authService.logout();
     this.router.navigate(['/login']);
   }

@@ -49,27 +49,20 @@ export interface TocItem {
             <main class="flex-1 max-w-4xl min-w-0 space-y-6">
               
               <!-- Document Title & Meta Header -->
-              <div class="space-y-3 pb-6 border-b border-[#2a2a2a]">
-                <div class="flex items-center gap-2">
-                  <span class="tag-bronze text-xs">Architecture Spec</span>
-                  <span class="text-xs text-[#8a8986] font-mono">&bull; System Design Whitepaper</span>
-                </div>
-                
-                <h1 class="text-3xl sm:text-4xl font-bold text-[#ffffff] tracking-tight">
+              <div class="space-y-2 pb-5 border-b border-[#2a2a2a]">
+                <h1 class="text-2xl sm:text-3xl font-bold text-[#ffffff] tracking-tight">
                   System Design Specification
                 </h1>
                 
-                <p class="text-sm text-[#9b9a97] leading-relaxed">
-                  Technical architecture, dual-database seam, field-level query projection RBAC, and parameterized non-blocking delay engineering for the MPloyChek platform.
+                <p class="text-xs sm:text-sm text-[#9b9a97] leading-relaxed">
+                  Technical architecture, dual-database seam, field-level query projection RBAC, and parameterized non-blocking delay engineering.
                 </p>
 
-                <!-- Document Author & Version Strip -->
-                <div class="flex flex-wrap items-center gap-4 pt-2 text-xs text-[#8a8986] font-mono">
-                  <div>Author: <span class="text-[#e6e6e5]">Ethan (Full-Stack Engineer)</span></div>
+                <!-- Document Author Strip -->
+                <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-[#8a8986] font-mono">
+                  <div>Author: <span class="text-[#e6e6e5]">Ashirwad Singh</span></div>
                   <div>&bull;</div>
                   <div>Source: <span class="text-[#bc8c74]">system-design.md</span></div>
-                  <div>&bull;</div>
-                  <div>Status: <span class="text-[#5cb87a]">Final Production Spec</span></div>
                 </div>
 
                 <!-- Mobile Floating TOC Button (Small Screens Only) -->

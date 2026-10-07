@@ -1,4 +1,4 @@
-import { Component, inject, signal, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, signal, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -72,85 +72,61 @@ import { AuthService } from '../../../core/services/auth.service';
           </a>
 
           @if (authService.isAuthenticated()) {
-            <div class="relative" #menuContainer>
+            <!-- Shadcn-style Profile Hover Card -->
+            <div class="relative group">
               <button
                 type="button"
-                (click)="toggleMenu()"
-                class="flex items-center gap-2 p-1 pl-2 rounded-md hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-colors cursor-pointer"
+                class="flex items-center gap-1.5 p-1 pl-1.5 rounded-md hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-colors cursor-pointer select-none"
               >
-                <span class="text-xs text-[#e6e6e5] font-medium max-w-[100px] truncate hidden sm:inline">
-                  {{ authService.currentUser()?.name?.split(' ')?.[0] }}
-                </span>
                 <div class="w-6 h-6 rounded-md bg-[#2a2a2a] border border-[#383838] flex items-center justify-center text-[10px] font-semibold text-[#e6e6e5]">
                   {{ getUserInitials() }}
                 </div>
               </button>
 
-              <!-- Profile Dropdown Menu -->
-              @if (isMenuOpen()) {
-                <div class="absolute right-0 mt-2 w-56 bg-[#252525] border border-[#333333] rounded-lg shadow-notion-dropdown p-1.5 z-50 text-xs animate-in fade-in zoom-in-95 duration-100">
-                  <div class="px-2.5 py-2 border-b border-[#2e2e2e] mb-1">
-                    <p class="font-medium text-[#ffffff] truncate">{{ authService.currentUser()?.name }}</p>
-                    <p class="text-[11px] text-[#8a8986] truncate font-mono mt-0.5">{{ authService.currentUser()?.userId }}</p>
-                    <div class="mt-1.5 flex items-center gap-1.5">
-                      @if (authService.isAdmin()) {
-                        <span class="tag-bronze text-[10px]">Admin Clearance</span>
-                      } @else {
-                        <span class="tag-blue text-[10px]">General User</span>
-                      }
+              <!-- Hover Card Popover -->
+              <div
+                class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-150 delay-75 absolute right-0 top-full pt-1.5 z-50 pointer-events-none group-hover:pointer-events-auto"
+              >
+                <div class="w-60 rounded-lg bg-[#202020] border border-[#2f2f2f] shadow-xl p-3 space-y-2.5 text-xs">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-md bg-[#292929] border border-[#383838] flex items-center justify-center text-xs font-bold text-[#ffffff] shrink-0">
+                      {{ getUserInitials() }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="font-medium text-[#ffffff] truncate">
+                        {{ authService.currentUser()?.name }}
+                      </div>
+                      <div class="text-[11px] text-[#8a8986] font-mono truncate">
+                        {{ authService.currentUser()?.userId }}
+                      </div>
                     </div>
                   </div>
 
-                  <a
-                    routerLink="/dashboard"
-                    (click)="isMenuOpen.set(false)"
-                    class="block px-2.5 py-1.5 rounded text-[#9b9a97] hover:text-[#ffffff] hover:bg-[#2e2e2e] transition-colors"
-                  >
-                    Open Workspace
-                  </a>
+                  <div class="flex items-center justify-between pt-2 border-t border-[#292929] text-[11px]">
+                    <span class="text-[#787774]">Role</span>
+                    @if (authService.isAdmin()) {
+                      <span class="tag-bronze text-[10px]">Admin</span>
+                    } @else {
+                      <span class="tag-blue text-[10px]">General User</span>
+                    }
+                  </div>
 
-                  @if (authService.isAdmin()) {
-                    <a
-                      routerLink="/admin/users"
-                      (click)="isMenuOpen.set(false)"
-                      class="block px-2.5 py-1.5 rounded text-[#9b9a97] hover:text-[#ffffff] hover:bg-[#2e2e2e] transition-colors"
+                  <div class="pt-2 border-t border-[#292929]">
+                    <button
+                      type="button"
+                      (click)="onSignOut()"
+                      class="w-full py-1.5 px-2 rounded-md hover:bg-[#2c2222] text-[#e05757] hover:text-[#ff6b6b] text-[11px] font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      User Management
-                    </a>
-                  }
-
-                  <a
-                    routerLink="/creator"
-                    (click)="isMenuOpen.set(false)"
-                    class="block px-2.5 py-1.5 rounded text-[#9b9a97] hover:text-[#ffffff] hover:bg-[#2e2e2e] transition-colors"
-                  >
-                    Creator Profile
-                  </a>
-
-                  <a
-                    routerLink="/docs"
-                    (click)="isMenuOpen.set(false)"
-                    class="block px-2.5 py-1.5 rounded text-[#9b9a97] hover:text-[#ffffff] hover:bg-[#2e2e2e] transition-colors"
-                  >
-                    Architecture Docs
-                  </a>
-
-                  <div class="h-px bg-[#2e2e2e] my-1"></div>
-
-                  <button
-                    type="button"
-                    (click)="onSignOut()"
-                    class="w-full text-left px-2.5 py-1.5 rounded text-[#e05757] hover:bg-[#3b2222]/40 transition-colors cursor-pointer"
-                  >
-                    Sign Out
-                  </button>
+                      <span>Sign out</span>
+                    </button>
+                  </div>
                 </div>
-              }
+              </div>
             </div>
           } @else {
             <a
               routerLink="/login"
-              class="notion-btn-primary text-xs py-1 px-3"
+              class="notion-btn-primary px-3 py-1 text-xs font-medium"
             >
               Sign In
             </a>
@@ -164,20 +140,6 @@ import { AuthService } from '../../../core/services/auth.service';
 export class NavbarComponent {
   authService = inject(AuthService);
   private router = inject(Router);
-  private elementRef = inject(ElementRef);
-
-  isMenuOpen = signal<boolean>(false);
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.isMenuOpen.set(false);
-    }
-  }
-
-  toggleMenu(): void {
-    this.isMenuOpen.update((v) => !v);
-  }
 
   getUserInitials(): string {
     const name = this.authService.currentUser()?.name || 'User';
@@ -190,7 +152,6 @@ export class NavbarComponent {
   }
 
   onSignOut(): void {
-    this.isMenuOpen.set(false);
     this.authService.logout();
     this.router.navigate(['/login']);
   }
