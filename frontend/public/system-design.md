@@ -1,16 +1,12 @@
-# MPloyChek: System design
+# MPloyChek: System Design Specification
 
-> Role-based employment verification platform that isolates sensitive records through database-level query projections, abstract repository seams, and non-blocking asynchronous latency simulation.
-
----
+> Role-based employment verification platform that isolates sensitive records through database query projections, swappable repository seams, and non-blocking asynchronous latency simulation.
 
 ## Problem statement
 
-Organizations handling employee verification must give administrators and standard employees access to the same portal while enforcing strict boundaries around data visibility. Standard employees require access only to their own verification status. Sensitive attributes such as compensation grades, risk scores, and internal audit notes must never reach non-administrative users.
+Employment verification portals require strict data isolation between roles. Standard employees should only access their own records, while administrators require organization-wide visibility.
 
-When access control relies on frontend filtering, the backend transmits full records over the network and leaves confidential data exposed in browser inspection tools. The system must enforce authorization and data redaction at the database layer before payloads serialize. The application must also run immediately without requiring reviewers to configure database instances or cloud credentials, while remaining modular enough to swap storage backends and demonstrate client-side asynchronous processing under variable network delays.
-
----
+Relying on client-side filtering exposes confidential fields (compensation grades, risk scores, internal audit notes) in network payloads. MPloyChek resolves this by enforcing query-level data redaction at the database tier, providing zero-configuration in-memory persistence, and supporting non-blocking parameterized latency to validate async client states.
 
 ## Goals and non-goals
 
@@ -26,8 +22,6 @@ When access control relies on frontend filtering, the backend transmits full rec
 - Document binary attachment storage or PDF export pipelines.
 - Distributed session clustering across multiple physical server instances.
 
----
-
 ## Functional requirements
 
 - Users authenticate using user ID, password, and a claimed role. The server rejects mismatched roles with HTTP 403.
@@ -38,16 +32,12 @@ When access control relies on frontend filtering, the backend transmits full rec
 - Any API endpoint must accept a `?delay=<ms>` query parameter that pauses execution on the server asynchronously before returning.
 - The frontend displays loading states, active user context, and role-appropriate table columns.
 
----
-
 ## Non-functional requirements
 
 - **Security**: Sensitive fields must be excluded at the query projection layer. They must never leave the database server in payloads intended for standard users.
 - **Portability**: The application must boot with zero external database dependencies in under 3 seconds using embedded memory fallback.
 - **Latency**: Baseline API response time must remain under 50 milliseconds when the delay parameter is zero. Simulated delays must execute within 5% of the requested duration.
 - **Modularity**: Complete separation between HTTP transport, business logic, and database persistence layers.
-
----
 
 ## Scale and capacity estimation
 
@@ -68,14 +58,12 @@ Target deployment: Internal enterprise screening portal for an organization of 5
 Peak traffic factor of 10x during morning onboarding windows = 0.4 queries per second sustained, with burst capacity up to 5 queries per second.
 A single Node.js runtime and single-node or embedded database handles this throughput comfortably at less than 2% CPU utilization and under 120 MB memory footprint.
 
----
-
 ## High-level design
 
 The architecture separates the frontend single-page application from the backend through an API gateway proxy, routing requests through authentication, authorization, business services, and a swappable repository layer.
 
 ```
-Client (Angular 18)
+Client (Angular 19)
       │
       ▼  HTTP /api (Vite reverse proxy)
 API Gateway / Express Server
@@ -98,14 +86,12 @@ Repository Interface (storage abstraction)
 
 ### Component responsibilities
 
-1. **Frontend single-page application**: Built with Angular 18 standalone components. Uses Angular Signals for fine-grained reactivity, functional HTTP interceptors for token attachment, and route guards for client-side navigation restrictions.
+1. **Frontend single-page application**: Built with Angular 19 standalone components. Uses Angular Signals for fine-grained reactivity, functional HTTP interceptors for token attachment, and route guards for client-side navigation restrictions.
 2. **Reverse proxy**: Local Vite development proxy maps `/api/*` requests from port 4200 to backend port 3000, avoiding cross-origin resource sharing complexities during development.
 3. **Delay engine**: Middleware intercepts the `?delay` query parameter and delays request resolution through an asynchronous Promise timer before reaching route handlers.
 4. **Authentication and RBAC middleware**: Validates JWT signatures, checks expiration, and rejects access to administrative endpoints if the caller token lacks administrator privileges.
 5. **Service layer**: Coordinates business operations, validates inputs, and delegates queries to repository interfaces.
 6. **Repository layer**: Implements domain interfaces (`IUserRepository`, `IRecordRepository`) to decouple storage engines from application logic.
-
----
 
 ## Low-level design
 
@@ -113,7 +99,7 @@ Repository Interface (storage abstraction)
 
 To simulate network conditions and showcase frontend asynchronous handling without freezing the Node.js event loop, the delay middleware uses non-blocking asynchronous timers:
 
-```
+```typescript
 function delayMiddleware(req, res, next):
     rawDelay = parseInteger(req.query.delay)
     delayMs = clamp(rawDelay, min: 0, max: 10000)
@@ -130,7 +116,7 @@ Using `setTimeout` inside a Promise keeps the Node.js event loop free to process
 
 Restricting sensitive records at the database driver prevents information leakage. The repository inspects the authenticated user role and executes specific projections:
 
-```
+```typescript
 function findRecordsForUser(userId, role):
     if role == "Admin":
         return db.records.find().sort({ createdAt: -1 })
@@ -152,7 +138,7 @@ Because projected fields are omitted in the database query, the server runtime n
 
 Controllers and services communicate exclusively through TypeScript interfaces, decoupling domain logic from database drivers:
 
-```
+```typescript
 interface IRecordRepository:
     findById(id: string): Promise<Record | null>
     findForUser(userId: string, role: string): Promise<Record[]>
@@ -167,13 +153,13 @@ class DynamoRecordRepository implements IRecordRepository:
     // AWS DynamoDB DocumentClient implementation
 ```
 
-This abstraction allows substituting MongoDB for Amazon DynamoDB or local XML storage by registering an alternate implementation during application bootstrap, without changing a single line in controllers or services.
+This abstraction allows substituting MongoDB for Amazon DynamoDB or local storage by registering an alternate implementation during application bootstrap, without changing a single line in controllers or services.
 
 ### Dual-mode persistence bootstrap
 
 To ensure zero-configuration setup while preserving external database compatibility, the connection layer attempts external connection first, then falls back to an embedded instance:
 
-```
+```typescript
 async function initializeDatabase():
     if MONGO_URI is set:
         try:
@@ -187,8 +173,6 @@ async function initializeDatabase():
     seedDatabaseIfEmpty()
     return "Connected to Embedded In-Memory Database"
 ```
-
----
 
 ## Data models and schemas
 
@@ -235,8 +219,6 @@ Represents employment screening and background audit records.
 }
 ```
 
----
-
 ## API design
 
 All endpoints support the optional `?delay=<ms>` query parameter.
@@ -273,21 +255,14 @@ Response payload (HTTP 200):
 `GET /api/records?delay=ms`
 Returns verification records. Requires Bearer token in Authorization header. Output fields depend strictly on token role.
 
-Admin response: Returns all records with `compensationGrade`, `riskScore`, and `auditNotes`.
-General User response: Returns only caller records with confidential fields stripped.
+- **Admin response**: Returns all records with `compensationGrade`, `riskScore`, and `auditNotes`.
+- **General User response**: Returns only caller records with confidential fields stripped.
 
 ### User management (Admin only)
 
-`GET /api/users?delay=ms`
-Returns list of registered platform users. Blocked with HTTP 403 for General Users.
-
-`PATCH /api/users/:id?delay=ms`
-Modifies user role, department, or active status.
-
-`DELETE /api/users/:id?delay=ms`
-Removes user record from the database.
-
----
+- `GET /api/users?delay=ms`: Returns list of registered platform users. Blocked with HTTP 403 for General Users.
+- `PATCH /api/users/:id?delay=ms`: Modifies user role, department, or active status.
+- `DELETE /api/users/:id?delay=ms`: Removes user record from the database.
 
 ## Key architectural decisions
 
@@ -303,8 +278,6 @@ Using synchronous loops (`while (Date.now() < target)`) to simulate delay blocks
 ### Why Angular Signals instead of NgRx store?
 The application manages distinct, bounded state: user authentication, active delay preferences, and verification record lists. Introducing NgRx actions, reducers, effects, and selectors adds substantial boilerplate with minimal benefit for this scale. Angular Signals provide synchronous reactivity, automatic dependency tracking, and direct template integration without RxJS subscription leaks.
 
----
-
 ## Reliability and failure handling
 
 | Component | Failure mode | Mitigation |
@@ -314,33 +287,6 @@ The application manages distinct, bounded state: user authentication, active del
 | Authorization | Role claim mismatch at login | Server compares requested role against stored database role and rejects spoofed requests with HTTP 403. |
 | Network latency | Delay parameter exceeds limit | Middleware clamps input between 0 and 10,000 ms to prevent denial of service through arbitrary timeouts. |
 | Frontend HTTP | Backend process stopped | Interceptor detects connection refusal and displays actionable terminal restart commands in UI banner. |
-
----
-
-## Diagram prompts
-
-### Architecture and data flow diagram
-> Draw a clean left-to-right system architecture diagram in Excalidraw style. White background with dark gray lines and rounded rectangular nodes. Generous spacing.
->
-> Nodes from left to right:
-> 1. Angular 18 Client (Port 4200)
-> 2. Vite Reverse Proxy (/api)
-> 3. Express Application (Port 3000)
-> 4. Delay Middleware (?delay=ms)
-> 5. JWT and RBAC Guard
-> 6. Repository Seam (IRecordRepository)
-> 7. Storage Target (showing dual paths: Embedded In-Memory DB as default, External MongoDB as configured path)
->
-> Label all arrows with protocol and payload type. Highlight the Repository Seam as the primary decoupling point using a distinct dashed border.
-
-### Security and query projection flow
-> Draw a top-to-bottom sequence diagram showing how a record request is handled for an Admin user versus a General User.
-> Show the request entering the Record Repository.
-> Branch 1: If role is Admin, query executes without field restrictions and returns full records.
-> Branch 2: If role is General User, query applies filter for caller userId and projects out riskScore, compensationGrade, and auditNotes.
-> Show both response payloads exiting the API boundary, highlighting that confidential fields never cross the boundary for the General User.
-
----
 
 ## Open questions
 
