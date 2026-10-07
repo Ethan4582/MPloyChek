@@ -37,11 +37,9 @@ import { AddRecordModalComponent } from './add-record-modal.component';
         <!-- Breadcrumb & Contextual Header (Top-Right Action Button) -->
         <app-workspace-header
           [breadcrumbs]="[{ label: 'Employment Verification Directory' }]"
-          [actionLabel]="authService.isAdmin() ? '+ New Record' : '🔄 Sync'"
-          [actionIcon]="authService.isAdmin() ? '➕' : '🔄'"
+          [actionLabel]="authService.isAdmin() ? '+ New Record' : null"
           [isActionLoading]="recordService.isLoading()"
           (actionClicked)="onHeaderAction()"
-          (refreshClicked)="loadRecords()"
         ></app-workspace-header>
 
         <!-- Edge-to-Edge Workspace Container -->
@@ -81,8 +79,21 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                 </div>
               </div>
 
-              <!-- Scope Indicator Badge -->
-              <div class="flex items-center gap-2">
+              <!-- Scope Indicator Badge & Sync Button -->
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  (click)="loadRecords()"
+                  [disabled]="recordService.isLoading()"
+                  class="notion-btn text-xs py-1 px-2.5 flex items-center gap-1.5 cursor-pointer"
+                  title="Sync directory with database"
+                >
+                  <svg class="w-3.5 h-3.5 text-[#8a8986]" [class.animate-spin]="recordService.isLoading()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>{{ recordService.isLoading() ? 'Syncing...' : 'Sync' }}</span>
+                </button>
+
                 <span class="tag-default text-[11px]">
                   <span>Status: </span>
                   <strong class="text-[#e6e6e5] font-mono">Active</strong>
@@ -263,33 +274,33 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                       Candidate
                     </th>
                     <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                      Role & Team
+                      Department
                     </th>
                     <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                      Clearance
+                      Clearance Level
                     </th>
                     <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                      Status
+                      Verification Status
                     </th>
                     <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
-                      Screen Date
+                      Audit Date
                     </th>
 
-                    <!-- Admin Protected Columns -->
+                    <!-- Admin Only Headers -->
                     @if (authService.isAdmin()) {
-                      <th class="py-2.5 px-3 border-r border-[#2a2a2a] text-[#bc8c74]">
-                        Compensation
+                      <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                        Comp Grade
                       </th>
-                      <th class="py-2.5 px-3 border-r border-[#2a2a2a] text-[#bc8c74]">
-                        Risk Score
+                      <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
+                        Risk %
                       </th>
-                      <th class="py-2.5 px-3 border-r border-[#2a2a2a] text-[#bc8c74]">
+                      <th class="py-2.5 px-3 border-r border-[#2a2a2a]">
                         Audit Notes
                       </th>
                     }
 
-                    <th class="py-2.5 px-3 w-16 text-right">
-                      Actions
+                    <th class="py-2.5 px-3 text-right">
+                      Detail
                     </th>
                   </tr>
                 </thead>
@@ -298,53 +309,47 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                   @if (recordService.isLoading()) {
                     <tr>
                       <td [attr.colspan]="authService.isAdmin() ? 10 : 7" class="py-12 text-center text-[#787774]">
-                        <div class="flex flex-col items-center justify-center gap-2">
-                          <span class="inline-block animate-spin text-xl">⏳</span>
-                          <span class="text-xs">Fetching records from MongoDB...</span>
-                        </div>
+                        <span class="inline-block animate-spin text-xl">⏳</span>
+                        <div class="mt-1 text-xs">Streaming records through delay pipeline...</div>
                       </td>
                     </tr>
                   } @else if (filteredRecords().length === 0) {
                     <tr>
-                      <td [attr.colspan]="authService.isAdmin() ? 10 : 7" class="py-12 text-center text-[#787774]">
-                        <div class="flex flex-col items-center justify-center gap-1.5">
-                          <span class="text-2xl">📋</span>
-                          <p class="text-xs font-medium text-[#9b9a97]">No verification records found</p>
-                          <p class="text-[11px] text-[#605f5b]">Try adjusting your search query or status filter.</p>
-                        </div>
+                      <td [attr.colspan]="authService.isAdmin() ? 10 : 7" class="py-8 text-center text-[#787774] text-xs">
+                        No records match the current view and filter parameters.
                       </td>
                     </tr>
                   } @else {
-                    @for (record of filteredRecords(); track record._id) {
+                    @for (record of filteredRecords(); track record.recordId) {
                       <tr
-                        class="hover:bg-[#232323] transition-colors group cursor-pointer"
                         (click)="viewRecordDetails(record)"
+                        class="hover:bg-[#252525] transition-colors cursor-pointer group"
                       >
-                        <td class="py-2 px-3 font-mono text-[11px] text-[#7da0ca] border-r border-[#262626]">
+                        <td class="py-2 px-3 font-mono text-[11px] text-[#bc8c74] border-r border-[#262626]">
                           {{ record.recordId }}
                         </td>
 
                         <td class="py-2 px-3 border-r border-[#262626]">
-                          <div class="font-medium text-[#e6e6e5]">{{ record.employeeName }}</div>
-                          <div class="text-[10px] text-[#787774] font-mono">{{ record.userId }}</div>
+                          <div class="font-medium text-[#ffffff] group-hover:text-[#bc8c74] transition-colors">
+                            {{ record.employeeName }}
+                          </div>
+                          <div class="text-[11px] text-[#787774]">{{ record.position }}</div>
+                        </td>
+
+                        <td class="py-2 px-3 text-[#9b9a97] border-r border-[#262626]">
+                          {{ record.department }}
                         </td>
 
                         <td class="py-2 px-3 border-r border-[#262626]">
-                          <div class="text-[#e6e6e5]">{{ record.position }}</div>
-                          <div class="text-[10px] text-[#787774]">{{ record.department }}</div>
-                        </td>
-
-                        <td class="py-2 px-3 border-r border-[#262626]">
-                          @if (record.accessLevel === 'General') {
-                            <span class="tag-blue">{{ record.accessLevel }}</span>
+                          @if (record.accessLevel === 'Executive') {
+                            <span class="tag-bronze">Executive</span>
                           } @else if (record.accessLevel === 'Confidential') {
-                            <span class="tag-bronze">{{ record.accessLevel }}</span>
+                            <span class="tag-blue">Confidential</span>
                           } @else {
-                            <span class="tag-orange">{{ record.accessLevel }}</span>
+                            <span class="tag-default">General</span>
                           }
                         </td>
 
-                        <!-- Status Pill -->
                         <td class="py-2 px-3 border-r border-[#262626]">
                           @if (record.verificationStatus === 'Verified') {
                             <span class="tag-green">Verified</span>
@@ -450,21 +455,16 @@ import { AddRecordModalComponent } from './add-record-modal.component';
                   @if (selectedRecord()?.verificationStatus === 'Verified') {
                     <span class="tag-green">Verified</span>
                   } @else if (selectedRecord()?.verificationStatus === 'Pending Review') {
-                    <span class="tag-yellow">Pending</span>
+                    <span class="tag-yellow">Pending Review</span>
                   } @else {
-                    <span class="tag-red">Flagged</span>
+                    <span class="tag-red">Flagged Risk</span>
                   }
                 </div>
               </div>
 
               <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
                 <span class="text-[#787774]">Access Level</span>
-                <span class="col-span-2 text-[#e6e6e5]">{{ selectedRecord()?.accessLevel }} Clearance</span>
-              </div>
-
-              <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
-                <span class="text-[#787774]">Check Date</span>
-                <span class="col-span-2 font-mono text-[#e6e6e5]">{{ selectedRecord()?.backgroundCheckDate }}</span>
+                <span class="col-span-2 font-mono text-[#e6e6e5]">{{ selectedRecord()?.accessLevel }}</span>
               </div>
 
               <div class="grid grid-cols-3 gap-2 py-1 border-b border-[#2a2a2a]">
@@ -625,8 +625,6 @@ export class DashboardComponent implements OnInit {
   onHeaderAction(): void {
     if (this.authService.isAdmin()) {
       this.isAddRecordModalOpen.set(true);
-    } else {
-      this.loadRecords();
     }
   }
 

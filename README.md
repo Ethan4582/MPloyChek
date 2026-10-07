@@ -6,7 +6,13 @@ A role-based employment verification portal built with Angular 18 and a Node.js 
 
 ---
 
-## High-level design
+## System design & architecture
+
+For an in-depth breakdown of the architecture, data modeling, RBAC security boundaries, and asynchronous latency injection, see the dedicated specification:
+
+📄 **[System Design Specification (system-design.md)](./system-design.md)**
+
+### High-level architecture
 
 MPloyChek consists of three layers:
 
@@ -121,27 +127,17 @@ npm run seed
 
 ---
 
-## API endpoints
+## License
 
-### Authentication
+Distributed under the [MIT License](LICENSE). See `LICENSE` for more information.
 
-- `POST /api/auth/login`: Authenticate and receive a JWT token.
-- `POST /api/auth/register`: Register a new user account.
-- `GET /api/auth/me`: Get profile information for the authenticated user.
+---
 
-### Records
+## Author
 
-- `GET /api/records`: Fetch employment records based on the user role.
-- `GET /api/records/:id`: Fetch a single verification record by ID.
+**Ashirwad Singh**
 
-### Admin user management
-
-- `GET /api/users`: List all users (Admin only).
-- `POST /api/users`: Create a new user (Admin only).
-- `PUT /api/users/:id`: Update user details (Admin only).
-- `PATCH /api/users/:id/toggle-status`: Toggle active or disabled status (Admin only).
-- `DELETE /api/users/:id`: Delete a user (Admin only).
-
-### Health check
-
-- `GET /api/health`: Verify backend status and connected database mode.
+- Portfolio: [https://aash7.xyz/](https://aash7.xyz/)
+- LinkedIn: [https://www.linkedin.com/in/ashirwad08singh/](https://www.linkedin.com/in/ashirwad08singh/)
+- X (Twitter): [https://x.com/ashirwadsingh_](https://x.com/ashirwadsingh_/)
+- GitHub: [https://github.com/Ethan4582](https://github.com/Ethan4582)

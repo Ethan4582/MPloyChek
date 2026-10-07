@@ -49,8 +49,8 @@ export class AppComponent {
     ) {
       return false;
     }
-    // On docs page, if user is logged in, the sidebar is used instead
-    if (url.startsWith('/docs') && this.authService.isAuthenticated()) {
+    // On docs and creator pages, if user is logged in, the sidebar is used instead
+    if ((url.startsWith('/docs') || url.startsWith('/creator')) && this.authService.isAuthenticated()) {
       return false;
     }
     return true;

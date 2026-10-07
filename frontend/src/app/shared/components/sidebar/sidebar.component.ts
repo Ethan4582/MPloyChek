@@ -34,21 +34,23 @@ import { SidebarService } from '../../../core/services/sidebar.service';
             <span class="text-xs font-semibold text-[#ffffff] tracking-tight">MPloyChek</span>
           </a>
 
-          <!-- Clear Close Sidebar Button -->
+          <!-- Notion-style Close Panel Button -->
           <button
             type="button"
             (click)="sidebarService.close()"
             class="p-1.5 rounded-md text-[#888885] hover:text-[#ffffff] hover:bg-[#252525] transition-colors cursor-pointer"
-            title="Close Sidebar"
-            aria-label="Close Sidebar"
+            title="Collapse Sidebar"
+            aria-label="Collapse Sidebar"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <rect x="3" y="4" width="18" height="16" rx="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 4v16" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M15 10l-2 2 2 2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
           </button>
         </div>
 
-        <!-- Navigation Links: Focused on Core Views -->
+        <!-- Navigation Links: Core Views -->
         <nav class="p-2.5 space-y-1 text-xs">
           <!-- Verification Directory -->
           <a
@@ -62,7 +64,7 @@ import { SidebarService } from '../../../core/services/sidebar.service';
             <span>Verification Directory</span>
           </a>
 
-          <!-- System Design -->
+          <!-- System Design Docs -->
           <a
             routerLink="/docs"
             routerLinkActive="bg-[#262626] text-[#ffffff] font-medium border-[#363636]"
@@ -72,6 +74,18 @@ import { SidebarService } from '../../../core/services/sidebar.service';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
             <span>System Design</span>
+          </a>
+
+          <!-- Creator Page -->
+          <a
+            routerLink="/creator"
+            routerLinkActive="bg-[#262626] text-[#ffffff] font-medium border-[#363636]"
+            class="flex items-center gap-2.5 px-3 py-2 rounded-md text-[#9b9a97] hover:text-[#ffffff] hover:bg-[#222222] border border-transparent transition-colors"
+          >
+            <svg class="w-4 h-4 shrink-0 text-[#888885]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>Creator</span>
           </a>
 
           <!-- Dedicated Telemetry Page -->

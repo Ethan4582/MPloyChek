@@ -5,6 +5,7 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { AdminUsersComponent } from './features/admin/admin-users.component';
 import { DocsComponent } from './features/docs/docs.component';
 import { TelemetryComponent } from './features/telemetry/telemetry.component';
+import { CreatorComponent } from './features/creator/creator.component';
 import { authGuard, adminGuard, publicGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -41,6 +42,11 @@ export const routes: Routes = [
     path: 'system-design',
     redirectTo: 'docs',
     pathMatch: 'full',
+  },
+  {
+    path: 'creator',
+    component: CreatorComponent,
+    title: 'Creator Profile • MPloyChek',
   },
   {
     path: 'telemetry',

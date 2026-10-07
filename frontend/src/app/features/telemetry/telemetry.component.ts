@@ -26,11 +26,8 @@ import { SidebarService } from '../../core/services/sidebar.service';
         <app-workspace-header
           [breadcrumbs]="[{ label: 'Telemetry & Asynchronous Metrics' }]"
           actionLabel="Send Ping"
-          actionIcon="⚡"
           [isActionLoading]="isPinging()"
           (actionClicked)="sendTestPing()"
-          [showRefresh]="true"
-          (refreshClicked)="refreshMetrics()"
         ></app-workspace-header>
 
         <!-- Page Content -->
@@ -50,6 +47,14 @@ import { SidebarService } from '../../core/services/sidebar.service';
                 <span class="w-2 h-2 rounded-full bg-[#5cb87a] animate-pulse"></span>
                 <span>Live Streaming</span>
               </span>
+              <button
+                type="button"
+                (click)="refreshMetrics()"
+                class="notion-btn text-xs py-1 px-2.5 cursor-pointer"
+                title="Fetch latest metrics"
+              >
+                Sync
+              </button>
               <button
                 type="button"
                 (click)="clearBuffer()"
@@ -103,7 +108,7 @@ import { SidebarService } from '../../core/services/sidebar.service';
                 {{ telemetryService.data()?.traffic?.totalRequests || 0 }}
               </div>
               <div class="text-xs text-[#8a8986] font-mono">
-                2xx: {{ telemetryService.data()?.traffic?.statusCodes?.['2xx'] || 0 }} &bull; 4xx: {{ telemetryService.data()?.traffic?.statusCodes?.['4xx'] || 0 }}
+                2xx: {{ telemetryService.data()?.traffic?.statusCodes?.['2xx'] || 0 }} • 4xx: {{ telemetryService.data()?.traffic?.statusCodes?.['4xx'] || 0 }}
               </div>
             </div>
           </div>
@@ -276,12 +281,8 @@ export class TelemetryComponent implements OnInit {
   }
 
   formatTime(isoString: string): string {
-    if (!isoString) return '--:--:--';
-    try {
-      const d = new Date(isoString);
-      return d.toTimeString().split(' ')[0];
-    } catch {
-      return isoString;
-    }
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    return date.toLocaleTimeString();
   }
 }

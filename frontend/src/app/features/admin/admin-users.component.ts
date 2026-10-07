@@ -29,18 +29,16 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
       <!-- Main Workspace View Container -->
       <div
         class="flex-1 flex flex-col min-w-0 transition-all duration-200"
-        [class.md:pl-60]="sidebarService.isOpen()"
-        [class.md:pl-0]="!sidebarService.isOpen()"
+        [class.md:pl-60]=\"sidebarService.isOpen()\"
+        [class.md:pl-0]=\"!sidebarService.isOpen()\"
       >
         
         <!-- Breadcrumb & Contextual Header (Top-Right Action Button) -->
         <app-workspace-header
           [breadcrumbs]="[{ label: 'Verification Directory', url: '/dashboard' }, { label: 'User Administration' }]"
           actionLabel="+ New Account"
-          actionIcon="👤"
           [isActionLoading]="userService.isLoading()"
           (actionClicked)="openCreateModal()"
-          (refreshClicked)="loadUsers()"
         ></app-workspace-header>
 
         <!-- Edge-to-Edge Workspace Container -->
@@ -60,8 +58,17 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
               </div>
 
               <div class="flex items-center gap-2">
-                <button (click)="loadUsers()" [disabled]="userService.isLoading()" class="notion-btn text-xs py-1.5 px-3">
-                  <span>Refresh</span>
+                <button
+                  type="button"
+                  (click)="loadUsers()"
+                  [disabled]="userService.isLoading()"
+                  class="notion-btn text-xs py-1.5 px-3 flex items-center gap-1.5 cursor-pointer"
+                  title="Reload users from MongoDB"
+                >
+                  <svg class="w-3.5 h-3.5 text-[#8a8986]" [class.animate-spin]="userService.isLoading()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>{{ userService.isLoading() ? 'Syncing...' : 'Sync' }}</span>
                 </button>
               </div>
             </div>
@@ -261,15 +268,23 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
                 />
               </div>
 
-              <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[#9b9a97] mb-1 font-medium">Password</label>
+                <input
+                  type="password"
+                  formControlName="password"
+                  placeholder="Min 6 characters"
+                  class="notion-input"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-[#9b9a97] mb-1 font-medium">Password</label>
-                  <input
-                    type="password"
-                    formControlName="password"
-                    placeholder="Min 6 characters"
-                    class="notion-input"
-                  />
+                  <label class="block text-[#9b9a97] mb-1 font-medium">Role</label>
+                  <select formControlName="role" class="notion-input cursor-pointer">
+                    <option value="General User">General User</option>
+                    <option value="Admin">Administrator</option>
+                  </select>
                 </div>
                 <div>
                   <label class="block text-[#9b9a97] mb-1 font-medium">Department</label>
@@ -282,43 +297,22 @@ import { WorkspaceHeaderComponent } from '../../shared/components/workspace-head
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[#9b9a97] mb-1 font-medium">Role</label>
-                  <select formControlName="role" class="notion-input cursor-pointer">
-                    <option value="General User">General User</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-[#9b9a97] mb-1 font-medium">Status</label>
-                  <select formControlName="status" class="notion-input cursor-pointer">
-                    <option value="Active">Active</option>
-                    <option value="Disabled">Disabled</option>
-                  </select>
-                </div>
-              </div>
-
               @if (createError()) {
-                <div class="p-2 rounded bg-[#3b2222] border border-[#e05757]/30 text-[#e05757] text-[11px]">
+                <div class="p-2.5 rounded bg-[#2c1d1d] border border-[#4a2a2a] text-[#e05757] text-[11px]">
                   {{ createError() }}
                 </div>
               }
 
-              <div class="pt-3 border-t border-[#2f2f2f] flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  (click)="closeCreateModal()"
-                  class="notion-btn-ghost text-xs"
-                >
+              <div class="pt-3 border-t border-[#2f2f2f] flex justify-end gap-2">
+                <button type="button" (click)="closeCreateModal()" class="notion-btn">
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  [disabled]="isSubmitting() || userForm.invalid"
-                  class="notion-btn-primary text-xs"
+                  [disabled]="userForm.invalid || isSubmitting()"
+                  class="notion-btn-primary"
                 >
-                  {{ isSubmitting() ? 'Creating...' : 'Create Account' }}
+                  {{ isSubmitting() ? 'Saving...' : 'Create Account' }}
                 </button>
               </div>
             </form>
@@ -338,26 +332,27 @@ export class AdminUsersComponent implements OnInit {
   searchQuery = signal<string>('');
   selectedRole = signal<string>('ALL');
   isRoleMenuOpen = signal<boolean>(false);
-
   showCreateModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
   createError = signal<string | null>(null);
 
   userForm = this.fb.group({
     userId: ['', [Validators.required, Validators.email]],
-    name: ['', [Validators.required, Validators.minLength(2)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    role: ['General User' as UserRole, [Validators.required]],
-    department: ['Engineering', [Validators.required]],
-    status: ['Active' as UserStatus, [Validators.required]],
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    role: ['General User' as UserRole, Validators.required],
+    department: ['Engineering'],
+    status: ['Active' as UserStatus],
   });
 
   filteredUsers = computed(() => {
     let list = this.userService.users();
+    const q = this.searchQuery().trim().toLowerCase();
+
     if (this.selectedRole() !== 'ALL') {
       list = list.filter((u) => u.role === this.selectedRole());
     }
-    const q = this.searchQuery().trim().toLowerCase();
+
     if (q) {
       list = list.filter(
         (u) =>
@@ -366,6 +361,7 @@ export class AdminUsersComponent implements OnInit {
           (u.department && u.department.toLowerCase().includes(q))
       );
     }
+
     return list;
   });
 
@@ -394,8 +390,8 @@ export class AdminUsersComponent implements OnInit {
   openCreateModal(): void {
     this.userForm.reset({
       userId: '',
-      name: '',
       password: '',
+      name: '',
       role: 'General User',
       department: 'Engineering',
       status: 'Active',
